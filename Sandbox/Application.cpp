@@ -1,6 +1,11 @@
 #include "Codi.h"
 
-int main() {
-    Codi::Print();
-    return 0;
+class Sandbox: public Codi::Application {
+public:
+    Sandbox() {}
+    ~Sandbox() {}
+};
+
+Codi::Application* Codi::CreateApplication() {
+    return new Sandbox();
 }

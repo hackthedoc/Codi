@@ -12,6 +12,9 @@ target_include_directories(Codi PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Codi
 )
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog EXCLUDE_FROM_ALL)
+target_link_libraries(Codi PUBLIC spdlog::spdlog)
+
 if (WIN32)
     target_compile_definitions(Codi
         PRIVATE CODI_BUILD_DLL

@@ -4,4 +4,6 @@
 
 namespace Codi {
     CAPI void Print();
+
+    class CAPI TestClass {};
 }
