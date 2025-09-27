@@ -26,6 +26,7 @@ private:
 };
 
 class CAPI WindowCloseEvent : public Event {
+public:
     WindowCloseEvent() {}
 
 
@@ -34,6 +35,7 @@ class CAPI WindowCloseEvent : public Event {
 };
 
 class CAPI AppTickEvent : public Event {
+public:
     AppTickEvent() {}
 
 
@@ -42,6 +44,7 @@ class CAPI AppTickEvent : public Event {
 };
 
 class CAPI AppUpdateEvent : public Event {
+public:
     AppUpdateEvent() {}
 
 
@@ -50,6 +53,7 @@ class CAPI AppUpdateEvent : public Event {
 };
 
 class CAPI AppRenderEvent : public Event {
+public:
     AppRenderEvent() {}
 
 

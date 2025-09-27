@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
     CINFO("Intialized Client Log!");
 
     auto app = Codi::CreateApplication();
-    app->Run();
+    app->run();
     delete app;
 
     return 0;
