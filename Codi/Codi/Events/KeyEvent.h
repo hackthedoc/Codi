@@ -2,9 +2,6 @@
 
 #include "Event.h"
 
-#include <sstream>
-
-
 namespace Codi {
 
 class CAPI KeyEvent : public Event {

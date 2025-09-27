@@ -2,8 +2,6 @@
 
 #include "Event.h"
 
-#include <sstream>
-
 namespace Codi {
 
 class CAPI MouseMovedEvent : public Event {
