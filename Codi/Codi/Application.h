@@ -1,15 +1,23 @@
 #pragma once
 
 #include "Core.h"
+#include "Window.h"
 
 namespace Codi {
-    class CAPI Application {
-    public:
-        Application();
-        virtual ~Application();
-        void Run();
-    };
 
-    // To be defined in CLIENT
-    Application* CreateApplication();
+class CAPI Application {
+public:
+    Application();
+    virtual ~Application();
+
+    void Run();
+
+private:
+    std::unique_ptr<Window> _window;
+    bool _running = true;
+};
+
+// To be defined in CLIENT
+Application* CreateApplication();
+
 }
