@@ -23,6 +23,7 @@ Application::~Application() {}
 
 void Application::run() {
     while (_running) {
+        glClearColor(0.1569f, 0.1647f, 0.2118f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         for (Layer* l : _layerStack)

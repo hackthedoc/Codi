@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Codi/Window.h"
+#include "Codi/Renderer/GraphicsContext.h"
 
-struct GLFWwindow;
+class GLFWwindow;
 
 namespace Codi {
 
@@ -27,6 +28,7 @@ private:
     virtual void shutdown();
 
     GLFWwindow* _window;
+    GraphicsContext* _context;
 
     struct WindowData {
         std::string title;

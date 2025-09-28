@@ -1,7 +1,5 @@
 file(GLOB_RECURSE CODI_SOURCES
-    src/Codi/*.cpp
-    src/Codi/ImGui/*.cpp
-    src/Platform/*.cpp
+    src/*.cpp
 )
 file(GLOB_RECURSE CODI_HEADERS
     src/*.h

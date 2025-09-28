@@ -4,7 +4,8 @@
 #include "Codi/Events/KeyEvent.h"
 #include "Codi/Events/MouseEvent.h"
 
-#include <glad/glad.h>
+#include "Platform/OpenGL/OpenGLContext.h"
+
 #include <GLFW/glfw3.h>
 
 namespace Codi {
@@ -34,6 +35,7 @@ void WindowsWindow::init(const WindowProps& props) {
 
     CODI_CORE_INFO("Creating window {0} ({1}, {2})", props.title, props.width, props.height);
 
+
     if (!_GLFWInitialized) {
         int success = glfwInit();
         CODI_CORE_ASSERT(success, "Could not initialized GLFW!");
@@ -43,9 +45,10 @@ void WindowsWindow::init(const WindowProps& props) {
     }
 
     _window = glfwCreateWindow((int)_data.w, (int)_data.h, _data.title.c_str(), nullptr, nullptr);
-    glfwMakeContextCurrent(_window);
-    int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    CODI_CORE_ASSERT(status, "Failed to initialize GLAD!");
+    
+    _context = new OpenGLContext(_window);
+    _context->init();
+
     glfwSetWindowUserPointer(_window, &_data);
     setVSync(true);
 
@@ -139,7 +142,7 @@ void WindowsWindow::shutdown() {
 
 void WindowsWindow::onUpdate() {
     glfwPollEvents();
-    glfwSwapBuffers(_window);
+    _context->swapBuffers();
 }
 
 void WindowsWindow::setVSync(bool enabled) {
