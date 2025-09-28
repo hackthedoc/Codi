@@ -1,8 +1,18 @@
-#include "Codi.h"
+#include <Codi.h>
+
+class ExampleLayer: public Codi::Layer {
+public:
+    ExampleLayer() : Layer("Example") {}
+
+    void onUpdate() override { CINFO("ExampleLayer::Update"); }
+    void onEvent(Codi::Event* e) override { CTRACE("{0}", e->toString()); }
+};
 
 class Sandbox: public Codi::Application {
 public:
-    Sandbox() {}
+    Sandbox() {
+        pushLayer(new ExampleLayer());
+    }
     ~Sandbox() {}
 };
 

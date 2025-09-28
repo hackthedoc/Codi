@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Codi/Application.h"
+
 #ifdef CODI_PLATFORM_WINDOWS
 
 extern Codi::Application* Codi::CreateApplication();

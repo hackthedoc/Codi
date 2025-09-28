@@ -42,6 +42,8 @@ public:
         return getCategoryFlags() & category;
     }
 
+    inline bool isHandled() const { return _handled; }
+
 protected:
     bool _handled = false;
 };

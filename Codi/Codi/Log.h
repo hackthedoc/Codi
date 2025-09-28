@@ -5,17 +5,19 @@
 #include "spdlog/fmt/ostr.h"
 
 namespace Codi {
-    class CAPI Log {
-    public:
-        static void Init();
 
-        inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return _CoreLogger; }
-        inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return _ClientLogger; }
+class CAPI Log {
+public:
+    static void Init();
 
-    private:
-        static std::shared_ptr<spdlog::logger> _CoreLogger;
-        static std::shared_ptr<spdlog::logger> _ClientLogger;
-    };
+    inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return _CoreLogger; }
+    inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return _ClientLogger; }
+
+private:
+    static std::shared_ptr<spdlog::logger> _CoreLogger;
+    static std::shared_ptr<spdlog::logger> _ClientLogger;
+};
+
 }
 
 // Core Log Macros
