@@ -4,9 +4,6 @@
 [submodule "Codi/vendor/GLFW"]
 	path = Codi/vendor/GLFW
 	url = https://github.com/glfw/glfw
-[submodule "Codi/vendor/imgui"]
-	path = Codi/vendor/imgui
-	url = https://github.com/ocornut/imgui
 [submodule "Codi/vendor/glm"]
 	path = Codi/vendor/glm
 	url = https://github.com/g-truc/glm
