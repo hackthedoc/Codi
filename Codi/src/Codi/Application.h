@@ -4,8 +4,10 @@
 
 #include "Window.h"
 #include "LayerStack.h"
+
 #include "Events/Event.h"
 #include "Events/ApplicationEvent.h"
+
 #include "ImGui/ImGuiLayer.h"
 
 namespace Codi {

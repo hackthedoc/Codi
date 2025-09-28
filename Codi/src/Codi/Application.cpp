@@ -16,7 +16,7 @@ Application::Application() {
     _window->setEventCallback(BIND_EVENT_FN(onEvent));
 
     _imGuiLayer = new ImGuiLayer();
-    pushOverlay(_imGuiLayer);
+    pushOverlay(_imGuiLayer);    
 }
 
 Application::~Application() {}
