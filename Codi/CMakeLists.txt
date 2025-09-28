@@ -14,13 +14,14 @@ target_include_directories(Codi PUBLIC
 )
 
 # ----- EXTERNAL LIBRARIES -----
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog EXCLUDE_FROM_ALL)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/GLFW EXCLUDE_FROM_ALL)
+macro(add_vendor NAME TARGET)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/${NAME} EXCLUDE_FROM_ALL)
+    target_link_libraries(Codi PUBLIC ${TARGET})
+endmacro()
 
-target_link_libraries(Codi 
-    PUBLIC spdlog::spdlog
-    PUBLIC glfw
-)
+add_vendor(spdlog spdlog::spdlog)
+add_vendor(GLFW glfw)
+add_vendor(GLAD glad)
 
 # ----- PLATFORM SPECIFIC DEFINES -----
 if (WIN32)

@@ -4,6 +4,9 @@
 #include "Codi/Events/KeyEvent.h"
 #include "Codi/Events/MouseEvent.h"
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 namespace Codi {
 
 static bool _GLFWInitialized = false;
@@ -41,6 +44,8 @@ void WindowsWindow::init(const WindowProps& props) {
 
     _window = glfwCreateWindow((int)_data.w, (int)_data.h, _data.title.c_str(), nullptr, nullptr);
     glfwMakeContextCurrent(_window);
+    int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    CODI_CORE_ASSERT(status, "Failed to initialize GLAD!");
     glfwSetWindowUserPointer(_window, &_data);
     setVSync(true);
 
