@@ -24,7 +24,7 @@ add_vendor(spdlog spdlog::spdlog)
 add_vendor(GLFW glfw)
 add_vendor(GLAD glad)
 add_vendor(imgui ImGui)
-
+add_vendor(glm glm)
 # ----- PLATFORM SPECIFIC DEFINES -----
 if (WIN32)
     target_compile_definitions(Codi
