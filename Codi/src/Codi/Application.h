@@ -6,6 +6,7 @@
 #include "LayerStack.h"
 #include "Events/Event.h"
 #include "Events/ApplicationEvent.h"
+#include "ImGui/ImGuiLayer.h"
 
 namespace Codi {
 
@@ -27,6 +28,7 @@ private:
     bool onWindowClosed(WindowCloseEvent& e);
 
     std::unique_ptr<Window> _window;
+    ImGuiLayer* _imGuiLayer;
     bool _running = true;
     LayerStack _layerStack;
 

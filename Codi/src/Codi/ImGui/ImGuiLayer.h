@@ -2,9 +2,9 @@
 
 #include "Codi/Layer.h"
 
-#include "Events/ApplicationEvent.h"
-#include "Events/KeyEvent.h"
-#include "Events/MouseEvent.h"
+#include "Codi/Events/ApplicationEvent.h"
+#include "Codi/Events/KeyEvent.h"
+#include "Codi/Events/MouseEvent.h"
 
 namespace Codi {
 
@@ -15,7 +15,10 @@ public:
 
     void onAttach() override;
     void onDetach() override;
-    void onUpdate() override;
+    void onImGuiRender() override;
+
+    void begin();
+    void end();
 private:
     float _time = 0.0f;
 };

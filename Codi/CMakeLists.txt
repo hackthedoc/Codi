@@ -1,17 +1,16 @@
 file(GLOB_RECURSE CODI_SOURCES
-    Codi/*.cpp
-    Codi/ImGui/*.cpp
-    Platform/*.cpp
+    src/Codi/*.cpp
+    src/Codi/ImGui/*.cpp
+    src/Platform/*.cpp
 )
 file(GLOB_RECURSE CODI_HEADERS
-    *.h
+    src/*.h
 )
 
-add_library(Codi SHARED ${CODI_SOURCES} ${CODI_HEADERS})
+add_library(Codi STATIC ${CODI_SOURCES} ${CODI_HEADERS})
 
 target_include_directories(Codi PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/Codi
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 # ----- EXTERNAL LIBRARIES -----
@@ -32,6 +31,7 @@ if (WIN32)
         PRIVATE CODI_BUILD_DLL
         PUBLIC CODI_PLATFORM_WINDOWS
     )
+    target_link_libraries(Codi PRIVATE opengl32)
 elseif(APPLE)
     target_compile_definitions(Codi
         PRIVATE CODI_BUILD_DLL
@@ -60,5 +60,5 @@ set_target_properties(Codi PROPERTIES
 
 # ----- PCH HEADERS -----
 target_precompile_headers(Codi PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/cdpch.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cdpch.h
 )

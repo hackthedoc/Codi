@@ -1,5 +1,7 @@
 #include "Application.h"
 
+#include "GLFW/glfw3.h"
+
 namespace Codi {
 
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
@@ -7,17 +9,30 @@ namespace Codi {
 Application* Application::_instance = nullptr;
 
 Application::Application() {
+    CODI_CORE_ASSERT(!_instance, "Application already exists!");
     _instance = this;
+
     _window = std::unique_ptr<Window>(Window::Create());
     _window->setEventCallback(BIND_EVENT_FN(onEvent));
+
+    _imGuiLayer = new ImGuiLayer();
+    pushOverlay(_imGuiLayer);
 }
 
 Application::~Application() {}
 
 void Application::run() {
     while (_running) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         for (Layer* l : _layerStack)
             l->onUpdate();
+        
+        _imGuiLayer->begin();
+        for (Layer* l : _layerStack)
+            l->onImGuiRender();
+        _imGuiLayer->end();
+
         _window->onUpdate();
     }
 }

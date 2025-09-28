@@ -3,7 +3,7 @@
 namespace Codi {
 
 LayerStack::LayerStack() {
-    _layerInsert = begin();
+    _layerIndex = 0;
 }
 
 LayerStack::~LayerStack() {
@@ -12,7 +12,8 @@ LayerStack::~LayerStack() {
 }
 
 void LayerStack::pushLayer(Layer* layer) {
-    _layerInsert = _layers.emplace(_layerInsert, layer);
+    _layers.emplace(begin() + _layerIndex, layer);
+    _layerIndex++;
 }
 
 void LayerStack::pushOverlay(Layer* overlay) {
@@ -23,7 +24,7 @@ void LayerStack::popLayer(Layer* layer) {
     std::vector<Layer*>::iterator it = std::find(begin(), end(), layer);
     if (it == end()) return;
     _layers.erase(it);
-    _layerInsert--;    
+    _layerIndex--;    
 }
 
 void LayerStack::popOverlay(Layer* overlay) {

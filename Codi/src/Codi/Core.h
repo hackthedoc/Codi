@@ -1,10 +1,14 @@
 #pragma once
 
 #ifdef CODI_PLATFORM_WINDOWS
-    #ifdef CODI_BUILD_DLL
-    #define CAPI __declspec(dllexport)
+    #if CODI_DYNAMIC_LINK
+        #ifdef CODI_BUILD_DLL
+            #define CAPI __declspec(dllexport)
+        #else
+            #define CAPI __declspec(dllimport)
+        #endif
     #else
-    #define CAPI __declspec(dllimport)
+        #define CAPI
     #endif
 #else
     #define CAPI

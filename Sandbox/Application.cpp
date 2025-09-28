@@ -17,7 +17,6 @@ class Sandbox: public Codi::Application {
 public:
     Sandbox() {
         pushLayer(new ExampleLayer());
-        pushOverlay(new Codi::ImGuiLayer());
     }
     ~Sandbox() {}
 };
