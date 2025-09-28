@@ -1,5 +1,6 @@
 file(GLOB_RECURSE CODI_SOURCES
     Codi/*.cpp
+    Codi/ImGui/*.cpp
     Platform/*.cpp
 )
 file(GLOB_RECURSE CODI_HEADERS
@@ -22,6 +23,7 @@ endmacro()
 add_vendor(spdlog spdlog::spdlog)
 add_vendor(GLFW glfw)
 add_vendor(GLAD glad)
+add_vendor(imgui ImGui)
 
 # ----- PLATFORM SPECIFIC DEFINES -----
 if (WIN32)

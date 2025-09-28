@@ -4,7 +4,10 @@ namespace Codi {
 
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
+Application* Application::_instance = nullptr;
+
 Application::Application() {
+    _instance = this;
     _window = std::unique_ptr<Window>(Window::Create());
     _window->setEventCallback(BIND_EVENT_FN(onEvent));
 }
@@ -26,17 +29,19 @@ void Application::onEvent(Event& e) {
     CODI_CORE_TRACE("{0}", e.toString());
 
     for (std::vector<Layer*>::iterator it = _layerStack.end(); it != _layerStack.begin();) {
-        (*--it)->onEvent(&e);
+        (*--it)->onEvent(e);
         if (e.isHandled()) break;
     }
 }
 
 void Application::pushLayer(Layer* layer) {
     _layerStack.pushLayer(layer);
+    layer->onAttach();
 }
 
 void Application::pushOverlay(Layer* overlay) {
     _layerStack.pushLayer(overlay);
+    overlay->onAttach();
 }
 
 bool Application::onWindowClosed(WindowCloseEvent& e) {

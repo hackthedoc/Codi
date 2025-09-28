@@ -20,12 +20,17 @@ public:
 
     void pushLayer(Layer* layer);
     void pushOverlay(Layer* overlay);
+
+    inline static Application& Get() { return *_instance; }
+    inline Window& getWindow() { return *_window; }
 private:
     bool onWindowClosed(WindowCloseEvent& e);
 
     std::unique_ptr<Window> _window;
     bool _running = true;
     LayerStack _layerStack;
+
+    static Application* _instance;
 };
 
 // To be defined in CLIENT
