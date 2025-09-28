@@ -1,14 +1,11 @@
 #pragma once
 
-#include "Core.h"
-
-#include "Window.h"
-#include "LayerStack.h"
-
-#include "Events/Event.h"
-#include "Events/ApplicationEvent.h"
-
-#include "ImGui/ImGuiLayer.h"
+#include "Codi/Core.h"
+#include "Codi/Window.h"
+#include "Codi/LayerStack.h"
+#include "Codi/Events/Event.h"
+#include "Codi/Events/ApplicationEvent.h"
+#include "Codi/ImGui/ImGuiLayer.h"
 
 namespace Codi {
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Event.h"
+#include "Codi/Events/Event.h"
 
 namespace Codi {
 

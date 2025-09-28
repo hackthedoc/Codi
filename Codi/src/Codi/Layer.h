@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Core.h"
-#include "Events/Event.h"
+#include "Codi/Core.h"
+#include "Codi/Events/Event.h"
 
 namespace Codi {
 

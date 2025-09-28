@@ -1,6 +1,7 @@
+#include "cdpch.h"
 #include "Application.h"
 
-#include "GLFW/glfw3.h"
+#include "Codi/Renderer/Renderer.h"
 
 namespace Codi {
 
@@ -23,8 +24,15 @@ Application::~Application() {}
 
 void Application::run() {
     while (_running) {
-        glClearColor(0.1569f, 0.1647f, 0.2118f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        RenderCommand::SetClearColor({0.1569f, 0.1647f, 0.2118f, 1.0f});
+        RenderCommand::Clear();
+
+        Renderer::BeginScene();
+
+        // no scene yet
+
+        Renderer::EndScene();
 
         for (Layer* l : _layerStack)
             l->onUpdate();

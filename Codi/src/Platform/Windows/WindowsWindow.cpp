@@ -1,3 +1,4 @@
+#include "cdpch.h"
 #include "WindowsWindow.h"
 
 #include "Codi/Events/ApplicationEvent.h"
@@ -6,7 +7,7 @@
 
 #include "Platform/OpenGL/OpenGLContext.h"
 
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
 namespace Codi {
 

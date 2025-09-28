@@ -1,18 +1,17 @@
 #pragma once
 
+#include "Codi/Renderer/RenderCommand.h"
+
 namespace Codi {
-    
-enum class RendererAPI {
-    None = 0,
-    OpenGL = 1
-};
 
 class Renderer {
 public:
-    inline static RendererAPI GetAPI() { return _rendererAPI; }
+    static void BeginScene();
+    static void EndScene();
 
-private:
-    static RendererAPI _rendererAPI;
+    static void Submit(const std::shared_ptr<class VertexArray>& vertexArray);
+
+    inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 };
 
 } // namespace Codi

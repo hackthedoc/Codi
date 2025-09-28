@@ -1,7 +1,7 @@
 #include "cdpch.h"
 #include "Buffer.h"
 
-#include "Renderer.h"
+#include "Codi/Renderer/Renderer.h"
 
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
@@ -10,10 +10,10 @@ namespace Codi {
 VertexBuffer* VertexBuffer::Create(float* vertices, uint size) {
     switch (Renderer::GetAPI())
     {
-    case RendererAPI::None  :
-        CODI_CORE_ASSERT(false, "RendererAPI::None is currently not supported!");
+    case RendererAPI::API::None  :
+        CODI_CORE_ASSERT(false, "RendererAPI::API::None is currently not supported!");
         return nullptr;
-    case RendererAPI::OpenGL:
+    case RendererAPI::API::OpenGL:
         return new OpenGLVertexBuffer(vertices, size);
     }
 
@@ -24,10 +24,10 @@ VertexBuffer* VertexBuffer::Create(float* vertices, uint size) {
 IndexBuffer* IndexBuffer::Create(uint* indices, uint size) {
     switch (Renderer::GetAPI())
     {
-    case RendererAPI::None  :
-        CODI_CORE_ASSERT(false, "RendererAPI::None is currently not supported!");
+    case RendererAPI::API::None  :
+        CODI_CORE_ASSERT(false, "RendererAPI::API::None is currently not supported!");
         return nullptr;
-    case RendererAPI::OpenGL:
+    case RendererAPI::API::OpenGL:
         return new OpenGLIndexBuffer(indices, size);
     }
 
