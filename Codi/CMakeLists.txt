@@ -47,7 +47,7 @@ endif()
 
 # ----- DEBUG SPECIFIC DEFINITIONS -----
 target_compile_definitions(Codi
-    PRIVATE $<$<CONFIG:Debug>:CODI_ENABLE_ASSERTS>
+    PRIVATE $<$<CONFIG:Debug>:CODI_DEBUG>
 )
 
 # ----- OUTPUT DIRS -----
