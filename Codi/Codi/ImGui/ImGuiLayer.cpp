@@ -1,9 +1,12 @@
 #include "ImGuiLayer.h"
 
-#include "Codi/Application.h"
-
 #include "imgui.h"
+
+#define IMGUI_IMPL_API
+#include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+
+#include "Codi/Application.h"
 
 // TODO: remove temporary includes
 #include "glad/glad.h"
@@ -21,8 +24,11 @@ void ImGuiLayer::onAttach() {
     ImGuiIO& io = ImGui::GetIO();
     ImGui::StyleColorsDark();
 
-    io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
-    io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    io.ConfigFlags |= 
     
     ImGui_ImplOpenGL3_Init("#version 410");
 }
@@ -93,7 +99,7 @@ bool ImGuiLayer::onMouseScrolledEvent(MouseScrolledEvent& e) {
     ImGuiIO& io = ImGui::GetIO();
     io.MouseWheelH += e.getXOffset();
     io.MouseWheel += e.getYOffset();
-
+`
     return false;
 }
 
