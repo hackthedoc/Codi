@@ -40,6 +40,8 @@ elseif(UNIX)
         PRIVATE CODI_BUILD_DLL
         PUBLIC CODI_PLATFORM_LINUX
     )
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(Codi PRIVATE OpenGL::GL dl pthread)
 else()
     message(FATAL_ERROR "unsupported platform")
 endif()
