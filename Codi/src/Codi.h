@@ -4,6 +4,8 @@
 #include "Codi/Layer.h"
 #include "Codi/Log.h"
 
+#include "Codi/Core/DeltaTime.h"
+
 #include "Codi/Input.h"
 #include "Codi/KeyCodes.h"
 #include "Codi/MouseButtonCodes.h"

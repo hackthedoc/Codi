@@ -3,6 +3,9 @@
 
 #include "Codi/Renderer/Renderer.h"
 
+// Temporary
+#include "GLFW/glfw3.h"
+
 namespace Codi {
 
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
@@ -15,6 +18,7 @@ Application::Application() {
 
     _window = std::unique_ptr<Window>(Window::Create());
     _window->setEventCallback(BIND_EVENT_FN(onEvent));
+    _window->setVSync(false);
 
     _imGuiLayer = new ImGuiLayer();
     pushOverlay(_imGuiLayer);    
@@ -24,8 +28,12 @@ Application::~Application() {}
 
 void Application::run() {
     while (_running) {
+        float time = (float)glfwGetTime(); // TODO: Platform::GetTime()
+        DeltaTime timestep = time - _lastFrameTime;
+        _lastFrameTime = time;
+
         for (Layer* l : _layerStack)
-            l->onUpdate();
+            l->onUpdate(timestep);
         
         _imGuiLayer->begin();
         for (Layer* l : _layerStack)
@@ -39,8 +47,6 @@ void Application::run() {
 void Application::onEvent(Event& e) {
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<WindowCloseEvent>(BIND_EVENT_FN(onWindowClosed));
-
-    CODI_CORE_TRACE("{0}", e.toString());
 
     for (std::vector<Layer*>::iterator it = _layerStack.end(); it != _layerStack.begin();) {
         (*--it)->onEvent(e);

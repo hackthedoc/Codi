@@ -1,8 +1,10 @@
 #include <Codi.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 class ExampleLayer: public Codi::Layer {
 public:
-    ExampleLayer() : Layer("Example"), _camera(-1.6f, 1.6f, -0.9f, 0.9f), _cameraPosition({0.0f, 0.0f, 0.0f}) {
+    ExampleLayer() : Layer("Example"), _camera(-1.6f, 1.6f, -0.9f, 0.9f), _cameraPosition({0.0f, 0.0f, 0.0f}), _rotation(0.0f), _squarePosition(0.0f) {
         _vertexArray.reset(Codi::VertexArray::Create());
         float vertices[3 * 7] = {
             -0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
@@ -51,6 +53,7 @@ public:
             layout(location = 1) in vec4 a_Color;
 
             uniform mat4 u_ViewProjection;
+            uniform mat4 u_Transform;
 
             out vec3 v_Position;
             out vec4 v_Color;
@@ -58,7 +61,7 @@ public:
             void main() {
                 v_Position = a_Position;
                 v_Color = a_Color;
-                gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+                gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
             }
         )";
 
@@ -84,12 +87,13 @@ public:
             layout(location = 0) in vec3 a_Position;
 
             uniform mat4 u_ViewProjection;
+            uniform mat4 u_Transform;
 
             out vec3 v_Position;
 
             void main() {
                 v_Position = a_Position;
-                gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+                gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
             }
         )";
 
@@ -108,26 +112,36 @@ public:
         CTRACE("ExampleLayer created");
     }
 
-    void onUpdate() override {
+    void onUpdate(Codi::DeltaTime deltatime) override {
+        CTRACE("DeltaTime: {0}s ({1} ms)", deltatime.getSeconds(), deltatime.getMilliseconds());
+
         if (Codi::Input::IsKeyPressed(CODI_KEY_ESCAPE))
             Codi::Application::Get().close();
         
+        // CAMERA MOVEMENT
         if (Codi::Input::IsKeyPressed(CODI_KEY_LEFT))
-            _cameraPosition.x += _cameraSpeed;
-            
+            _cameraPosition.x += _cameraSpeed * deltatime;
         if (Codi::Input::IsKeyPressed(CODI_KEY_RIGHT))
-            _cameraPosition.x -= _cameraSpeed;
-            
+            _cameraPosition.x -= _cameraSpeed * deltatime;  
         if (Codi::Input::IsKeyPressed(CODI_KEY_UP))
-            _cameraPosition.y -= _cameraSpeed;
-            
+            _cameraPosition.y -= _cameraSpeed * deltatime;   
         if (Codi::Input::IsKeyPressed(CODI_KEY_DOWN))
-            _cameraPosition.y += _cameraSpeed;
+            _cameraPosition.y += _cameraSpeed * deltatime;
 
         if (Codi::Input::IsKeyPressed(CODI_KEY_Q))
-            _rotation -= _rotationSpeed;
+            _rotation -= _rotationSpeed * deltatime;
         if (Codi::Input::IsKeyPressed(CODI_KEY_E))
-            _rotation += _rotationSpeed;
+            _rotation += _rotationSpeed * deltatime;
+
+        // SQUARE MOVEMENT
+        if (Codi::Input::IsKeyPressed(CODI_KEY_A))
+            _squarePosition.x -= _squareSpeed * deltatime;   
+        if (Codi::Input::IsKeyPressed(CODI_KEY_D))
+            _squarePosition.x += _squareSpeed * deltatime; 
+        if (Codi::Input::IsKeyPressed(CODI_KEY_W))
+            _squarePosition.y += _squareSpeed * deltatime; 
+        if (Codi::Input::IsKeyPressed(CODI_KEY_S))
+            _squarePosition.y -= _squareSpeed * deltatime;
 
         Codi::RenderCommand::SetClearColor({ 0.0863f, 0.0902f, 0.1137f, 1.0f });
         Codi::RenderCommand::Clear();
@@ -137,7 +151,9 @@ public:
 
         Codi::Renderer::BeginScene(_camera);
 
-        Codi::Renderer::Submit(_blueShader, _squareVA);
+        glm::mat4 transform = glm::translate(glm::mat4(1.0f), _squarePosition);
+        
+        Codi::Renderer::Submit(_blueShader, _squareVA, transform);
         Codi::Renderer::Submit(_shader, _vertexArray);
 
         Codi::Renderer::EndScene();
@@ -152,9 +168,12 @@ private:
 
     Codi::OrthographicCamera _camera;
     glm::vec3 _cameraPosition;
-    float _cameraSpeed = 0.05f;
+    float _cameraSpeed = 1.0f;
     float _rotation = 0.0f;
-    float _rotationSpeed = 1.0f;
+    float _rotationSpeed = 90.0f;
+
+    glm::vec3 _squarePosition;
+    float _squareSpeed = 1.0f;
 };
 
 class Sandbox: public Codi::Application {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Codi/Core.h"
+#include "Codi/Core/DeltaTime.h"
 #include "Codi/Events/Event.h"
 
 namespace Codi {
@@ -12,7 +13,7 @@ public:
 
     virtual void onAttach() {}
     virtual void onDetach() {}
-    virtual void onUpdate() {}
+    virtual void onUpdate(DeltaTime ts) {}
     virtual void onImGuiRender() {}
     virtual void onEvent(Event& e) {}
 

@@ -3,6 +3,7 @@
 #include "Codi/Core.h"
 #include "Codi/Window.h"
 #include "Codi/LayerStack.h"
+#include "Codi/Core/DeltaTime.h"
 #include "Codi/Events/Event.h"
 #include "Codi/Events/ApplicationEvent.h"
 #include "Codi/ImGui/ImGuiLayer.h"
@@ -32,6 +33,7 @@ private:
     ImGuiLayer* _imGuiLayer;
     bool _running = true;
     LayerStack _layerStack;
+    float _lastFrameTime = 0.0f;
 
     static Application* _instance;
 };
