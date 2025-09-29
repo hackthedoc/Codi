@@ -6,17 +6,13 @@ namespace Codi {
 
 class Shader {
 public:
-    Shader(const std::string& vertexSrc, const std::string& fragmentSrc);
-    ~Shader();
+    virtual ~Shader() = default;
 
-    void bind() const;
-    void unbind() const;
+    virtual void bind() const = 0;
+    virtual void unbind() const = 0;
 
-    void uploadUniformMat4(const std::string& name, const glm::mat4& matrix);
-
-    inline uint getID() const { return _rendererID; }
-private:
-    uint _rendererID;
+    static Shader* Create(const std::string& filepath);
+    static Shader* Create(const std::string& vertexSrc, const std::string& fragmentSrc);
 };
 
 } // namespace Codi

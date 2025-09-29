@@ -46,75 +46,11 @@ public:
         squareIB.reset(Codi::IndexBuffer::Create(squareIndices, 6));
         _squareVA->setIndexBuffer(squareIB);
 
-        std::string vertexSrc = R"(
-            #version 330 core
-
-            layout(location = 0) in vec3 a_Position;
-            layout(location = 1) in vec4 a_Color;
-
-            uniform mat4 u_ViewProjection;
-            uniform mat4 u_Transform;
-
-            out vec3 v_Position;
-            out vec4 v_Color;
-
-            void main() {
-                v_Position = a_Position;
-                v_Color = a_Color;
-                gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
-            }
-        )";
-
-        std::string fragmentSrc = R"(
-            #version 330 core
-
-            layout(location = 0) out vec4 color;
-
-            in vec3 v_Position;
-            in vec4 v_Color;
-
-            void main() {
-                color = vec4(v_Position * 0.5 + 0.5, 1.0);
-                color = v_Color;
-            }
-        )";
-
-        _shader.reset(new Codi::Shader(vertexSrc, fragmentSrc));
-
-        std::string blueVertexSrc = R"(
-            #version 330 core
-
-            layout(location = 0) in vec3 a_Position;
-
-            uniform mat4 u_ViewProjection;
-            uniform mat4 u_Transform;
-
-            out vec3 v_Position;
-
-            void main() {
-                v_Position = a_Position;
-                gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
-            }
-        )";
-
-        std::string blueFragmentSrc = R"(
-            #version 330 core
-
-            layout(location = 0) out vec4 color;
-
-            void main() {
-                color = vec4(0.2, 0.3, 0.8, 1.0);
-            }
-        )";
-
-        _blueShader.reset(new Codi::Shader(blueVertexSrc, blueFragmentSrc));
-
-        CTRACE("ExampleLayer created");
+        _shader.reset(Codi::Shader::Create("assets/shaders/TriangleShader.glsl"));
+        _blueShader.reset(Codi::Shader::Create("assets/shaders/BlueShader.glsl"));
     }
 
     void onUpdate(Codi::DeltaTime deltatime) override {
-        CTRACE("DeltaTime: {0}s ({1} ms)", deltatime.getSeconds(), deltatime.getMilliseconds());
-
         if (Codi::Input::IsKeyPressed(CODI_KEY_ESCAPE))
             Codi::Application::Get().close();
         
@@ -160,11 +96,11 @@ public:
     }
 
 private:
-    std::shared_ptr<Codi::Shader> _shader;
-    std::shared_ptr<Codi::VertexArray> _vertexArray;
+    Codi::Ref<Codi::Shader> _shader;
+    Codi::Ref<Codi::VertexArray> _vertexArray;
 
-    std::shared_ptr<Codi::Shader> _blueShader;
-    std::shared_ptr<Codi::VertexArray> _squareVA;
+    Codi::Ref<Codi::Shader> _blueShader;
+    Codi::Ref<Codi::VertexArray> _squareVA;
 
     Codi::OrthographicCamera _camera;
     glm::vec3 _cameraPosition;
@@ -174,6 +110,7 @@ private:
 
     glm::vec3 _squarePosition;
     float _squareSpeed = 1.0f;
+    glm::vec4 _squareColor = { 1.0f, 0.0f, 0.0f, 1.0f };
 };
 
 class Sandbox: public Codi::Application {

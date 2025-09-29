@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #ifdef CODI_PLATFORM_WINDOWS
     #if CODI_DYNAMIC_LINK
         #ifdef CODI_BUILD_DLL
@@ -32,3 +34,13 @@
 #define CODI_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
 
 using uint = unsigned int;
+
+namespace Codi {
+
+template<typename T>
+using Scope = std::unique_ptr<T>;
+
+template<typename T>
+using Ref = std::shared_ptr<T>;
+
+} // namespace Codi
