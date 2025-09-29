@@ -9,6 +9,7 @@ namespace Codi {
     
 OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint size) {
     glCreateBuffers(1, &_rendererID);
+    glBindBuffer(GL_ARRAY_BUFFER, _rendererID);
     glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 }
 
@@ -26,10 +27,11 @@ void OpenGLVertexBuffer::unbind() const {
 
 /* ---------- INDEX BUFFER ---------- */
     
-OpenGLIndexBuffer::OpenGLIndexBuffer(uint* indices, uint count)
+OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count)
     : _count(count) {
     glCreateBuffers(1, &_rendererID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint), indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _rendererID);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
 }
 
 OpenGLIndexBuffer::~OpenGLIndexBuffer() {

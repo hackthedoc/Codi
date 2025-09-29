@@ -22,17 +22,19 @@ private:
 
 class OpenGLIndexBuffer : public IndexBuffer {
 public:
-    OpenGLIndexBuffer(uint* indices, uint count);
+    OpenGLIndexBuffer(uint32_t* indices, uint32_t count);
     virtual ~OpenGLIndexBuffer();
 
     virtual void bind() const override;
     virtual void unbind() const override;
     
-    virtual uint getCount() const override { return _count; }
+    virtual uint32_t getCount() const override { return _count; }
+
+    virtual uint getID() const override { return _rendererID; }
 
 private:
     uint _rendererID;
-    uint _count;
+    uint32_t _count;
 };
 
 } // namespace Codi

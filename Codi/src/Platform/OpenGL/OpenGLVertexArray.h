@@ -19,6 +19,7 @@ public:
     virtual const std::vector<std::shared_ptr<VertexBuffer>>& getVertexBuffers() const override { return _vertexBuffers; }
     virtual const std::shared_ptr<IndexBuffer>& getIndexBuffer() const override { return _indexBuffer; }
 
+    inline uint getID() const override { return _rendererID; }
 private:
     std::vector<std::shared_ptr<VertexBuffer>> _vertexBuffers;
     std::shared_ptr<IndexBuffer> _indexBuffer;

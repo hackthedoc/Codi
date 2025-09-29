@@ -21,14 +21,14 @@ VertexBuffer* VertexBuffer::Create(float* vertices, uint size) {
     return nullptr;
 }
 
-IndexBuffer* IndexBuffer::Create(uint* indices, uint size) {
+IndexBuffer* IndexBuffer::Create(uint32_t* indices, uint32_t count) {
     switch (Renderer::GetAPI())
     {
     case RendererAPI::API::None  :
         CODI_CORE_ASSERT(false, "RendererAPI::API::None is currently not supported!");
         return nullptr;
     case RendererAPI::API::OpenGL:
-        return new OpenGLIndexBuffer(indices, size);
+        return new OpenGLIndexBuffer(indices, count);
     }
 
     CODI_CORE_ASSERT(false, "Unknown RenderAPI!");

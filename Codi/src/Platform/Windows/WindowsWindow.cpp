@@ -36,7 +36,6 @@ void WindowsWindow::init(const WindowProps& props) {
 
     CODI_CORE_INFO("Creating window {0} ({1}, {2})", props.title, props.width, props.height);
 
-
     if (!_GLFWInitialized) {
         int success = glfwInit();
         CODI_CORE_ASSERT(success, "Could not initialized GLFW!");
@@ -50,6 +49,8 @@ void WindowsWindow::init(const WindowProps& props) {
     _context = new OpenGLContext(_window);
     _context->init();
 
+    glViewport(0, 0, _data.w, _data.h);
+
     glfwSetWindowUserPointer(_window, &_data);
     setVSync(true);
 
@@ -59,6 +60,8 @@ void WindowsWindow::init(const WindowProps& props) {
         WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
         data.w = w;
         data.h = h;
+
+        glViewport(0, 0, w, h);
 
         WindowResizeEvent event(w, h);
         data.eventCallback(event);

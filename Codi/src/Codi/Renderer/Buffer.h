@@ -12,7 +12,7 @@ enum class ShaderDataType {
     Bool
 };
 
-static uint ShaderDataTypeSize(ShaderDataType type) {
+static uint32_t ShaderDataTypeSize(ShaderDataType type) {
     switch (type) {
     case ShaderDataType::Float  : return 4;
     case ShaderDataType::Float2 : return 4 * 2;
@@ -34,8 +34,8 @@ static uint ShaderDataTypeSize(ShaderDataType type) {
 struct BufferElement {
     std::string name;
     ShaderDataType type;
-    uint size;
-    uint offset;
+    uint32_t size;
+    uint32_t offset;
     bool normalized;
 
     BufferElement() {}
@@ -43,7 +43,7 @@ struct BufferElement {
     BufferElement(ShaderDataType type, const std::string& name, bool normalized = false)
         : name(name), type(type), size(ShaderDataTypeSize(type)), offset(0), normalized(normalized) {}
 
-    uint getComponentCount() const {
+    uint32_t getComponentCount() const {
         switch (type) {
         case ShaderDataType::Float  : return 1;
         case ShaderDataType::Float2 : return 2;
@@ -80,7 +80,7 @@ public:
 
 private:
     void CalculateOffsetsAndStride() {
-        uint offset = 0;
+        uint32_t offset = 0;
         _stride = 0;
         for (BufferElement& element : _elements) {
             element.offset = offset;
@@ -113,9 +113,11 @@ public:
     virtual void bind() const = 0;
     virtual void unbind() const = 0;
 
-    virtual uint getCount() const = 0;
+    virtual uint32_t getCount() const = 0;
 
-    static IndexBuffer* Create(uint* indices, uint size);
+    static IndexBuffer* Create(uint32_t* indices, uint32_t size);
+
+    virtual uint getID() const = 0;
 };
 
 } // namespace Codi

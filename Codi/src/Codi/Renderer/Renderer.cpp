@@ -3,11 +3,19 @@
 
 namespace Codi {
 
-void Renderer::BeginScene() {}
+Renderer::SceneData* Renderer::_sceneData = new Renderer::SceneData;
+
+void Renderer::BeginScene(OrthographicCamera& camera) {
+    _sceneData->viewProjectionMatrix = camera.getViewProjectionMatrix();
+}
 
 void Renderer::EndScene() {}
 
-void Renderer::Submit(const std::shared_ptr<class VertexArray>& vertexArray) {
+void Renderer::Submit(const std::shared_ptr<class Shader>& shader, const std::shared_ptr<class VertexArray>& vertexArray) {
+    shader->bind();
+    shader->uploadUniformMat4("u_ViewProjection", _sceneData->viewProjectionMatrix);
+
+    vertexArray->bind();
     RenderCommand::DrawIndexed(vertexArray);
 }
 

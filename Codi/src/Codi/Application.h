@@ -21,6 +21,8 @@ public:
     void pushLayer(Layer* layer);
     void pushOverlay(Layer* overlay);
 
+    void close() { _running = false; }
+
     inline static Application& Get() { return *_instance; }
     inline Window& getWindow() { return *_window; }
 private:

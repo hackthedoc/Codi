@@ -2,6 +2,7 @@
 #include "Shader.h"
 
 #include "glad/glad.h"
+#include "glm/gtc/type_ptr.hpp"
 
 namespace Codi {
 
@@ -109,6 +110,13 @@ void Shader::bind() const {
 
 void Shader::unbind() const {
     glUseProgram(0);
+}
+
+void Shader::uploadUniformMat4(const std::string& name, const glm::mat4& matrix) {
+    GLint location = glGetUniformLocation(_rendererID, name.c_str());
+    CODI_CORE_ASSERT(location != -1, "Uniform {0} not found!", name);
+    glUseProgram(_rendererID);
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
 } // namespace Codi

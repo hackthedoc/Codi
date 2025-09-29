@@ -24,16 +24,6 @@ Application::~Application() {}
 
 void Application::run() {
     while (_running) {
-
-        RenderCommand::SetClearColor({0.1569f, 0.1647f, 0.2118f, 1.0f});
-        RenderCommand::Clear();
-
-        Renderer::BeginScene();
-
-        // no scene yet
-
-        Renderer::EndScene();
-
         for (Layer* l : _layerStack)
             l->onUpdate();
         
