@@ -1,11 +1,14 @@
 #include <Codi.h>
+#include <Codi/Core/EntryPoint.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "Sandbox2D.h"
 
 class ExampleLayer: public Codi::Layer {
 public:
     ExampleLayer() : Layer("Example"), _squarePosition(0.0f), _cameraController(1280.0f / 720.0f) {
-        _vertexArray.reset(Codi::VertexArray::Create());
+        _vertexArray = Codi::VertexArray::Create();
         float vertices[3 * 7] = {
             -0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
              0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
@@ -26,7 +29,7 @@ public:
         indexBuffer.reset(Codi::IndexBuffer::Create(indices, 3));
         _vertexArray->setIndexBuffer(indexBuffer);
 
-        _squareVA.reset(Codi::VertexArray::Create());
+        _squareVA = Codi::VertexArray::Create();
         float squareVertices[3 * 4] = {
             -0.75f, -0.75f, 0.0f,
              0.75f, -0.75f, 0.0f,
@@ -46,8 +49,8 @@ public:
         squareIB.reset(Codi::IndexBuffer::Create(squareIndices, 6));
         _squareVA->setIndexBuffer(squareIB);
 
-        _shader.reset(Codi::Shader::Create("assets/shaders/TriangleShader.glsl"));
-        _blueShader.reset(Codi::Shader::Create("assets/shaders/BlueShader.glsl"));
+        _shader = Codi::Shader::Create("assets/shaders/TriangleShader.glsl");
+        _blueShader = Codi::Shader::Create("assets/shaders/BlueShader.glsl");
     }
 
     void onUpdate(Codi::DeltaTime deltatime) override {
@@ -94,7 +97,8 @@ private:
 class Sandbox: public Codi::Application {
 public:
     Sandbox() {
-        pushLayer(new ExampleLayer());
+        //pushLayer(new ExampleLayer());
+        pushLayer(new Sandbox2D());
     }
     ~Sandbox() {}
 };

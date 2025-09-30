@@ -12,14 +12,16 @@ OrthographicCameraController::OrthographicCameraController(float aspectRatio, bo
     {}
 
 void OrthographicCameraController::onUpdate(DeltaTime deltatime) {
+    _cameraTranslationSpeed = _zoomLevel;
+
     if (Input::IsKeyPressed(CODI_KEY_W))
-        _cameraPosition.y -= _cameraTranslationSpeed * deltatime;
-    if (Input::IsKeyPressed(CODI_KEY_A))
-        _cameraPosition.x += _cameraTranslationSpeed * deltatime;
-    if (Input::IsKeyPressed(CODI_KEY_S))
         _cameraPosition.y += _cameraTranslationSpeed * deltatime;
-    if (Input::IsKeyPressed(CODI_KEY_D))
+    if (Input::IsKeyPressed(CODI_KEY_A))
         _cameraPosition.x -= _cameraTranslationSpeed * deltatime;
+    if (Input::IsKeyPressed(CODI_KEY_S))
+        _cameraPosition.y -= _cameraTranslationSpeed * deltatime;
+    if (Input::IsKeyPressed(CODI_KEY_D))
+        _cameraPosition.x += _cameraTranslationSpeed * deltatime;
 
     _camera.setPosition(_cameraPosition);
 

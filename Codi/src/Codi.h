@@ -15,6 +15,7 @@
 
 /* ---------------------- RENDERER --------------------- */
 #include "Codi/Renderer/Renderer.h"
+#include "Codi/Renderer/Renderer2D.h"
 #include "Codi/Renderer/RenderCommand.h"
 
 #include "Codi/Renderer/Buffer.h"
@@ -24,8 +25,4 @@
 
 #include "Codi/Renderer/OrthographicCamera.h"
 #include "Codi/Renderer/OrthographicCameraController.h"
-/* ----------------------------------------------------- */
-
-/* -------------------- ENTRY POINT -------------------- */
-#include "Codi/Core/EntryPoint.h"
 /* ----------------------------------------------------- */

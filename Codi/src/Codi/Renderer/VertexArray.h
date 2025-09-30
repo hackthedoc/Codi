@@ -23,7 +23,7 @@ public:
 
     virtual uint getID() const = 0;
 
-    static VertexArray* Create();
+    static Ref<VertexArray> Create();
 };
 
 } // namespace Codi

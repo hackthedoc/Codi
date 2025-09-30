@@ -1,6 +1,8 @@
-add_executable(Sandbox
-    Application.cpp
+file(GLOB_RECURSE SANDBOX_SRC
+    src/*.cpp
 )
+
+add_executable(Sandbox ${SANDBOX_SRC})
 
 add_dependencies(Sandbox Codi)
 

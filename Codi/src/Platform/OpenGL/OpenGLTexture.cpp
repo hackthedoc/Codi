@@ -3,9 +3,26 @@
 
 #include "stb_image.h"
 
-#include <glad/glad.h>
-
 namespace Codi {
+
+OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height, void* data)
+    : _width(width), _height(height) 
+    {
+    _internalFormat = GL_RGBA8;
+     _dataFormat = GL_RGBA;
+    
+    glCreateTextures(GL_TEXTURE_2D, 1, &_rendererID);
+    glTextureStorage2D(_rendererID, 1, _internalFormat, _width, _height);
+
+    glTextureParameteri(_rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTextureParameteri(_rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(_rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    if (data)
+        setData(data, width * height * 4);
+}
 
 OpenGLTexture2D::OpenGLTexture2D(const std::string& path) : _path(path) {
     int w, h, c;
@@ -15,24 +32,27 @@ OpenGLTexture2D::OpenGLTexture2D(const std::string& path) : _path(path) {
     _width = w;
     _height = h;
 
-    GLenum internalFormat = 0, dataFormat = 0;
+    GLenum _internalFormat = 0, _dataFormat = 0;
     if (c == 4) {
-        internalFormat = GL_RGB8;
-        dataFormat = GL_RGBA;
+        _internalFormat = GL_RGBA8;
+        _dataFormat = GL_RGBA;
     }
     else if (c == 3) {
-        internalFormat = GL_RGB8;
-        dataFormat = GL_RGB;
+        _internalFormat = GL_RGB8;
+        _dataFormat = GL_RGB;
     }
-    CODI_CORE_ASSERT(internalFormat & dataFormat, "Format not supported!");
+    CODI_CORE_ASSERT(_internalFormat & _dataFormat, "Format not supported!");
 
     glCreateTextures(GL_TEXTURE_2D, 1, &_rendererID);
-    glTextureStorage2D(_rendererID, 1, internalFormat, _width, _height);
+    glTextureStorage2D(_rendererID, 1, _internalFormat, _width, _height);
 
     glTextureParameteri(_rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTextureParameteri(_rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST); 
+    glTextureParameteri(_rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glTextureSubImage2D(_rendererID, 0, 0, 0, _width, _height, dataFormat, GL_UNSIGNED_BYTE, data);
+    glTextureParameteri(_rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(_rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTextureSubImage2D(_rendererID, 0, 0, 0, _width, _height, _dataFormat, GL_UNSIGNED_BYTE, data);
 
     stbi_image_free(data);
 }
@@ -43,6 +63,16 @@ OpenGLTexture2D::~OpenGLTexture2D() {
 
 void OpenGLTexture2D::bind(uint32_t slot) const {
     glBindTextureUnit(slot, _rendererID);
+}
+
+void OpenGLTexture2D::unbind() const {
+    glBindTextureUnit(0, 0);
+}
+
+void OpenGLTexture2D::setData(void* data, uint32_t size) {
+    uint32_t bpp = _dataFormat == GL_RGBA ? 4 : 3;
+    CODI_CORE_ASSERT(size == _width * _height * bpp, "Data must be entire texture!");
+    glTextureSubImage2D(_rendererID, 0, 0, 0, _width, _height, _dataFormat, GL_UNSIGNED_BYTE, data);
 }
 
 } // namespace Codi

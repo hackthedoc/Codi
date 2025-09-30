@@ -136,6 +136,15 @@ void WindowsWindow::init(const WindowProps& props) {
         MouseMovedEvent event((float)xPos, (float)yPos);
         data.eventCallback(event);
     });
+    
+    // LOGGING OPENGL INFO
+    const char* vendor  = reinterpret_cast<const char*>(glGetString(GL_VENDOR));   // get vendor string
+    const char* renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER)); // get renderer string
+    const char* version  = reinterpret_cast<const char*>(glGetString(GL_VERSION));  // version as string
+    CODI_CORE_INFO("OpenGL Info:");
+    CODI_CORE_INFO("  Vendor:   {0}", vendor);
+    CODI_CORE_INFO("  Renderer: {0}", renderer);
+    CODI_CORE_INFO("  Version:  {0}", version);
 }
 
 void WindowsWindow::shutdown() {

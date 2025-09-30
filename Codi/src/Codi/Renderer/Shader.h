@@ -11,8 +11,12 @@ public:
     virtual void bind() const = 0;
     virtual void unbind() const = 0;
 
-    static Shader* Create(const std::string& filepath);
-    static Shader* Create(const std::string& vertexSrc, const std::string& fragmentSrc);
+    virtual void setInt(const std::string& name, const int value) = 0;
+    virtual void setFloat4(const std::string& name,const glm::vec4& value) = 0;
+    virtual void setMat4(const std::string& name, const glm::mat4& matrix) = 0;
+
+    static Ref<Shader> Create(const std::string& filepath);
+    static Ref<Shader> Create(const std::string& vertexSrc, const std::string& fragmentSrc);
 };
 
 } // namespace Codi
