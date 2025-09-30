@@ -45,7 +45,7 @@ void Sandbox2D::onUpdate(Codi::DeltaTime deltatime) {
         CODI_PROFILE_SCOPE("Renderer2D DrawScene");
         Codi::Renderer2D::BeginScene(_cameraController.getCamera());
 
-        Codi::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 2.0f, 2.0f }, _squareColor);
+        Codi::Renderer2D::DrawRotatedQuad({ 0.0f, 0.0f, -0.1f }, { 2.0f, 2.0f }, glm::radians(45.0f), _squareColor);
         Codi::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, _texture);
 
         Codi::Renderer2D::EndScene();

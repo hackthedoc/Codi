@@ -17,8 +17,8 @@ static void GLFWErrorCallback(int err, const char* msg) {
     CODI_CORE_ERROR("GLFW Error ({0}): {1}", err ,msg);
 }
 
-Window* Window::Create(const WindowProps& props) {
-    return new WindowsWindow(props);
+Scope<Window> Window::Create(const WindowProps& props) {
+    return CreateScope<WindowsWindow>(props);
 }
 
 WindowsWindow::WindowsWindow(const WindowProps& props) {

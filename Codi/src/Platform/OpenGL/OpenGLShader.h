@@ -17,6 +17,7 @@ public:
     virtual void unbind() const override;
 
     virtual void setInt(const std::string& name, const int value) override;
+    virtual void setFloat(const std::string& name, const float value) override;
     virtual void setFloat4(const std::string& name, const glm::vec4& value) override;
     virtual void setMat4(const std::string& name, const glm::mat4& matrix) override;
 

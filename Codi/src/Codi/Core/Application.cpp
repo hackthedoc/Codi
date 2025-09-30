@@ -16,7 +16,7 @@ Application::Application() {
     CODI_CORE_ASSERT(!_instance, "Application already exists!");
     _instance = this;
 
-    _window = std::unique_ptr<Window>(Window::Create());
+    _window = Window::Create();
     _window->setEventCallback(CODI_BIND_EVENT_FN(Application::onEvent));
     
     Renderer::Init();

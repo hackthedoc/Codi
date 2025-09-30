@@ -168,6 +168,12 @@ void OpenGLShader::setInt(const std::string& name, const int value) {
     uploadUniformInt(name, value);
 }
 
+void OpenGLShader::setFloat(const std::string& name, const float value) {
+    CODI_PROFILE_FUNCTION();
+    
+    uploadUniformFloat(name, value);
+}
+
 void OpenGLShader::setFloat4(const std::string& name, const glm::vec4& value) {
     CODI_PROFILE_FUNCTION();
     
