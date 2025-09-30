@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Codi/Core.h"
+#include "Codi/Core/Core.h"
 #include "Codi/Core/DeltaTime.h"
 #include "Codi/Events/Event.h"
 

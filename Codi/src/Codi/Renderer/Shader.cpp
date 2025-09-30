@@ -1,7 +1,7 @@
 #include "cdpch.h"
 #include "Shader.h"
 
-#include "Renderer.h"
+#include "Codi/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Codi {

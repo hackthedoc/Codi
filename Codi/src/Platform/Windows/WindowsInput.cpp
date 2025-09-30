@@ -1,7 +1,7 @@
 #include "cdpch.h"
 #include "WindowsInput.h"
 
-#include "Codi/Application.h"
+#include "Codi/Core/Application.h"
 
 #include "GLFW/glfw3.h"
 

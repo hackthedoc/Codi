@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Codi/Application.h"
+#include "Codi/Core/Application.h"
 
 #ifdef CODI_PLATFORM_WINDOWS
 

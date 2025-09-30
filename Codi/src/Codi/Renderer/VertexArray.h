@@ -3,7 +3,7 @@
 // TODO: remove shared_ptr
 #include <memory>
 
-#include "Codi/Core.h"
+#include "Codi/Core/Core.h"
 #include "Codi/Renderer/Buffer.h"
 
 namespace Codi {

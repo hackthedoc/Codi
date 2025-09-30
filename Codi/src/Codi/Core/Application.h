@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Codi/Core.h"
-#include "Codi/Window.h"
-#include "Codi/LayerStack.h"
+#include "Codi/Core/Core.h"
+#include "Codi/Core/Window.h"
+#include "Codi/Core/LayerStack.h"
 #include "Codi/Core/DeltaTime.h"
 #include "Codi/Events/Event.h"
 #include "Codi/Events/ApplicationEvent.h"

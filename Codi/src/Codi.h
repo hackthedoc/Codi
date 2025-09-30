@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Codi/Application.h"
-#include "Codi/Layer.h"
-#include "Codi/Log.h"
+#include "Codi/Core/Log.h"
+#include "Codi/Core/Layer.h"
+#include "Codi/Core/Application.h"
 
 #include "Codi/Core/DeltaTime.h"
+
 #include "Codi/Core/Input.h"
 #include "Codi/Core/KeyCodes.h"
 #include "Codi/Core/MouseButtonCodes.h"
 
-#include "Codi/OrthographicCameraController.h"
 
 #include "Codi/ImGui/ImGuiLayer.h"
 
@@ -23,8 +23,9 @@
 #include "Codi/Renderer/VertexArray.h"
 
 #include "Codi/Renderer/OrthographicCamera.h"
+#include "Codi/Renderer/OrthographicCameraController.h"
 /* ----------------------------------------------------- */
 
 /* -------------------- ENTRY POINT -------------------- */
-#include "Codi/EntryPoint.h"
+#include "Codi/Core/EntryPoint.h"
 /* ----------------------------------------------------- */

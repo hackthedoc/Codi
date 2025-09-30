@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Codi/Window.h"
+#include "Codi/Core/Window.h"
 #include "Codi/Renderer/GraphicsContext.h"
 
 class GLFWwindow;

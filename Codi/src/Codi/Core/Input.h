@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Codi/Core.h"
+#include "Codi/Core/Core.h"
 
 namespace Codi {
 

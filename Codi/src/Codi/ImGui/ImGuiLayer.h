@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Codi/Layer.h"
+#include "Codi/Core/Layer.h"
 
 #include "Codi/Events/ApplicationEvent.h"
 #include "Codi/Events/KeyEvent.h"

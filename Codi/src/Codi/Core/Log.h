@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Codi/Core.h"
+#include "Codi/Core/Core.h"
 
 #include "spdlog/spdlog.h"
 #include "spdlog/fmt/ostr.h"

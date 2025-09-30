@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "Codi/Log.h"
+#include "Codi/Core/Log.h"
 
 #ifdef CODI_PLATFORM_WINDOWS
     #include <Windows.h>

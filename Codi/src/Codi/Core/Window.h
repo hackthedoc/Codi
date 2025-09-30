@@ -2,7 +2,7 @@
 
 #include "cdpch.h"
 
-#include "Codi/Core.h"
+#include "Codi/Core/Core.h"
 #include "Codi/Events/Event.h"
 
 namespace Codi {

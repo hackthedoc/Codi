@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Codi/Core.h"
-#include "Codi/Layer.h"
+#include "Codi/Core/Core.h"
+#include "Codi/Core/Layer.h"
 
 namespace Codi {
 

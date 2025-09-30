@@ -5,7 +5,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
-#include "Codi/Application.h"
+#include "Codi/Core/Application.h"
 
 // TODO: remove temporary includes
 #include "glad/glad.h"
