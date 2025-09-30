@@ -4,7 +4,7 @@
 
 class ExampleLayer: public Codi::Layer {
 public:
-    ExampleLayer() : Layer("Example"), _camera(-1.6f, 1.6f, -0.9f, 0.9f), _cameraPosition({0.0f, 0.0f, 0.0f}), _rotation(0.0f), _squarePosition(0.0f) {
+    ExampleLayer() : Layer("Example"), _squarePosition(0.0f), _cameraController(1280.0f / 720.0f) {
         _vertexArray.reset(Codi::VertexArray::Create());
         float vertices[3 * 7] = {
             -0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
@@ -51,41 +51,19 @@ public:
     }
 
     void onUpdate(Codi::DeltaTime deltatime) override {
+        //////// UPDATING //////////
+        
         if (Codi::Input::IsKeyPressed(CODI_KEY_ESCAPE))
             Codi::Application::Get().close();
         
-        // CAMERA MOVEMENT
-        if (Codi::Input::IsKeyPressed(CODI_KEY_LEFT))
-            _cameraPosition.x += _cameraSpeed * deltatime;
-        if (Codi::Input::IsKeyPressed(CODI_KEY_RIGHT))
-            _cameraPosition.x -= _cameraSpeed * deltatime;  
-        if (Codi::Input::IsKeyPressed(CODI_KEY_UP))
-            _cameraPosition.y -= _cameraSpeed * deltatime;   
-        if (Codi::Input::IsKeyPressed(CODI_KEY_DOWN))
-            _cameraPosition.y += _cameraSpeed * deltatime;
+        _cameraController.onUpdate(deltatime);
 
-        if (Codi::Input::IsKeyPressed(CODI_KEY_Q))
-            _rotation -= _rotationSpeed * deltatime;
-        if (Codi::Input::IsKeyPressed(CODI_KEY_E))
-            _rotation += _rotationSpeed * deltatime;
-
-        // SQUARE MOVEMENT
-        if (Codi::Input::IsKeyPressed(CODI_KEY_A))
-            _squarePosition.x -= _squareSpeed * deltatime;   
-        if (Codi::Input::IsKeyPressed(CODI_KEY_D))
-            _squarePosition.x += _squareSpeed * deltatime; 
-        if (Codi::Input::IsKeyPressed(CODI_KEY_W))
-            _squarePosition.y += _squareSpeed * deltatime; 
-        if (Codi::Input::IsKeyPressed(CODI_KEY_S))
-            _squarePosition.y -= _squareSpeed * deltatime;
+        ////////// RENDERING //////////
 
         Codi::RenderCommand::SetClearColor({ 0.0863f, 0.0902f, 0.1137f, 1.0f });
         Codi::RenderCommand::Clear();
 
-        _camera.setPosition(_cameraPosition);
-        _camera.setRotation(_rotation);
-
-        Codi::Renderer::BeginScene(_camera);
+        Codi::Renderer::BeginScene(_cameraController.getCamera());
 
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), _squarePosition);
         
@@ -95,6 +73,10 @@ public:
         Codi::Renderer::EndScene();
     }
 
+    void onEvent(Codi::Event& e) override {
+        _cameraController.onEvent(e);
+    }
+
 private:
     Codi::Ref<Codi::Shader> _shader;
     Codi::Ref<Codi::VertexArray> _vertexArray;
@@ -102,11 +84,7 @@ private:
     Codi::Ref<Codi::Shader> _blueShader;
     Codi::Ref<Codi::VertexArray> _squareVA;
 
-    Codi::OrthographicCamera _camera;
-    glm::vec3 _cameraPosition;
-    float _cameraSpeed = 1.0f;
-    float _rotation = 0.0f;
-    float _rotationSpeed = 90.0f;
+    Codi::OrthographicCameraController _cameraController;
 
     glm::vec3 _squarePosition;
     float _squareSpeed = 1.0f;

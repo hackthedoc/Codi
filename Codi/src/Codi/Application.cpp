@@ -8,8 +8,6 @@
 
 namespace Codi {
 
-#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
-
 Application* Application::_instance = nullptr;
 
 Application::Application() {
@@ -17,7 +15,7 @@ Application::Application() {
     _instance = this;
 
     _window = std::unique_ptr<Window>(Window::Create());
-    _window->setEventCallback(BIND_EVENT_FN(onEvent));
+    _window->setEventCallback(CODI_BIND_EVENT_FN(Application::onEvent));
     
     Renderer::Init();
 
@@ -33,8 +31,10 @@ void Application::run() {
         DeltaTime timestep = time - _lastFrameTime;
         _lastFrameTime = time;
 
-        for (Layer* l : _layerStack)
-            l->onUpdate(timestep);
+        if (!_minimized) {
+            for (Layer* l : _layerStack)
+                l->onUpdate(timestep);
+        }
         
         _imGuiLayer->begin();
         for (Layer* l : _layerStack)
@@ -47,7 +47,8 @@ void Application::run() {
 
 void Application::onEvent(Event& e) {
     EventDispatcher dispatcher(e);
-    dispatcher.dispatch<WindowCloseEvent>(BIND_EVENT_FN(onWindowClosed));
+    dispatcher.dispatch<WindowCloseEvent>(CODI_BIND_EVENT_FN(Application::onWindowClosed));
+    dispatcher.dispatch<WindowResizeEvent>(CODI_BIND_EVENT_FN(Application::onWindowResize));
 
     for (std::vector<Layer*>::iterator it = _layerStack.end(); it != _layerStack.begin();) {
         (*--it)->onEvent(e);
@@ -68,6 +69,12 @@ void Application::pushOverlay(Layer* overlay) {
 bool Application::onWindowClosed(WindowCloseEvent& e) {
     _running = false;
     return true;
+}
+
+bool Application::onWindowResize(WindowResizeEvent& e) {
+    _minimized = e.getWidth() == 0 || e.getHeight() == 0;
+    Renderer::OnWindowResize(e.getWidth(), e.getHeight());
+    return false;
 }
 
 }

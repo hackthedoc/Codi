@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Codi/Input.h"
+#include "Codi/Core/Input.h"
 
 namespace Codi {
 

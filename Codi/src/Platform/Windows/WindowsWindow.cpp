@@ -61,8 +61,6 @@ void WindowsWindow::init(const WindowProps& props) {
         data.w = w;
         data.h = h;
 
-        glViewport(0, 0, w, h);
-
         WindowResizeEvent event(w, h);
         data.eventCallback(event);
     });

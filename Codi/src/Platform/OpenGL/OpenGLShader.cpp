@@ -85,14 +85,12 @@ void OpenGLShader::compile(const std::unordered_map<GLenum, std::string>& shader
             
         const char* srcCstr = source.c_str();
         int length = (int)source.size();
-        CINFO("\n{0}", srcCstr);
         glShaderSource(shader, 1, &srcCstr, &length);
         
         glCompileShader(shader);
         
         int isCompiled = 0;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
-        CWARN("Is Compiled: {0}", isCompiled);
         if (isCompiled == GL_FALSE) {
             int maxLength = 0;
             glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
