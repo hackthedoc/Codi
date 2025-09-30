@@ -9,6 +9,7 @@ namespace Codi {
 class Renderer {
 public:
     static void Init();
+    static void Shutdown();
 
     static void OnWindowResize(uint width, uint height);
 

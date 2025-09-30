@@ -14,6 +14,8 @@
 
 #include "Codi/Core/Log.h"
 
+#include "Codi/Debug/Instrumentor.h"
+
 #ifdef CODI_PLATFORM_WINDOWS
     #include <Windows.h>
 #endif

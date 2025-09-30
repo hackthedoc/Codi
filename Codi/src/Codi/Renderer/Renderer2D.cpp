@@ -18,6 +18,8 @@ struct Renderer2DData {
 static Renderer2DData* _Data;
 
 void Renderer2D::Init() {
+    CODI_PROFILE_FUNCTION();
+
     _Data = new Renderer2DData();
 
     _Data->SquareVertexArray = VertexArray::Create();
@@ -50,15 +52,21 @@ void Renderer2D::Init() {
 }
 
 void Renderer2D::Shutdown() {
+    CODI_PROFILE_FUNCTION();
+    
     delete _Data;
 }
 
 void Renderer2D::BeginScene(const OrthographicCamera& camera) {    
+    CODI_PROFILE_FUNCTION();
+    
     _Data->TextureShader->bind();
     _Data->TextureShader->setMat4("u_ViewProjection", camera.getViewProjectionMatrix());
 }
 
 void Renderer2D::EndScene() {
+    CODI_PROFILE_FUNCTION();
+    
 
 }
 
@@ -67,6 +75,8 @@ void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, cons
 }
 
 void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color) {
+    CODI_PROFILE_FUNCTION();
+    
     _Data->TextureShader->setFloat4("u_Color", color);
     _Data->WhiteTexture->bind();
 
@@ -83,6 +93,8 @@ void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, cons
 }
 
 void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& tintColor) {
+    CODI_PROFILE_FUNCTION();
+    
     texture->bind();
 
     _Data->TextureShader->setFloat4("u_Color", tintColor);

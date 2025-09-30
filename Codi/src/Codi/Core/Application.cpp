@@ -11,6 +11,8 @@ namespace Codi {
 Application* Application::_instance = nullptr;
 
 Application::Application() {
+    CODI_PROFILE_FUNCTION();
+
     CODI_CORE_ASSERT(!_instance, "Application already exists!");
     _instance = this;
 
@@ -23,29 +25,47 @@ Application::Application() {
     pushOverlay(_imGuiLayer);    
 }
 
-Application::~Application() {}
+Application::~Application() {
+    CODI_PROFILE_FUNCTION();
+    
+    Renderer::Shutdown();
+}
 
-void Application::run() {
+void Application::run() {    
+    CODI_PROFILE_FUNCTION();
+    
     while (_running) {
+        CODI_PROFILE_SCOPE("RunLoop");
+        
         float time = (float)glfwGetTime(); // TODO: Platform::GetTime()
         DeltaTime timestep = time - _lastFrameTime;
         _lastFrameTime = time;
 
         if (!_minimized) {
-            for (Layer* l : _layerStack)
+            {
+                CODI_PROFILE_SCOPE("LayerStack onUpdate");
+
+                for (Layer* l : _layerStack)
                 l->onUpdate(timestep);
+            }
+
+            _imGuiLayer->begin();
+            {
+                CODI_PROFILE_SCOPE("LayerStack onImGuiRender");
+
+                for (Layer* l : _layerStack)
+                l->onImGuiRender();
+            }
+            _imGuiLayer->end();
         }
         
-        _imGuiLayer->begin();
-        for (Layer* l : _layerStack)
-            l->onImGuiRender();
-        _imGuiLayer->end();
-
         _window->onUpdate();
     }
 }
 
 void Application::onEvent(Event& e) {
+    CODI_PROFILE_FUNCTION();
+    
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<WindowCloseEvent>(CODI_BIND_EVENT_FN(Application::onWindowClosed));
     dispatcher.dispatch<WindowResizeEvent>(CODI_BIND_EVENT_FN(Application::onWindowResize));
@@ -57,11 +77,15 @@ void Application::onEvent(Event& e) {
 }
 
 void Application::pushLayer(Layer* layer) {
+    CODI_PROFILE_FUNCTION();
+    
     _layerStack.pushLayer(layer);
     layer->onAttach();
 }
 
 void Application::pushOverlay(Layer* overlay) {
+    CODI_PROFILE_FUNCTION();
+    
     _layerStack.pushLayer(overlay);
     overlay->onAttach();
 }
@@ -72,6 +96,8 @@ bool Application::onWindowClosed(WindowCloseEvent& e) {
 }
 
 bool Application::onWindowResize(WindowResizeEvent& e) {
+    CODI_PROFILE_FUNCTION();
+    
     _minimized = e.getWidth() == 0 || e.getHeight() == 0;
     Renderer::OnWindowResize(e.getWidth(), e.getHeight());
     return false;

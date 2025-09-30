@@ -18,12 +18,16 @@ static GLenum ShaderTypeFromString(const std::string& type) {
 }
 
 OpenGLShader::OpenGLShader(const std::string& filepath) {
+    CODI_PROFILE_FUNCTION();
+    
     std::string raw = readFile(filepath);
     std::unordered_map<GLenum, std::string> src = preprocess(raw);
     compile(src);
 }
 
 OpenGLShader::OpenGLShader(const std::string& vertexSrc, const std::string& fragmentSrc) {
+    CODI_PROFILE_FUNCTION();
+    
     std::unordered_map<GLenum, std::string> sources;
     sources[GL_VERTEX_SHADER] = vertexSrc;
     sources[GL_FRAGMENT_SHADER] = fragmentSrc;
@@ -31,10 +35,14 @@ OpenGLShader::OpenGLShader(const std::string& vertexSrc, const std::string& frag
 }
 
 OpenGLShader::~OpenGLShader() {
+    CODI_PROFILE_FUNCTION();
+    
     glDeleteProgram(_rendererID);
 }
 
 std::string OpenGLShader::readFile(const std::string& filepath) {
+    CODI_PROFILE_FUNCTION();
+    
     std::ifstream infile(filepath, std::ios::binary);
     if (!infile) {
         CODI_CORE_ERROR("Could not open file '{0}'", filepath);
@@ -51,6 +59,8 @@ std::string OpenGLShader::readFile(const std::string& filepath) {
 }
 
 std::unordered_map<GLenum, std::string> OpenGLShader::preprocess(const std::string& source) {
+    CODI_PROFILE_FUNCTION();
+    
     std::unordered_map<GLenum, std::string> shaderSources;
 
     const char* typeToken("#type");
@@ -73,6 +83,8 @@ std::unordered_map<GLenum, std::string> OpenGLShader::preprocess(const std::stri
 }
 
 void OpenGLShader::compile(const std::unordered_map<GLenum, std::string>& shaderSources) {
+    CODI_PROFILE_FUNCTION();
+    
     _rendererID = glCreateProgram();
     std::vector<GLenum> glShaderIDs;
     glShaderIDs.reserve(shaderSources.size());
@@ -139,22 +151,32 @@ void OpenGLShader::compile(const std::unordered_map<GLenum, std::string>& shader
 }
 
 void OpenGLShader::bind() const {
+    CODI_PROFILE_FUNCTION();
+    
     glUseProgram(_rendererID);
 }
 
 void OpenGLShader::unbind() const {
+    CODI_PROFILE_FUNCTION();
+    
     glUseProgram(0);
 }
 
 void OpenGLShader::setInt(const std::string& name, const int value) {
+    CODI_PROFILE_FUNCTION();
+    
     uploadUniformInt(name, value);
 }
 
 void OpenGLShader::setFloat4(const std::string& name, const glm::vec4& value) {
+    CODI_PROFILE_FUNCTION();
+    
     uploadUniformFloat4(name, value);
 }
 
 void OpenGLShader::setMat4(const std::string& name, const glm::mat4& matrix) {
+    CODI_PROFILE_FUNCTION();
+    
     uploadUniformMat4(name, matrix);
 }
 

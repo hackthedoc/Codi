@@ -22,6 +22,8 @@ Window* Window::Create(const WindowProps& props) {
 }
 
 WindowsWindow::WindowsWindow(const WindowProps& props) {
+    CODI_PROFILE_FUNCTION();
+
     init(props);
 }
 
@@ -30,6 +32,8 @@ WindowsWindow::~WindowsWindow() {
 }
 
 void WindowsWindow::init(const WindowProps& props) {
+    CODI_PROFILE_FUNCTION();
+
     _data.title = props.title;
     _data.w = props.width;
     _data.h = props.height;
@@ -37,6 +41,7 @@ void WindowsWindow::init(const WindowProps& props) {
     CODI_CORE_INFO("Creating window {0} ({1}, {2})", props.title, props.width, props.height);
 
     if (!_GLFWInitialized) {
+        CODI_PROFILE_SCOPE("glfwInit");
         int success = glfwInit();
         CODI_CORE_ASSERT(success, "Could not initialized GLFW!");
 
@@ -44,7 +49,12 @@ void WindowsWindow::init(const WindowProps& props) {
         _GLFWInitialized = true;
     }
 
-    _window = glfwCreateWindow((int)_data.w, (int)_data.h, _data.title.c_str(), nullptr, nullptr);
+    {
+        CODI_PROFILE_SCOPE("glfwCreateWindow");
+
+        _window = glfwCreateWindow((int)_data.w, (int)_data.h, _data.title.c_str(), nullptr, nullptr);
+    }
+    
     
     _context = new OpenGLContext(_window);
     _context->init();
@@ -136,27 +146,24 @@ void WindowsWindow::init(const WindowProps& props) {
         MouseMovedEvent event((float)xPos, (float)yPos);
         data.eventCallback(event);
     });
-    
-    // LOGGING OPENGL INFO
-    const char* vendor  = reinterpret_cast<const char*>(glGetString(GL_VENDOR));   // get vendor string
-    const char* renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER)); // get renderer string
-    const char* version  = reinterpret_cast<const char*>(glGetString(GL_VERSION));  // version as string
-    CODI_CORE_INFO("OpenGL Info:");
-    CODI_CORE_INFO("  Vendor:   {0}", vendor);
-    CODI_CORE_INFO("  Renderer: {0}", renderer);
-    CODI_CORE_INFO("  Version:  {0}", version);
 }
 
 void WindowsWindow::shutdown() {
+    CODI_PROFILE_FUNCTION();
+
     glfwDestroyWindow(_window);
 }
 
 void WindowsWindow::onUpdate() {
+    CODI_PROFILE_FUNCTION();
+
     glfwPollEvents();
     _context->swapBuffers();
 }
 
 void WindowsWindow::setVSync(bool enabled) {
+    CODI_PROFILE_FUNCTION();
+
     if (enabled) glfwSwapInterval(1);
     else glfwSwapInterval(0);
 

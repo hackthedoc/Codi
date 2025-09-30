@@ -10,8 +10,17 @@ namespace Codi {
 Renderer::SceneData* Renderer::_sceneData = new Renderer::SceneData;
 
 void Renderer::Init() {
+    CODI_PROFILE_FUNCTION();
+
     RenderCommand::Init();
     Renderer2D::Init();
+}
+
+void Renderer::Shutdown() {
+    CODI_PROFILE_FUNCTION();
+    
+    Renderer2D::Shutdown();
+    delete _sceneData;
 }
 
 void Renderer::OnWindowResize(uint width, uint height) {

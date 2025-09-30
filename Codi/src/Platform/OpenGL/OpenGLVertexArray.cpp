@@ -25,22 +25,32 @@ static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type) {
 }
 
 OpenGLVertexArray::OpenGLVertexArray() {
+    CODI_PROFILE_FUNCTION();
+
     glCreateVertexArrays(1, &_rendererID);
 }
 
 OpenGLVertexArray::~OpenGLVertexArray() {
+    CODI_PROFILE_FUNCTION();
+    
     glDeleteVertexArrays(1, &_rendererID);
 }
 
 void OpenGLVertexArray::bind() const {
+    CODI_PROFILE_FUNCTION();
+    
     glBindVertexArray(_rendererID);
 }
 
 void OpenGLVertexArray::unbind() const {
+    CODI_PROFILE_FUNCTION();
+    
     glBindVertexArray(0);
 }
 
 void OpenGLVertexArray::addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer) {
+    CODI_PROFILE_FUNCTION();
+    
     bind();
     vertexBuffer->bind();
 
@@ -63,6 +73,8 @@ void OpenGLVertexArray::addVertexBuffer(const std::shared_ptr<VertexBuffer>& ver
 }
 
 void OpenGLVertexArray::setIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer) {
+    CODI_PROFILE_FUNCTION();
+    
     bind();
     indexBuffer->bind();
 

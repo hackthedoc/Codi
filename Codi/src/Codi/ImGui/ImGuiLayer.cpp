@@ -18,6 +18,8 @@ ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {}
 ImGuiLayer::~ImGuiLayer() {}
 
 void ImGuiLayer::onAttach() {
+    CODI_PROFILE_FUNCTION();
+    
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -42,25 +44,24 @@ void ImGuiLayer::onAttach() {
 }
 
 void ImGuiLayer::onDetach() {
+    CODI_PROFILE_FUNCTION();
+    
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
-void ImGuiLayer::onImGuiRender() {
-    static bool show = true;
-    ImGui::ShowDemoWindow(&show);
-
-
-}
-
 void ImGuiLayer::begin() {
+    CODI_PROFILE_FUNCTION();
+    
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 }
 
 void ImGuiLayer::end() {
+    CODI_PROFILE_FUNCTION();
+    
     ImGuiIO& io = ImGui::GetIO();
     Application& app = Application::Get();
     io.DisplaySize = ImVec2((float)app.getWindow().getWidth(), (float)app.getWindow().getHeight());

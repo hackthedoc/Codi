@@ -17,7 +17,7 @@
     #error "CODI only supports Windows!"
 #endif
 
-#ifdef CODI_DEUBG
+#ifdef CODI_DEBUG
     #define CODI_ENABLE_ASSERTS
 #endif
 
