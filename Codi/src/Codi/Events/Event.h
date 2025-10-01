@@ -29,10 +29,12 @@ enum EventCategory {
 
 #define EVENT_CLASS_CATEGORY(category) virtual int getCategoryFlags() const override { return category; }
 
-class CAPI Event {
+class Event {
 friend class EventDispatcher;
 
 public:
+    virtual ~Event() = default;
+
     virtual EventType getEventType() const = 0;
     virtual const char* getName() const = 0;
     virtual int getCategoryFlags() const = 0;

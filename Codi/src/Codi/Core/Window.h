@@ -9,12 +9,12 @@ namespace Codi {
 
 struct WindowProps {
     std::string title;
-    uint width;
-    uint height;
+    uint32_t width;
+    uint32_t height;
 
     WindowProps(const std::string& t = "Codi Engine",
-                uint w = 1280,
-                uint h = 720)
+                uint32_t w = 1280,
+                uint32_t h = 720)
         : title(t), width(w), height(h)
     {}
 };
@@ -29,8 +29,8 @@ public:
 
     virtual void onUpdate() = 0;
 
-    virtual uint getWidth() const = 0;
-    virtual uint getHeight() const = 0;
+    virtual uint32_t getWidth() const = 0;
+    virtual uint32_t getHeight() const = 0;
 
     // Window Attributes
     virtual void setEventCallback(const EventCallbackFn& callback) = 0;

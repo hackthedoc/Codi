@@ -10,13 +10,13 @@ namespace Codi {
 
 Application* Application::_instance = nullptr;
 
-Application::Application() {
+Application::Application(const std::string& name) {
     CODI_PROFILE_FUNCTION();
 
     CODI_CORE_ASSERT(!_instance, "Application already exists!");
     _instance = this;
 
-    _window = Window::Create();
+    _window = Window::Create(WindowProps(name));
     _window->setEventCallback(CODI_BIND_EVENT_FN(Application::onEvent));
     
     Renderer::Init();

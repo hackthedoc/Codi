@@ -19,6 +19,7 @@
 #include "Codi/Renderer/RenderCommand.h"
 
 #include "Codi/Renderer/Buffer.h"
+#include "Codi/Renderer/FrameBuffer.h"
 #include "Codi/Renderer/Shader.h"
 #include "Codi/Renderer/Texture.h"
 #include "Codi/Renderer/SubTexture.h"

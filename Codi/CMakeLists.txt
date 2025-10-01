@@ -1,3 +1,5 @@
+project(Codi)
+
 file(GLOB_RECURSE CODI_SOURCES
     src/*.cpp
 )

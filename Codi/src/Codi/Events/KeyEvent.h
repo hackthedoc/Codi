@@ -4,7 +4,7 @@
 
 namespace Codi {
 
-class CAPI KeyEvent : public Event {
+class KeyEvent : public Event {
 public:
     inline int getKeyCode() const { return _keyCode; }
 
@@ -18,7 +18,7 @@ protected:
     int _keyCode;
 };
 
-class CAPI KeyPressedEvent : public KeyEvent {
+class KeyPressedEvent : public KeyEvent {
 public:
     KeyPressedEvent(int keycode, int repeatCount) : KeyEvent(keycode), _repeatCount(repeatCount) {}
 
@@ -36,7 +36,7 @@ private:
     int _repeatCount;
 };
 
-class CAPI KeyReleasedEvent : public KeyEvent {
+class KeyReleasedEvent : public KeyEvent {
 public:
     KeyReleasedEvent(int keycode) : KeyEvent(keycode) {}
 
@@ -49,7 +49,7 @@ public:
     EVENT_CLASS_TYPE(KeyReleased)
 };
 
-class CAPI KeyTypedEvent : public KeyEvent {
+class KeyTypedEvent : public KeyEvent {
 public:
     KeyTypedEvent(int keycode) : KeyEvent(keycode) {}
 

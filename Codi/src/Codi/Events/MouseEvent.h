@@ -4,7 +4,7 @@
 
 namespace Codi {
 
-class CAPI MouseMovedEvent : public Event {
+class MouseMovedEvent : public Event {
 public:
     MouseMovedEvent(float x, float y) : _x(x), _y(y) {}
     
@@ -25,7 +25,7 @@ private:
     float _y;
 };
 
-class CAPI MouseScrolledEvent : public Event {
+class MouseScrolledEvent : public Event {
 public:
     MouseScrolledEvent(float xOffset, float yOffset)
         : _xOffset(xOffset), _yOffset(yOffset) {
@@ -48,7 +48,7 @@ private:
     float _yOffset;
 };
 
-class CAPI MouseButtonEvent : public Event {
+class MouseButtonEvent : public Event {
 public:
     inline int GetMouseButton() const { return _button; }
 
@@ -62,7 +62,7 @@ protected:
     int _button;
 };
 
-class CAPI MouseButtonPressedEvent : public MouseButtonEvent {
+class MouseButtonPressedEvent : public MouseButtonEvent {
 public:
     MouseButtonPressedEvent(int button) : MouseButtonEvent(button) {}
 
@@ -75,7 +75,7 @@ public:
     EVENT_CLASS_TYPE(MouseButtonPressed)
 };
 
-class CAPI MouseButtonReleasedEvent : public MouseButtonEvent {
+class MouseButtonReleasedEvent : public MouseButtonEvent {
 public:
     MouseButtonReleasedEvent(int button) : MouseButtonEvent(button) {}
 

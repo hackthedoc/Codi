@@ -12,7 +12,7 @@ namespace Codi {
 
 class CAPI Application {
 public:
-    Application();
+    Application(const std::string& name = "Codi Application");
     virtual ~Application();
 
     void run();

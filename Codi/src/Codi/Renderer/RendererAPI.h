@@ -13,6 +13,8 @@ public:
         OpenGL = 1
     };
 
+    virtual ~RendererAPI() = default;
+
     virtual void init() = 0;
 
     virtual void SetViewport(uint x, uint y, uint width, uint height) = 0;

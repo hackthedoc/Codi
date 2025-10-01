@@ -10,4 +10,5 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/obj)
 
 add_subdirectory(Codi)
+add_subdirectory(CodiEditor)
 add_subdirectory(Sandbox)
