@@ -14,6 +14,8 @@ public:
     void onUpdate(DeltaTime deltatime);
     void onEvent(Event& e);
 
+    void onResize(const float width, const float height);
+
     OrthographicCamera& getCamera() { return _camera; }
     const OrthographicCamera& getCamera() const { return _camera; }
 

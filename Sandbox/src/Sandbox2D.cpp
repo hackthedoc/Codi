@@ -14,6 +14,11 @@ void Sandbox2D::onAttach() {
     CODI_PROFILE_FUNCTION();
     
     _texture = Codi::Texture2D::Create("assets/textures/love.png");
+
+    Codi::FrameBufferSpecification fbSpec;
+    fbSpec.width = 1280;
+    fbSpec.height = 720;
+    _frameBuffer = Codi::FrameBuffer::Create(fbSpec);
 }
 
 void Sandbox2D::onDetach() {
@@ -25,7 +30,7 @@ void Sandbox2D::onUpdate(Codi::DeltaTime deltatime) {
     
     //////// UPDATING //////////
     
-    if (Codi::Input::IsKeyPressed(CODI_KEY_ESCAPE))
+    if (Codi::Input::IsKeyPressed(Codi::KeyCode::KEY_ESCAPE))
         Codi::Application::Get().close();
     
     {
@@ -39,11 +44,12 @@ void Sandbox2D::onUpdate(Codi::DeltaTime deltatime) {
 
     {
         CODI_PROFILE_SCOPE("Renderer Clear");
+        _frameBuffer->bind();
         Codi::RenderCommand::SetClearColor({ 0.0863f, 0.0902f, 0.1137f, 1.0f });
         Codi::RenderCommand::Clear();
     }
 
-    {
+    { 
         CODI_PROFILE_SCOPE("Renderer2D DrawScene");
         Codi::Renderer2D::BeginScene(_cameraController.getCamera());
 
@@ -52,6 +58,7 @@ void Sandbox2D::onUpdate(Codi::DeltaTime deltatime) {
                 Codi::Renderer2D::DrawQuad({ x, y }, { 0.24f, 0.24f }, { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.75f });
 
         Codi::Renderer2D::EndScene();
+        _frameBuffer->unbind();
     }
 }
 

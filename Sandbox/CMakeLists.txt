@@ -1,3 +1,5 @@
+project(Sandbox)
+
 file(GLOB_RECURSE SANDBOX_SRC
     src/*.cpp
 )

@@ -16,22 +16,22 @@ void OrthographicCameraController::onUpdate(DeltaTime deltatime) {
     
     _cameraTranslationSpeed = _zoomLevel;
 
-    if (Input::IsKeyPressed(CODI_KEY_W))
+    if (Input::IsKeyPressed(KeyCode::KEY_W))
         _cameraPosition.y += _cameraTranslationSpeed * deltatime;
-    if (Input::IsKeyPressed(CODI_KEY_A))
+    if (Input::IsKeyPressed(KeyCode::KEY_A))
         _cameraPosition.x -= _cameraTranslationSpeed * deltatime;
-    if (Input::IsKeyPressed(CODI_KEY_S))
+    if (Input::IsKeyPressed(KeyCode::KEY_S))
         _cameraPosition.y -= _cameraTranslationSpeed * deltatime;
-    if (Input::IsKeyPressed(CODI_KEY_D))
+    if (Input::IsKeyPressed(KeyCode::KEY_D))
         _cameraPosition.x += _cameraTranslationSpeed * deltatime;
 
     _camera.setPosition(_cameraPosition);
 
     if (!_rotation) return;
 
-    if (Input::IsKeyPressed(CODI_KEY_Q))
+    if (Input::IsKeyPressed(KeyCode::KEY_Q))
         _cameraRotation -= _cameraRotationSpeed * deltatime;
-    if (Input::IsKeyPressed(CODI_KEY_E))
+    if (Input::IsKeyPressed(KeyCode::KEY_E))
         _cameraRotation += _cameraRotationSpeed * deltatime;
             
     _camera.setRotation(_cameraRotation);    
@@ -43,6 +43,13 @@ void OrthographicCameraController::onEvent(Event& e) {
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<MouseScrolledEvent>(CODI_BIND_EVENT_FN(OrthographicCameraController::onMouseScrolled));
     dispatcher.dispatch<WindowResizeEvent>(CODI_BIND_EVENT_FN(OrthographicCameraController::onWindowResized));
+}
+
+void OrthographicCameraController::onResize(const float width, const float height) {
+    CODI_PROFILE_FUNCTION();
+    
+    _aspectRatio = width / height;
+    _camera.setProjection(-_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel);
 }
 
 bool OrthographicCameraController::onMouseScrolled(MouseScrolledEvent& e) {
@@ -57,8 +64,7 @@ bool OrthographicCameraController::onMouseScrolled(MouseScrolledEvent& e) {
 bool OrthographicCameraController::onWindowResized(WindowResizeEvent& e) {
     CODI_PROFILE_FUNCTION();
     
-    _aspectRatio = (float)e.getWidth() / (float)e.getHeight();
-    _camera.setProjection(-_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel);
+    onResize((float)e.getWidth(), (float)e.getHeight());
     return false;
 }
 

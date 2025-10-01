@@ -5,7 +5,7 @@
 
 class Sandbox: public Codi::Application {
 public:
-    Sandbox() {
+    Sandbox() : Codi::Application("Sandbox") {
         pushLayer(new Sandbox2D());
     }
     ~Sandbox() {}

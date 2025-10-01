@@ -20,4 +20,5 @@ private:
     // TEMP
     Codi::Ref<Codi::Texture2D> _texture;
     glm::vec4 _squareColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+    Codi::Ref<Codi::FrameBuffer> _frameBuffer;
 };
