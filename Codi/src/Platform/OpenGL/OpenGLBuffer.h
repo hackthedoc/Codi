@@ -6,11 +6,14 @@ namespace Codi {
     
 class OpenGLVertexBuffer : public VertexBuffer {
 public:
-    OpenGLVertexBuffer(float* vertices, uint size);
+    OpenGLVertexBuffer(uint32_t size);
+    OpenGLVertexBuffer(float* vertices, uint32_t size);
     virtual ~OpenGLVertexBuffer();
 
     virtual void bind() const override;
     virtual void unbind() const override;
+
+    virtual void setData(const void* data, uint32_t size) override;
 
     virtual const BufferLayout& getLayout() const override { return _layout; }
     virtual void setLayout(const BufferLayout& layout) override { _layout = layout; }
@@ -29,8 +32,6 @@ public:
     virtual void unbind() const override;
     
     virtual uint32_t getCount() const override { return _count; }
-
-    virtual uint getID() const override { return _rendererID; }
 
 private:
     uint _rendererID;

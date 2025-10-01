@@ -13,8 +13,8 @@ public:
     inline static void SetClearColor(const glm::vec4& color) { _rendererAPI->SetClearColor(color); }
     inline static void Clear() { _rendererAPI->Clear(); }
 
-    inline static void DrawIndexed(const Ref<class VertexArray>& vertexArray) {
-        _rendererAPI->DrawIndexed(vertexArray);
+    inline static void DrawIndexed(const Ref<class VertexArray>& vertexArray, uint32_t indexCount = 0) {
+        _rendererAPI->DrawIndexed(vertexArray, indexCount);
     }
 
 private:

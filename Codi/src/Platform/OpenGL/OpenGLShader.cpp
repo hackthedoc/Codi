@@ -168,6 +168,12 @@ void OpenGLShader::setInt(const std::string& name, const int value) {
     uploadUniformInt(name, value);
 }
 
+void OpenGLShader::setIntArray(const std::string& name, int* values, uint32_t count) {
+    CODI_PROFILE_FUNCTION();
+    
+    uploadUniformIntArray(name, values, count);
+}
+
 void OpenGLShader::setFloat(const std::string& name, const float value) {
     CODI_PROFILE_FUNCTION();
     
@@ -189,6 +195,11 @@ void OpenGLShader::setMat4(const std::string& name, const glm::mat4& matrix) {
 void OpenGLShader::uploadUniformInt(const std::string& name, const int value) {
     GLint location = glGetUniformLocation(_rendererID, name.c_str());
     glUniform1i(location, value);
+}
+
+void OpenGLShader::uploadUniformIntArray(const std::string& name, int* values, uint32_t count) {
+    GLint location = glGetUniformLocation(_rendererID, name.c_str());
+    glUniform1iv(location, count, values);
 }
 
 void OpenGLShader::uploadUniformFloat(const std::string& name, const float value) {

@@ -17,6 +17,8 @@ public:
 
     virtual void bind(uint32_t slot = 0) const = 0;
     virtual void unbind() const = 0;
+
+    virtual bool operator==(const Texture& other) const = 0;
 };
 
 class Texture2D : public Texture {

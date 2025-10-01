@@ -5,7 +5,15 @@
 
 namespace Codi {
     
-/* ---------- VERTEX BUFFER ---------- */
+/* -------------------- VERTEX BUFFER -------------------- */
+
+OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size) {
+    CODI_PROFILE_FUNCTION();
+    
+    glCreateBuffers(1, &_rendererID);
+    glBindBuffer(GL_ARRAY_BUFFER, _rendererID);
+    glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+}
     
 OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint size) {
     CODI_PROFILE_FUNCTION();
@@ -33,7 +41,14 @@ void OpenGLVertexBuffer::unbind() const {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-/* ---------- INDEX BUFFER ---------- */
+void OpenGLVertexBuffer::setData(const void* data, uint32_t size) {
+    CODI_PROFILE_FUNCTION();
+    
+    glBindBuffer(GL_ARRAY_BUFFER, _rendererID);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+}
+
+/* -------------------- INDEX BUFFER -------------------- */
     
 OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count)
     : _count(count) {

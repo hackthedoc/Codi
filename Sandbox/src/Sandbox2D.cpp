@@ -35,6 +35,8 @@ void Sandbox2D::onUpdate(Codi::DeltaTime deltatime) {
 
     ////////// RENDERING //////////
 
+    Codi::Renderer2D::ResetStats();
+
     {
         CODI_PROFILE_SCOPE("Renderer Clear");
         Codi::RenderCommand::SetClearColor({ 0.0863f, 0.0902f, 0.1137f, 1.0f });
@@ -45,8 +47,9 @@ void Sandbox2D::onUpdate(Codi::DeltaTime deltatime) {
         CODI_PROFILE_SCOPE("Renderer2D DrawScene");
         Codi::Renderer2D::BeginScene(_cameraController.getCamera());
 
-        Codi::Renderer2D::DrawRotatedQuad({ 0.0f, 0.0f, -0.1f }, { 2.0f, 2.0f }, glm::radians(45.0f), _squareColor);
-        Codi::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, _texture);
+        for (float y = -5.0f; y < 5.0f; y += 0.25f)
+            for (float x = -5.0f; x < 5.0f; x += 0.25f)
+                Codi::Renderer2D::DrawQuad({ x, y }, { 0.24f, 0.24f }, { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.75f });
 
         Codi::Renderer2D::EndScene();
     }
@@ -55,8 +58,16 @@ void Sandbox2D::onUpdate(Codi::DeltaTime deltatime) {
 void Sandbox2D::onImGuiRender() {
     CODI_PROFILE_FUNCTION();
     
-    ImGui::Begin("Settings");
-    ImGui::ColorEdit4("Square Color", glm::value_ptr(_squareColor));
+    ImGui::Begin("Stats");
+
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+    auto stats = Codi::Renderer2D::GetStats();
+    ImGui::Text("Renderer2D Stats:");
+    ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+    ImGui::Text("Quads: %d", stats.QuadCount);
+    ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+    ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 
     ImGui::End();
 }
