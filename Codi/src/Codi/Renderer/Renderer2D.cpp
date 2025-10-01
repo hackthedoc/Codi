@@ -207,6 +207,9 @@ void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, cons
     }
 
     if (textureIndex == 0.0f) {
+        if (_Data.TextureSlotIndex >= Renderer2DData::MAX_TEXTURE_SLOTS)
+            FlushAndReset();
+
         textureIndex = (float)_Data.TextureSlotIndex;
         _Data.TextureSlots[_Data.TextureSlotIndex] = texture;
         _Data.TextureSlotIndex++;
@@ -239,6 +242,72 @@ void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, cons
     _Data.QuadVertexBufferPtr->Position = transform * _Data.QuadVertexPositions[3];
     _Data.QuadVertexBufferPtr->Color = tintColor;
     _Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 1.0f };
+    _Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+    _Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+    _Data.QuadVertexBufferPtr++;
+
+    _Data.QuadIndexCount += 6;
+
+    _Data.Stats.QuadCount++;
+}
+
+void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<SubTexture2D>& subtexture, const float tilingFactor, const glm::vec4& tintColor) {
+    DrawQuad({ position.x, position.y, 0.0f }, size, subtexture, tilingFactor, tintColor);
+}
+
+void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<SubTexture2D>& subtexture, const float tilingFactor, const glm::vec4& tintColor) {
+    CODI_PROFILE_FUNCTION();
+
+    if (_Data.QuadIndexCount >= Renderer2DData::MAX_INDICES) FlushAndReset();
+
+    const Ref<Texture2D>& texture = subtexture->getTexture();
+    const glm::vec2* texCoords = subtexture->getTexCoords();
+
+    float textureIndex = 0.0f;
+
+    for (uint32_t i = 1; i < _Data.TextureSlotIndex; i++) {
+        if (*_Data.TextureSlots[i].get() == *texture.get()) {
+            textureIndex = (float)i;
+            break;
+        }
+    }
+
+    if (textureIndex == 0.0f) {
+        if (_Data.TextureSlotIndex >= Renderer2DData::MAX_TEXTURE_SLOTS)
+            FlushAndReset();
+
+        textureIndex = (float)_Data.TextureSlotIndex;
+        _Data.TextureSlots[_Data.TextureSlotIndex] = texture;
+        _Data.TextureSlotIndex++;
+    }
+
+    glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+                        * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+    _Data.QuadVertexBufferPtr->Position = transform * _Data.QuadVertexPositions[0];
+    _Data.QuadVertexBufferPtr->Color = tintColor;
+    _Data.QuadVertexBufferPtr->TexCoord = texCoords[0];
+    _Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+    _Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+    _Data.QuadVertexBufferPtr++;
+
+    _Data.QuadVertexBufferPtr->Position = transform * _Data.QuadVertexPositions[1];
+    _Data.QuadVertexBufferPtr->Color = tintColor;
+    _Data.QuadVertexBufferPtr->TexCoord = texCoords[1];
+    _Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+    _Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+    _Data.QuadVertexBufferPtr++;
+
+    _Data.QuadVertexBufferPtr->Position = transform * _Data.QuadVertexPositions[2];
+    _Data.QuadVertexBufferPtr->Color = tintColor;
+    _Data.QuadVertexBufferPtr->TexCoord = texCoords[2];
+    _Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+    _Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+    _Data.QuadVertexBufferPtr++;
+
+    _Data.QuadVertexBufferPtr->Position = transform * _Data.QuadVertexPositions[3];
+    _Data.QuadVertexBufferPtr->Color = tintColor;
+    _Data.QuadVertexBufferPtr->TexCoord = texCoords[3];
     _Data.QuadVertexBufferPtr->TexIndex = textureIndex;
     _Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
     _Data.QuadVertexBufferPtr++;
@@ -316,6 +385,9 @@ void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& siz
     }
 
     if (textureIndex == 0.0f) {
+        if (_Data.TextureSlotIndex >= Renderer2DData::MAX_TEXTURE_SLOTS)
+            FlushAndReset();
+
         textureIndex = (float)_Data.TextureSlotIndex;
         _Data.TextureSlots[_Data.TextureSlotIndex] = texture;
         _Data.TextureSlotIndex++;
@@ -349,6 +421,73 @@ void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& siz
     _Data.QuadVertexBufferPtr->Position = transform * _Data.QuadVertexPositions[3];
     _Data.QuadVertexBufferPtr->Color = tintColor;
     _Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 1.0f };
+    _Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+    _Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+    _Data.QuadVertexBufferPtr++;
+
+    _Data.QuadIndexCount += 6;
+
+    _Data.Stats.QuadCount++;
+}
+
+void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, const float rotation, const Ref<SubTexture2D>& subtexture, const float tilingFactor, const glm::vec4& tintColor) {
+    DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, subtexture, tilingFactor, tintColor);
+}
+
+void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, const float rotation, const Ref<SubTexture2D>& subtexture, const float tilingFactor, const glm::vec4& tintColor) {
+    CODI_PROFILE_FUNCTION();
+
+    if (_Data.QuadIndexCount >= Renderer2DData::MAX_INDICES) FlushAndReset();
+
+    const Ref<Texture2D>& texture = subtexture->getTexture();
+    const glm::vec2* texCoords = subtexture->getTexCoords();
+    
+    float textureIndex = 0.0f;
+
+    for (uint32_t i = 1; i < _Data.TextureSlotIndex; i++) {
+        if (*_Data.TextureSlots[i].get() == *texture.get()) {
+            textureIndex = (float)i;
+            break;
+        }
+    }
+
+    if (textureIndex == 0.0f) {
+        if (_Data.TextureSlotIndex >= Renderer2DData::MAX_TEXTURE_SLOTS)
+            FlushAndReset();
+
+        textureIndex = (float)_Data.TextureSlotIndex;
+        _Data.TextureSlots[_Data.TextureSlotIndex] = texture;
+        _Data.TextureSlotIndex++;
+    }
+
+    glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+                        * glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f })
+                        * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+    _Data.QuadVertexBufferPtr->Position = transform * _Data.QuadVertexPositions[0];
+    _Data.QuadVertexBufferPtr->Color = tintColor;
+    _Data.QuadVertexBufferPtr->TexCoord = texCoords[0];
+    _Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+    _Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+    _Data.QuadVertexBufferPtr++;
+
+    _Data.QuadVertexBufferPtr->Position = transform * _Data.QuadVertexPositions[1];
+    _Data.QuadVertexBufferPtr->Color = tintColor;
+    _Data.QuadVertexBufferPtr->TexCoord = texCoords[1];
+    _Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+    _Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+    _Data.QuadVertexBufferPtr++;
+
+    _Data.QuadVertexBufferPtr->Position = transform * _Data.QuadVertexPositions[2];
+    _Data.QuadVertexBufferPtr->Color = tintColor;
+    _Data.QuadVertexBufferPtr->TexCoord = texCoords[2];
+    _Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+    _Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+    _Data.QuadVertexBufferPtr++;
+
+    _Data.QuadVertexBufferPtr->Position = transform * _Data.QuadVertexPositions[3];
+    _Data.QuadVertexBufferPtr->Color = tintColor;
+    _Data.QuadVertexBufferPtr->TexCoord = texCoords[3];
     _Data.QuadVertexBufferPtr->TexIndex = textureIndex;
     _Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
     _Data.QuadVertexBufferPtr++;
