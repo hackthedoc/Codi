@@ -71,8 +71,8 @@ void Application::onEvent(Event& e) {
     dispatcher.dispatch<WindowResizeEvent>(CODI_BIND_EVENT_FN(Application::onWindowResize));
 
     for (std::vector<Layer*>::iterator it = _layerStack.end(); it != _layerStack.begin();) {
-        (*--it)->onEvent(e);
         if (e.isHandled()) break;
+        (*--it)->onEvent(e);
     }
 }
 
