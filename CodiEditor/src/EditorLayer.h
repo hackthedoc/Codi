@@ -17,8 +17,6 @@ public:
     void onEvent(Event& e) override;
 
 private:
-    OrthographicCameraController _cameraController;
-
     Ref<FrameBuffer> _frameBuffer;
     
     Ref<Scene> _activeScene;

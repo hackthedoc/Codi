@@ -25,6 +25,22 @@ Entity Scene::createEntity(const std::string& name) {
 void Scene::onUpdate(DeltaTime deltatime) {
     CODI_PROFILE_FUNCTION();
 
+    // Update Script
+    {
+        _registry.view<NativeScriptComponent>().each([=](auto entity, NativeScriptComponent& nsc) {
+            if (!nsc.instance) {
+                nsc.instance = nsc.instantiate();
+                nsc.instance->_entity = Entity{ entity, this };
+                
+                nsc.instance->onCreate();
+            }
+
+            nsc.instance->onUpdate(deltatime);
+        });
+    }
+
+    // Render 2D
+
     Camera* primaryCamera = nullptr;
     glm::mat4* sceneTransform = nullptr; 
     {
@@ -42,9 +58,10 @@ void Scene::onUpdate(DeltaTime deltatime) {
 
     Renderer2D::BeginScene(*primaryCamera, *sceneTransform);
 
-    auto view = _registry.view<TransformComponent, SpriteRendererComponent>();
-    for (const auto& [entity, transform, sprite] : view.each())
+    _registry.view<TransformComponent, SpriteRendererComponent>().each([=](auto entity, TransformComponent& transform, SpriteRendererComponent& sprite) {
         Renderer2D::DrawQuad(transform, sprite.color);
+    });
+        
 
     Renderer2D::EndScene();
 }

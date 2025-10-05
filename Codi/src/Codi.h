@@ -16,6 +16,7 @@
 /* ---------------------- SCENE ------------------------ */
 #include "Codi/Scene/Scene.h"
 #include "Codi/Scene/Entity.h"
+#include "Codi/Scene/ScriptableEntity.h"
 #include "Codi/Scene/Component.h"
 /* ----------------------------------------------------- */
 

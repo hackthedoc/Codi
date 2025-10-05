@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "Codi/Scene/SceneCamera.h"
+#include "Codi/Scene/ScriptableEntity.h"
 
 namespace Codi {
 
@@ -43,6 +44,19 @@ struct CameraComponent {
 
     CameraComponent() = default;
     CameraComponent(const CameraComponent&) = default;
+};
+
+struct NativeScriptComponent {
+    ScriptableEntity* instance = nullptr;
+
+    ScriptableEntity*(*instantiate)();
+    void(*destroyInstance)(NativeScriptComponent*);
+
+    template<typename T>
+    void bind() {
+        instantiate = []() { return static_cast<ScriptableEntity*>(new T()); };
+        destroyInstance = [](NativeScriptComponent* nsc) { delete nsc->instance; nsc->instance = nullptr; };
+    }
 };
 
 } // namespace Codi

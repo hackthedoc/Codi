@@ -30,7 +30,7 @@ void Sandbox2D::onUpdate(Codi::DeltaTime deltatime) {
     
     //////// UPDATING //////////
     
-    if (Codi::Input::IsKeyPressed(Codi::KeyCode::KEY_ESCAPE))
+    if (Codi::Input::IsKeyPressed(Codi::KeyCode::ESCAPE))
         Codi::Application::Get().close();
     
     {

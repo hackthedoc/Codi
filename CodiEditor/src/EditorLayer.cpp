@@ -9,24 +9,38 @@ namespace Codi {
 
 EditorLayer::EditorLayer()
     : Layer("EditorLayer")
-    , _cameraController(1280.0f / 720.0f)
     {}
 
 void EditorLayer::onAttach() {
     CODI_PROFILE_FUNCTION();
-    
+
     FrameBufferSpecification fbSpec;
     fbSpec.width = 1280;
     fbSpec.height = 720;
     _frameBuffer = FrameBuffer::Create(fbSpec);
 
-   _activeScene = CreateRef<Scene>();
+    _activeScene = CreateRef<Scene>();
 
-   _squareEntity = _activeScene->createEntity("Square Entity");
-   _squareEntity.addComponent<SpriteRendererComponent>(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
+    _squareEntity = _activeScene->createEntity("Square Entity");
+    _squareEntity.addComponent<SpriteRendererComponent>(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
 
-   _cameraEntity = _activeScene->createEntity("Camera Entity");
-   _cameraEntity.addComponent<CameraComponent>();
+    _cameraEntity = _activeScene->createEntity("Camera Entity");
+    _cameraEntity.addComponent<CameraComponent>();
+
+    class CameraController : public ScriptableEntity {
+    public:
+        virtual void onUpdate(DeltaTime deltatime) override {
+            auto& transform = getComponent<TransformComponent>().transform;
+            const float speed = 5.0f;
+
+            if (Input::IsKeyPressed(KeyCode::W)) transform[3][1] -= speed * deltatime;
+            if (Input::IsKeyPressed(KeyCode::A)) transform[3][0] += speed * deltatime;
+            if (Input::IsKeyPressed(KeyCode::S)) transform[3][1] += speed * deltatime;
+            if (Input::IsKeyPressed(KeyCode::D)) transform[3][0] -= speed * deltatime;
+        }
+   };
+
+   _cameraEntity.addComponent<NativeScriptComponent>().bind<CameraController>();
 }
 
 void EditorLayer::onDetach() {
@@ -36,7 +50,7 @@ void EditorLayer::onDetach() {
 void EditorLayer::onUpdate(DeltaTime deltatime) {
     CODI_PROFILE_FUNCTION();
     
-    if (Input::IsKeyPressed(KeyCode::KEY_ESCAPE))
+    if (Input::IsKeyPressed(KeyCode::ESCAPE))
         Application::Get().close();
     
     if (FrameBufferSpecification spec = _frameBuffer->getSpecification();
@@ -46,11 +60,6 @@ void EditorLayer::onUpdate(DeltaTime deltatime) {
         _frameBuffer->resize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
 
         _activeScene->onViewportResize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
-    }
-
-    if (_viewportFocused) {
-        CODI_PROFILE_SCOPE("CameraController::onUpdate");
-        _cameraController.onUpdate(deltatime);
     }
 
     Renderer2D::ResetStats();
@@ -145,8 +154,6 @@ void EditorLayer::onImGuiRender() {
     ImGui::End(); // Main DockSpace
 }
 
-void EditorLayer::onEvent(Event& e) {
-    _cameraController.onEvent(e);
-}
+void EditorLayer::onEvent(Event& e) {}
 
 }// namespace Codi

@@ -16,22 +16,22 @@ void OrthographicCameraController::onUpdate(DeltaTime deltatime) {
     
     _cameraTranslationSpeed = _zoomLevel;
 
-    if (Input::IsKeyPressed(KeyCode::KEY_W))
+    if (Input::IsKeyPressed(KeyCode::W))
         _cameraPosition.y += _cameraTranslationSpeed * deltatime;
-    if (Input::IsKeyPressed(KeyCode::KEY_A))
+    if (Input::IsKeyPressed(KeyCode::A))
         _cameraPosition.x -= _cameraTranslationSpeed * deltatime;
-    if (Input::IsKeyPressed(KeyCode::KEY_S))
+    if (Input::IsKeyPressed(KeyCode::S))
         _cameraPosition.y -= _cameraTranslationSpeed * deltatime;
-    if (Input::IsKeyPressed(KeyCode::KEY_D))
+    if (Input::IsKeyPressed(KeyCode::D))
         _cameraPosition.x += _cameraTranslationSpeed * deltatime;
 
     _camera.setPosition(_cameraPosition);
 
     if (!_rotation) return;
 
-    if (Input::IsKeyPressed(KeyCode::KEY_Q))
+    if (Input::IsKeyPressed(KeyCode::Q))
         _cameraRotation -= _cameraRotationSpeed * deltatime;
-    if (Input::IsKeyPressed(KeyCode::KEY_E))
+    if (Input::IsKeyPressed(KeyCode::E))
         _cameraRotation += _cameraRotationSpeed * deltatime;
             
     _camera.setRotation(_cameraRotation);    
