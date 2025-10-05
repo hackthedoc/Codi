@@ -29,13 +29,13 @@ void EditorLayer::onAttach() {
     class CameraController : public ScriptableEntity {
     public:
         virtual void onUpdate(DeltaTime deltatime) override {
-            auto& transform = getComponent<TransformComponent>().transform;
+            glm::vec3& translation = getComponent<TransformComponent>().translation;
             const float speed = 5.0f;
 
-            if (Input::IsKeyPressed(KeyCode::W)) transform[3][1] -= speed * deltatime;
-            if (Input::IsKeyPressed(KeyCode::A)) transform[3][0] += speed * deltatime;
-            if (Input::IsKeyPressed(KeyCode::S)) transform[3][1] += speed * deltatime;
-            if (Input::IsKeyPressed(KeyCode::D)) transform[3][0] -= speed * deltatime;
+            if (Input::IsKeyPressed(KeyCode::W)) translation[1] -= speed * deltatime;
+            if (Input::IsKeyPressed(KeyCode::A)) translation[0] += speed * deltatime;
+            if (Input::IsKeyPressed(KeyCode::S)) translation[1] += speed * deltatime;
+            if (Input::IsKeyPressed(KeyCode::D)) translation[0] -= speed * deltatime;
         }
    };
 
@@ -122,7 +122,7 @@ void EditorLayer::onImGuiRender() {
 
     _hierarchyPanel.onImGuiRender();
     
-    ImGui::Begin("Settings");
+    ImGui::Begin("Stats");
     ImGui::Text("Application %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     auto stats = Renderer2D::GetStats();
     ImGui::Text("Renderer2D Stats:");

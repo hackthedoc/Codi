@@ -42,13 +42,13 @@ void Scene::onUpdate(DeltaTime deltatime) {
     // Render 2D
 
     Camera* primaryCamera = nullptr;
-    glm::mat4* sceneTransform = nullptr; 
+    glm::mat4 cameraTransform; 
     {
         auto view = _registry.view<TransformComponent, CameraComponent>();
         for (const auto& [entity, transform, camera] : view.each()) {
             if (camera.primary) {
                 primaryCamera = &camera.camera;
-                sceneTransform = &transform.transform;
+                cameraTransform = transform.getTransform();
                 break;
             }
         }
@@ -56,10 +56,10 @@ void Scene::onUpdate(DeltaTime deltatime) {
 
     if (!primaryCamera) return;
 
-    Renderer2D::BeginScene(*primaryCamera, *sceneTransform);
+    Renderer2D::BeginScene(*primaryCamera, cameraTransform);
 
     _registry.view<TransformComponent, SpriteRendererComponent>().each([=](auto entity, TransformComponent& transform, SpriteRendererComponent& sprite) {
-        Renderer2D::DrawQuad(transform, sprite.color);
+        Renderer2D::DrawQuad(transform.getTransform(), sprite.color);
     });
         
 

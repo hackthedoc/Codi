@@ -3,6 +3,8 @@
 #include "Codi/Scene/Component.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
+
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Codi {
@@ -49,6 +51,59 @@ void SceneHierarchyPanel::_drawEntityNode(Entity entity, const std::string& tag)
     }
 }
 
+static void DrawVec3Control(const std::string& label, glm::vec3& vec, const float resetValue = 0.0f, const float columnWidth = 100.0f) {
+    ImGui::PushID(label.c_str());
+
+    ImGui::Columns(2);
+    ImGui::SetColumnWidth(0, columnWidth);
+    ImGui::Text(label.c_str());
+    ImGui::NextColumn();
+
+    ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0,0});
+
+    float lineHeight = ImGui::GetFontSize() + GImGui->Style.FramePadding.y * 2.0f;
+    ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f});
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.25f, 0.2f, 1.0f});
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f});
+    if (ImGui::Button("X", buttonSize)) vec.x = resetValue;
+    ImGui::PopStyleColor(3);
+
+    ImGui::SameLine();
+    ImGui::DragFloat("##X", &vec.x, 0.1f);
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f});
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f});
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f});
+    if (ImGui::Button("Y", buttonSize)) vec.y = resetValue;
+    ImGui::PopStyleColor(3);
+
+    ImGui::SameLine();
+    ImGui::DragFloat("##Y", &vec.y, 0.1f);
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f});
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f});
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f});
+    if (ImGui::Button("Z", buttonSize)) vec.z = resetValue; 
+    ImGui::PopStyleColor(3);
+
+    ImGui::SameLine();
+    ImGui::DragFloat("##Z", &vec.z, 0.1f);
+    ImGui::PopItemWidth();
+
+    ImGui::PopStyleVar();
+
+    ImGui::Columns(1);
+
+    ImGui::PopID();
+}
+
 void SceneHierarchyPanel::_drawComponents(Entity entity) {
     if (entity.hasComponent<TagComponent>()) {
         std::string& tag = entity.getComponent<TagComponent>().tag;
@@ -61,16 +116,24 @@ void SceneHierarchyPanel::_drawComponents(Entity entity) {
 
     if (entity.hasComponent<TransformComponent>()) {
         if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform")) {
-            glm::mat4& transform = entity.getComponent<TransformComponent>().transform;
-            ImGui::DragFloat3("Position", glm::value_ptr(transform[3]), 0.1f);
+            TransformComponent& tc = entity.getComponent<TransformComponent>();
+            DrawVec3Control("Translation", tc.translation);
+            glm::vec3 rotation = glm::degrees(tc.rotation);
+            DrawVec3Control("Rotation", rotation);
+            tc.rotation = glm::radians(rotation);
+            DrawVec3Control("Scale", tc.scale, 1.0f);
 
             ImGui::TreePop();
         }
     }
 
     if (entity.hasComponent<SpriteRendererComponent>()) {
-        glm::vec4& color = entity.getComponent<SpriteRendererComponent>().color;
-        ImGui::ColorEdit4("Square Color", glm::value_ptr(color));
+        if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Texture")) {
+            glm::vec4& color = entity.getComponent<SpriteRendererComponent>().color;
+            ImGui::ColorEdit4("Square Color", glm::value_ptr(color));
+
+            ImGui::TreePop();
+        }
     }
 
     if (entity.hasComponent<CameraComponent>()) {
