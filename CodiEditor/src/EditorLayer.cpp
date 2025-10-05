@@ -3,7 +3,6 @@
 #include "Platform/OpenGL/OpenGLShader.h"
 
 #include <imgui.h>
-#include <glm/gtc/type_ptr.hpp>
 
 namespace Codi {
 
@@ -41,6 +40,8 @@ void EditorLayer::onAttach() {
    };
 
    _cameraEntity.addComponent<NativeScriptComponent>().bind<CameraController>();
+
+   _hierarchyPanel.setContext(_activeScene);
 }
 
 void EditorLayer::onDetach() {
@@ -118,6 +119,8 @@ void EditorLayer::onImGuiRender() {
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     
     }
+
+    _hierarchyPanel.onImGuiRender();
     
     ImGui::Begin("Settings");
     ImGui::Text("Application %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -128,10 +131,6 @@ void EditorLayer::onImGuiRender() {
     ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
     ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 
-    if (_squareEntity) {
-        SpriteRendererComponent& squareRenderer = _squareEntity.getComponent<SpriteRendererComponent>();
-        ImGui::ColorEdit4("Square Color", glm::value_ptr(squareRenderer.color));
-    }
     ImGui::End();
 
     ImGui::PushStyleVar (ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });

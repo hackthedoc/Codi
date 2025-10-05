@@ -2,6 +2,8 @@
 
 #include <Codi.h>
 
+#include "Panels/SceneHierarchyPanel.h"
+
 namespace Codi {
 
 class EditorLayer : public Layer {
@@ -26,6 +28,8 @@ private:
     bool _viewportFocused = false;
     bool _viewportHovered = false;
     glm::vec2 _viewportSize = glm::vec2(0.0f);
+
+    SceneHierarchyPanel _hierarchyPanel;
 };
 
 } // namespace Codi

@@ -24,6 +24,7 @@ private:
     uint32_t _viewprotHeight = 0;
 
     friend Entity;
+    friend class SceneHierarchyPanel;
 };
     
 } // namespace Codi

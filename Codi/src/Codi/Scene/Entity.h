@@ -36,6 +36,10 @@ public:
     }
 
     operator bool() const { return _entityHandle != entt::null; }
+    operator uint32_t() const { return (uint32_t)_entityHandle; }
+
+    bool operator==(const Entity& o) const { return _entityHandle == o._entityHandle && _scene == o._scene; }
+    bool operator!=(const Entity& o) const { return _entityHandle != o._entityHandle || _scene != o._scene; }
 
 private:
     entt::entity _entityHandle{ entt::null };
