@@ -20,11 +20,8 @@ void EditorLayer::onAttach() {
 
     _activeScene = CreateRef<Scene>();
 
-    _squareEntity = _activeScene->createEntity("Square Entity");
-    _squareEntity.addComponent<SpriteRendererComponent>(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
-
-    _cameraEntity = _activeScene->createEntity("Camera Entity");
-    _cameraEntity.addComponent<CameraComponent>();
+    Entity cameraEntity = _activeScene->createEntity("Camera Entity");
+    cameraEntity.addComponent<CameraComponent>();
 
     class CameraController : public ScriptableEntity {
     public:
@@ -39,7 +36,7 @@ void EditorLayer::onAttach() {
         }
    };
 
-   _cameraEntity.addComponent<NativeScriptComponent>().bind<CameraController>();
+   cameraEntity.addComponent<NativeScriptComponent>().bind<CameraController>();
 
    _hierarchyPanel.setContext(_activeScene);
 }

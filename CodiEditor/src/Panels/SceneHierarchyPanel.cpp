@@ -26,11 +26,35 @@ void SceneHierarchyPanel::onImGuiRender() {
 
     if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) _selectionContext = {};
 
+    // right click popup in blank space
+    if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_MouseButtonRight)) {
+        if (ImGui::MenuItem("Create Empty Entity")) _context->createEntity("Empty Entity");
+
+        ImGui::EndPopup();
+    }
+
     ImGui::End();
 
     ImGui::Begin("Properties");
 
-    if (_selectionContext) _drawComponents(_selectionContext);
+    if (_selectionContext) {
+        _drawComponents(_selectionContext);
+
+        if (ImGui::Button("Add Component")) ImGui::OpenPopup("AddComponent");
+
+        if (ImGui::BeginPopup("AddComponent")) {
+            if (ImGui::MenuItem("Camera")) {
+                _selectionContext.addComponent<CameraComponent>();
+                ImGui::CloseCurrentPopup();
+            }
+            if (ImGui::MenuItem("Sprite Renderer")) {
+                _selectionContext.addComponent<SpriteRendererComponent>();
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+    }
 
     ImGui::End();
 }
@@ -46,8 +70,21 @@ void SceneHierarchyPanel::_drawEntityNode(Entity entity, const std::string& tag)
         _selectionContext = entity;
     }
 
+    bool entityDeleted = false;
+    if (ImGui::BeginPopupContextItem()) {
+        if (ImGui::MenuItem("Delete")) entityDeleted = true;
+
+        ImGui::EndPopup();
+    }
+
     if (opened) {
         ImGui::TreePop();
+    }
+
+    if (entityDeleted) {
+        if (entity == _selectionContext) _selectionContext = {};
+
+        _context->destroyEntity(entity);
     }
 }
 
@@ -114,8 +151,10 @@ void SceneHierarchyPanel::_drawComponents(Entity entity) {
         if (ImGui::InputText("Tag", buffer, sizeof(buffer))) tag = std::string(buffer);
     }
 
+    const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap;
+
     if (entity.hasComponent<TransformComponent>()) {
-        if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform")) {
+        if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), treeNodeFlags, "Transform")) {
             TransformComponent& tc = entity.getComponent<TransformComponent>();
             DrawVec3Control("Translation", tc.translation);
             glm::vec3 rotation = glm::degrees(tc.rotation);
@@ -128,16 +167,30 @@ void SceneHierarchyPanel::_drawComponents(Entity entity) {
     }
 
     if (entity.hasComponent<SpriteRendererComponent>()) {
-        if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Texture")) {
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+        bool open = ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), treeNodeFlags, "Texture");
+        ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
+        if (ImGui::Button("+", ImVec2{ 20, 20 })) ImGui::OpenPopup("ComponentSettings");
+        
+        bool removeComponent = false;
+        if (ImGui::BeginPopup("ComponentSettings")) {
+            if (ImGui::MenuItem("Remove")) removeComponent = true;
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleVar();
+
+        if (open) {
             glm::vec4& color = entity.getComponent<SpriteRendererComponent>().color;
             ImGui::ColorEdit4("Square Color", glm::value_ptr(color));
 
             ImGui::TreePop();
         }
+
+        if (removeComponent) entity.removeComponent<SpriteRendererComponent>();
     }
 
     if (entity.hasComponent<CameraComponent>()) {
-        if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera")) {
+        if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), treeNodeFlags, "Camera")) {
             CameraComponent& cameraComponent = entity.getComponent<CameraComponent>();
             SceneCamera& camera = entity.getComponent<CameraComponent>().camera;
 

@@ -22,6 +22,10 @@ Entity Scene::createEntity(const std::string& name) {
     return entity; 
 }
 
+void Scene::destroyEntity(Entity entity) {
+    _registry.destroy(entity);
+}
+
 void Scene::onUpdate(DeltaTime deltatime) {
     CODI_PROFILE_FUNCTION();
 
@@ -58,10 +62,9 @@ void Scene::onUpdate(DeltaTime deltatime) {
 
     Renderer2D::BeginScene(*primaryCamera, cameraTransform);
 
-    _registry.view<TransformComponent, SpriteRendererComponent>().each([=](auto entity, TransformComponent& transform, SpriteRendererComponent& sprite) {
+    _registry.view<TransformComponent, SpriteRendererComponent>().each([](auto entity, TransformComponent& transform, SpriteRendererComponent& sprite) {
         Renderer2D::DrawQuad(transform.getTransform(), sprite.color);
     });
-        
 
     Renderer2D::EndScene();
 }
@@ -77,5 +80,27 @@ void Scene::onViewportResize(uint32_t width, uint32_t height) {
         }
     }
 }
+
+template<typename T>
+void Scene::onComponentAdded(Entity entity, T& component) {
+    CODI_CORE_ASSERT(false);
+}
+
+template<>
+void Scene::onComponentAdded<TransformComponent>(Entity entity, TransformComponent& component) {}
+
+template<>
+void Scene::onComponentAdded<CameraComponent>(Entity entity, CameraComponent& component) {
+    component.camera.setViewportSize(_viewportWidth, _viewprotHeight);
+}
+
+template<>
+void Scene::onComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component) {}
+
+template<>
+void Scene::onComponentAdded<TagComponent>(Entity entity, TagComponent& component) {}
+
+template<>
+void Scene::onComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 
 } // namespace Codi

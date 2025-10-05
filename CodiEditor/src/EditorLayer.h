@@ -22,8 +22,6 @@ private:
     Ref<FrameBuffer> _frameBuffer;
     
     Ref<Scene> _activeScene;
-    Entity _squareEntity;
-    Entity _cameraEntity;
 
     bool _viewportFocused = false;
     bool _viewportHovered = false;

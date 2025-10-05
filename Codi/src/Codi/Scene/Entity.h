@@ -26,7 +26,9 @@ public:
     template<typename T, typename ... Args>
     T& addComponent(Args&&... args) { 
         CODI_CORE_ASSERT(!hasComponent<T>(), "Entity already has component!"); 
-        return _scene->_registry.emplace<T>(_entityHandle, std::forward<Args>(args)...); 
+        T& component = _scene->_registry.emplace<T>(_entityHandle, std::forward<Args>(args)...); 
+        _scene->onComponentAdded<T>(*this, component);
+        return component;
     }
 
     template<typename T>
@@ -36,6 +38,7 @@ public:
     }
 
     operator bool() const { return _entityHandle != entt::null; }
+    operator entt::entity() const { return _entityHandle; }
     operator uint32_t() const { return (uint32_t)_entityHandle; }
 
     bool operator==(const Entity& o) const { return _entityHandle == o._entityHandle && _scene == o._scene; }
