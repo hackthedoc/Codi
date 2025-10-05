@@ -6,10 +6,10 @@ namespace Codi {
 
 class WindowResizeEvent : public Event {
 public:
-    WindowResizeEvent(uint width, uint height) : _width(width), _height(height) {}
+    WindowResizeEvent(uint32_t width, uint32_t height) : _width(width), _height(height) {}
 
-    inline uint getWidth() const { return _width; }
-    inline uint getHeight() const { return _height; }
+    inline uint32_t getWidth() const { return _width; }
+    inline uint32_t getHeight() const { return _height; }
 
     std::string toString() const override {
         std::stringstream ss;
@@ -21,8 +21,8 @@ public:
     EVENT_CLASS_CATEGORY(EventCategoryApplication)
 
 private:
-    uint _width;
-    uint _height;
+    uint32_t _width;
+    uint32_t _height;
 };
 
 class WindowCloseEvent : public Event {

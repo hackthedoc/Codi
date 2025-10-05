@@ -51,6 +51,15 @@ void ImGuiLayer::onDetach() {
     ImGui::DestroyContext();
 }
 
+void ImGuiLayer::onEvent(Event& e) {
+    if (!_blockEvents) return;
+
+    ImGuiIO& io = ImGui::GetIO();
+    if (e.isInCategory(EventCategoryMouse) & io.WantCaptureMouse ||
+        e.isInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard
+    ) e.handle();
+}
+
 void ImGuiLayer::begin() {
     CODI_PROFILE_FUNCTION();
     
@@ -75,6 +84,10 @@ void ImGuiLayer::end() {
         ImGui::RenderPlatformWindowsDefault();
         glfwMakeContextCurrent(backupCurrentContext);
     }
+}
+
+void ImGuiLayer::blockEvents(const bool flag) {
+    _blockEvents = flag;
 }
 
 }

@@ -70,6 +70,8 @@ void Application::onEvent(Event& e) {
     dispatcher.dispatch<WindowCloseEvent>(CODI_BIND_EVENT_FN(Application::onWindowClosed));
     dispatcher.dispatch<WindowResizeEvent>(CODI_BIND_EVENT_FN(Application::onWindowResize));
 
+    _imGuiLayer->onEvent(e);
+
     for (std::vector<Layer*>::iterator it = _layerStack.end(); it != _layerStack.begin();) {
         if (e.isHandled()) break;
         (*--it)->onEvent(e);

@@ -8,7 +8,7 @@ namespace Codi {
 
 OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation)
     : _aspectRatio(aspectRatio), _rotation(rotation),
-      _camera(-_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, - _zoomLevel, _zoomLevel)
+      _camera(-_aspectRatio * _zoomLevel, _aspectRatio * _zoomLevel, -_zoomLevel, _zoomLevel)
     {}
 
 void OrthographicCameraController::onUpdate(DeltaTime deltatime) {

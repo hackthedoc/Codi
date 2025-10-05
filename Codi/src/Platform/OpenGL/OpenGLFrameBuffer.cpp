@@ -5,6 +5,8 @@
 
 namespace Codi {
 
+constexpr uint32_t MAX_FRAME_BUFFER_SIZE = 8192;
+
 OpenGLFrameBuffer::OpenGLFrameBuffer(const FrameBufferSpecification& spec)
     : _specification(spec) {
     CODI_PROFILE_FUNCTION();
@@ -72,6 +74,13 @@ void OpenGLFrameBuffer::unbind() const {
 }
 
 void OpenGLFrameBuffer::resize(uint32_t width, uint32_t height) {
+    if (width <= 0 || width > MAX_FRAME_BUFFER_SIZE ||
+        height <= 0 || height > MAX_FRAME_BUFFER_SIZE
+    ) {
+        CODI_CORE_WARN("Attempted to resize the framebuffer to {0}, {1}", width, height);
+        return;
+    }
+
     _specification.width = width;
     _specification.height = height;
     invalidate();

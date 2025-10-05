@@ -10,7 +10,7 @@
 
 namespace Codi {
 
-class CAPI Application {
+class Application {
 public:
     Application(const std::string& name = "Codi Application");
     virtual ~Application();
@@ -23,6 +23,8 @@ public:
     void pushOverlay(Layer* overlay);
 
     void close() { _running = false; }
+
+    inline ImGuiLayer* getImGuiLayer() { return _imGuiLayer; }
 
     inline static Application& Get() { return *_instance; }
     inline Window& getWindow() { return *_window; }

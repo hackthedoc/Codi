@@ -93,7 +93,7 @@ void OpenGLShader::compile(const std::unordered_map<GLenum, std::string>& shader
         GLenum type = kv.first;
         const std::string& source = kv.second;
 
-        uint shader = glCreateShader(type);
+        uint32_t shader = glCreateShader(type);
             
         const char* srcCstr = source.c_str();
         int length = (int)source.size();

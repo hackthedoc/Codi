@@ -71,7 +71,7 @@ public:
         CalculateOffsetsAndStride();
     }
 
-    inline uint getStride() const { return _stride; }
+    inline uint32_t getStride() const { return _stride; }
 
     inline const std::vector<BufferElement>& getElements() const { return _elements; }
 
@@ -90,7 +90,7 @@ private:
     }
 
     std::vector<BufferElement> _elements;
-    uint _stride = 0;
+    uint32_t _stride = 0;
 };
     
 class VertexBuffer {

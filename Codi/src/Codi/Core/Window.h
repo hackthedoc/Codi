@@ -21,7 +21,7 @@ struct WindowProps {
 
 
 /// @brief Interface representing a desktop system based Window
-class CAPI Window {
+class Window {
 public:
     using EventCallbackFn = std::function<void(Event&)>;
 

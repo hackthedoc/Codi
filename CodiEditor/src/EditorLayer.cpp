@@ -9,7 +9,7 @@ namespace Codi {
 
 EditorLayer::EditorLayer()
     : Layer("EditorLayer")
-    , _cameraController(1280.0f / 720.0f, true)
+    , _cameraController(1280.0f / 720.0f)
     {}
 
 void EditorLayer::onAttach() {
@@ -19,6 +19,10 @@ void EditorLayer::onAttach() {
     fbSpec.width = 1280;
     fbSpec.height = 720;
     _frameBuffer = FrameBuffer::Create(fbSpec);
+
+   _scene = CreateRef<Scene>();
+   _squareEntity = _scene->createEntity("Square");
+   _squareEntity.addComponent<SpriteRendererComponent>(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
 }
 
 void EditorLayer::onDetach() {
@@ -33,7 +37,7 @@ void EditorLayer::onUpdate(DeltaTime deltatime) {
     if (Input::IsKeyPressed(KeyCode::KEY_ESCAPE))
         Application::Get().close();
     
-    {
+    if (_viewportFocused) {
         CODI_PROFILE_SCOPE("CameraController::onUpdate");
         _cameraController.onUpdate(deltatime);
     }
@@ -42,24 +46,16 @@ void EditorLayer::onUpdate(DeltaTime deltatime) {
 
     Renderer2D::ResetStats();
 
-    {
-        CODI_PROFILE_SCOPE("Renderer Clear");
-        _frameBuffer->bind();
-        RenderCommand::SetClearColor({ 0.0863f, 0.0902f, 0.1137f, 1.0f });
-        RenderCommand::Clear();
-    }
+    _frameBuffer->bind();
+    RenderCommand::SetClearColor({ 0.0863f, 0.0902f, 0.1137f, 1.0f });
+    RenderCommand::Clear();
 
-    { 
-        CODI_PROFILE_SCOPE("Renderer2D DrawScene");
-        Renderer2D::BeginScene(_cameraController.getCamera());
 
-        for (float y = -5.0f; y < 5.0f; y += 0.25f)
-            for (float x = -5.0f; x < 5.0f; x += 0.25f)
-                Renderer2D::DrawQuad({ x, y }, { 0.24f, 0.24f }, { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.75f });
+    Renderer2D::BeginScene(_cameraController.getCamera());
+    _scene->onUpdate(deltatime);
+    Renderer2D::EndScene();
 
-        Renderer2D::EndScene();
-        _frameBuffer->unbind();
-    }
+    _frameBuffer->unbind();
 }
 
 void EditorLayer::onImGuiRender() {
@@ -107,7 +103,7 @@ void EditorLayer::onImGuiRender() {
     
     }
     
-    ImGui::Begin("Stats");
+    ImGui::Begin("Settings");
     ImGui::Text("Application %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     auto stats = Renderer2D::GetStats();
     ImGui::Text("Renderer2D Stats:");
@@ -115,15 +111,23 @@ void EditorLayer::onImGuiRender() {
     ImGui::Text("Quads: %d", stats.QuadCount);
     ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
     ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+
+    if (_squareEntity) {
+        SpriteRendererComponent& squareRenderer = _squareEntity.getComponent<SpriteRendererComponent>();
+        ImGui::ColorEdit4("Square Color", glm::value_ptr(squareRenderer.color));
+    }
     ImGui::End();
 
     ImGui::PushStyleVar (ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
     ImGui::Begin("Viewport");
+    _viewportFocused = ImGui::IsWindowFocused();
+    _viewportHovered = ImGui::IsWindowHovered();
+    Application::Get().getImGuiLayer()->blockEvents(!_viewportFocused || !_viewportHovered);
     ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-    if (_viewportSize != *((glm::vec2*)&viewportPanelSize)) {
+    if (_viewportSize != *((glm::vec2*)&viewportPanelSize) && viewportPanelSize.x && viewportPanelSize.y) {
         _viewportSize = { viewportPanelSize.x, viewportPanelSize.y };
         _frameBuffer->resize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
-        _cameraController.onResize(_viewportSize.x, _viewportSize.y);
+        //_cameraController.onResize(_viewportSize.x, _viewportSize.y);
     }
     uint32_t textureID = _frameBuffer->getColorAttachmentRendererID();
     ImGui::Image((void*)textureID, viewportPanelSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });

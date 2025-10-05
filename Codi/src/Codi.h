@@ -3,6 +3,7 @@
 #include "Codi/Core/Log.h"
 #include "Codi/Core/Layer.h"
 #include "Codi/Core/Application.h"
+#include "Codi/Core/Assert.h"
 
 #include "Codi/Core/DeltaTime.h"
 
@@ -10,8 +11,13 @@
 #include "Codi/Core/KeyCodes.h"
 #include "Codi/Core/MouseButtonCodes.h"
 
-
 #include "Codi/ImGui/ImGuiLayer.h"
+
+/* ---------------------- SCENE ------------------------ */
+#include "Codi/Scene/Scene.h"
+#include "Codi/Scene/Entity.h"
+#include "Codi/Scene/Component.h"
+/* ----------------------------------------------------- */
 
 /* ---------------------- RENDERER --------------------- */
 #include "Codi/Renderer/Renderer.h"

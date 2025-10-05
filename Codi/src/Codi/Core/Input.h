@@ -7,7 +7,7 @@
 
 namespace Codi {
 
-class CAPI Input {
+class Input {
 public:
     static bool IsKeyPressed(KeyCode keycode);
     

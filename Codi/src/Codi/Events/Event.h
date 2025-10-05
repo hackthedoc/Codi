@@ -44,6 +44,7 @@ public:
         return getCategoryFlags() & category;
     }
 
+    void handle() { _handled = true; }
     inline bool isHandled() const { return _handled; }
 
 protected:

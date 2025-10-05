@@ -15,7 +15,7 @@ OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size) {
     glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 }
     
-OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint size) {
+OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint32_t size) {
     CODI_PROFILE_FUNCTION();
     
     glCreateBuffers(1, &_rendererID);

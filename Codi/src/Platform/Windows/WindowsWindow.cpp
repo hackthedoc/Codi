@@ -107,8 +107,8 @@ void WindowsWindow::init(const WindowProps& props) {
         }
     });
     
-    glfwSetCharCallback(_window, [](GLFWwindow* window, uint keycode) {
-        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);\
+    glfwSetCharCallback(_window, [](GLFWwindow* window, uint32_t keycode) {
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
         KeyTypedEvent event(keycode);
         data.eventCallback(event);

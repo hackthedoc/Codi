@@ -21,7 +21,7 @@ Ref<VertexBuffer> VertexBuffer::Create(uint32_t size) {
     return nullptr;
 }
     
-Ref<VertexBuffer> VertexBuffer::Create(float* vertices, uint size) {
+Ref<VertexBuffer> VertexBuffer::Create(float* vertices, uint32_t size) {
     switch (Renderer::GetAPI())
     {
     case RendererAPI::API::None  :

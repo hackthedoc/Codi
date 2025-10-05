@@ -19,7 +19,7 @@ public:
     virtual void setLayout(const BufferLayout& layout) override { _layout = layout; }
 
 private:
-    uint _rendererID;
+    uint32_t _rendererID;
     BufferLayout _layout;
 };
 
@@ -34,7 +34,7 @@ public:
     virtual uint32_t getCount() const override { return _count; }
 
 private:
-    uint _rendererID;
+    uint32_t _rendererID;
     uint32_t _count;
 };
 

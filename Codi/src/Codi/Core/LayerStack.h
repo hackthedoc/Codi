@@ -5,7 +5,7 @@
 
 namespace Codi {
 
-class CAPI LayerStack {
+class LayerStack {
 public:
     LayerStack();
     ~LayerStack();
@@ -20,7 +20,7 @@ public:
 
 private:
     std::vector<Layer*> _layers;
-    uint _layerIndex = 0;
+    uint32_t _layerIndex = 0;
 };
 
 }

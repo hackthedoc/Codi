@@ -25,6 +25,7 @@ add_vendor(GLAD glad)
 add_vendor(imgui ImGui)
 add_vendor(glm glm)
 add_vendor(stb_image stb)
+add_vendor(entt entt)
 
 # ----- PLATFORM SPECIFIC DEFINES -----
 if (WIN32)
@@ -52,6 +53,7 @@ endif()
 # ----- DEBUG SPECIFIC DEFINITIONS -----
 target_compile_definitions(Codi
     PRIVATE $<$<CONFIG:Debug>:CODI_DEBUG>
+    PRIVATE $<$<CONFIG:Debug>:CODI_PROFILE>
 )
 
 # ----- OUTPUT DIRS -----

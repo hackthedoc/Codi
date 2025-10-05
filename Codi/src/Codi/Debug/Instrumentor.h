@@ -111,8 +111,7 @@ private:
 
 } // namespace Codi
 
-#define CODI_PROFILE 1
-#if CODI_PROFILE
+#ifdef CODI_PROFILE
     #define CODI_PROFILE_BEGIN_SESSION(name, filepath) ::Codi::Instrumentor::Get().beginSession(name, filepath)
     #define CODI_PROFILE_END_SESSION() ::Codi::Instrumentor::Get().endSession()
     #define CODI_PROFILE_SCOPE(name) ::Codi::IntrumentorTimer timer##__LINE__(name)

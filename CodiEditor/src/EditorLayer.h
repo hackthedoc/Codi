@@ -20,7 +20,14 @@ private:
     OrthographicCameraController _cameraController;
 
     Ref<FrameBuffer> _frameBuffer;
-    glm::vec2 _viewportSize;
+    
+    Ref<Scene> _scene;
+    Entity _squareEntity;
+    glm::vec4 _squareColor = { 0.0f, 1.0f, 0.0f, 1.0f };
+
+    bool _viewportFocused = false;
+    bool _viewportHovered = false;
+    glm::vec2 _viewportSize = glm::vec2(0.0f);
 };
 
 } // namespace Codi

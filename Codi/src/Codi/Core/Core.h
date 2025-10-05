@@ -2,38 +2,27 @@
 
 #include <memory>
 
-#ifdef CODI_PLATFORM_WINDOWS
-    #if CODI_DYNAMIC_LINK
-        #ifdef CODI_BUILD_DLL
-            #define CAPI __declspec(dllexport)
-        #else
-            #define CAPI __declspec(dllimport)
-        #endif
+#if defined(CODI_DEBUG)
+    #if defined(CODI_PLATFORM_WINDOWS)
+        #define CODI_DEBUGBREAK() __debugbreak()
+    #elif defined(CODI_PLATFORM_LINUX)
+        #include <signal.h>
+        #define CODI_DEBUGBREAK() raise(SIGTRAP)
     #else
-        #define CAPI
+        #error "Platform doesn't support debugbreak yet!"
     #endif
-#else
-    #define CAPI
-    #error "CODI only supports Windows!"
-#endif
 
-#ifdef CODI_DEBUG
     #define CODI_ENABLE_ASSERTS
+#else
+    #define CODI_DEBUGBREAK()
 #endif
 
-#ifdef CODI_ENABLE_ASSERTS
-    #define CASSERT(x, ...) { if (!(x)) { CODI_ERROR("Assertion Failoed: {0}", __VA_ARGS__); __debugbreak(); } }
-    #define CODI_CORE_ASSERT(x, ...) { if (!(x)) { CODI_CORE_ERROR("Assertion Failoed: {0}", __VA_ARGS__); __debugbreak(); } }
-#else
-    #define CASSERT(x, ...)
-    #define CODI_CORE_ASSERT(x, ...)
-#endif
+#define CODI_EXPAND_MACRO(x) x
+#define CODI_STRINGIFY_MACRO(x) #x
 
 #define BIT(x) 1 << x
 
-#define CODI_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
-
-using uint = unsigned int;
+#define CODI_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
 
 namespace Codi {
 
@@ -52,3 +41,5 @@ constexpr Ref<T> CreateRef(Args&&... args) {
 }
 
 } // namespace Codi
+
+#include "Codi/Core/Assert.h"

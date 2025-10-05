@@ -7,7 +7,7 @@
 
 namespace Codi {
 
-class CAPI Log {
+class Log {
 public:
     static void Init();
 
@@ -29,8 +29,8 @@ private:
 #define CODI_CORE_CRITICAL(...) ::Codi::Log::GetCoreLogger()->critical(__VA_ARGS__)
 
 // Client Log Macros
-#define CTRACE(...) ::Codi::Log::GetClientLogger()->trace(__VA_ARGS__)
-#define CINFO(...) ::Codi::Log::GetClientLogger()->info(__VA_ARGS__)
-#define CWARN(...) ::Codi::Log::GetClientLogger()->warn(__VA_ARGS__)
-#define CERROR(...) ::Codi::Log::GetClientLogger()->error(__VA_ARGS__)
-#define CCRITICAL(...) ::Codi::Log::GetClientLogger()->critical(__VA_ARGS__)
+#define CODI_TRACE(...) ::Codi::Log::GetClientLogger()->trace(__VA_ARGS__)
+#define CODI_INFO(...) ::Codi::Log::GetClientLogger()->info(__VA_ARGS__)
+#define CODI_WARN(...) ::Codi::Log::GetClientLogger()->warn(__VA_ARGS__)
+#define CODI_ERROR(...) ::Codi::Log::GetClientLogger()->error(__VA_ARGS__)
+#define CODI_CRITICAL(...) ::Codi::Log::GetClientLogger()->critical(__VA_ARGS__)

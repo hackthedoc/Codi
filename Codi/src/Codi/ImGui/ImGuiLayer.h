@@ -8,17 +8,22 @@
 
 namespace Codi {
 
-class CAPI ImGuiLayer : public Layer {
+class ImGuiLayer : public Layer {
 public:
     ImGuiLayer();
     ~ImGuiLayer();
 
-    void onAttach() override;
-    void onDetach() override;
+    virtual void onAttach() override;
+    virtual void onDetach() override;
+    virtual void onEvent(Event& e) override;
 
     void begin();
     void end();
+
+    void blockEvents(const bool flag);
+
 private:
+    bool _blockEvents = false;
     float _time = 0.0f;
 };
 
