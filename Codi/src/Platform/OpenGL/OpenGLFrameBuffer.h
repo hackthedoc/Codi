@@ -16,7 +16,7 @@ public:
 
     virtual void resize(uint32_t width, uint32_t height) override;
 
-    virtual const FrameBufferSpecification& getSpecificationRef() const override { return _specification; }
+    virtual const FrameBufferSpecification& getSpecification() const override { return _specification; }
 
     virtual uint32_t getColorAttachmentRendererID() const override { return _colorAttachment; }
 

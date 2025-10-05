@@ -20,9 +20,13 @@ void EditorLayer::onAttach() {
     fbSpec.height = 720;
     _frameBuffer = FrameBuffer::Create(fbSpec);
 
-   _scene = CreateRef<Scene>();
-   _squareEntity = _scene->createEntity("Square");
+   _activeScene = CreateRef<Scene>();
+
+   _squareEntity = _activeScene->createEntity("Square Entity");
    _squareEntity.addComponent<SpriteRendererComponent>(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
+
+   _cameraEntity = _activeScene->createEntity("Camera Entity");
+   _cameraEntity.addComponent<CameraComponent>();
 }
 
 void EditorLayer::onDetach() {
@@ -32,29 +36,32 @@ void EditorLayer::onDetach() {
 void EditorLayer::onUpdate(DeltaTime deltatime) {
     CODI_PROFILE_FUNCTION();
     
-    //////// UPDATING //////////
-    
     if (Input::IsKeyPressed(KeyCode::KEY_ESCAPE))
         Application::Get().close();
     
+    if (FrameBufferSpecification spec = _frameBuffer->getSpecification();
+        _viewportSize.x > 0.0f && _viewportSize.y > 0 &&
+        (spec.width != _viewportSize.x || spec.height != _viewportSize.y)
+        ) {
+        _frameBuffer->resize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
+
+        _activeScene->onViewportResize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
+    }
+
     if (_viewportFocused) {
         CODI_PROFILE_SCOPE("CameraController::onUpdate");
         _cameraController.onUpdate(deltatime);
     }
 
-    ////////// RENDERING //////////
-
     Renderer2D::ResetStats();
 
     _frameBuffer->bind();
+    RenderCommand::SetViewport(0, 0, (uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
     RenderCommand::SetClearColor({ 0.0863f, 0.0902f, 0.1137f, 1.0f });
     RenderCommand::Clear();
 
-
-    Renderer2D::BeginScene(_cameraController.getCamera());
-    _scene->onUpdate(deltatime);
-    Renderer2D::EndScene();
-
+    _activeScene->onUpdate(deltatime);
+    
     _frameBuffer->unbind();
 }
 
@@ -120,17 +127,18 @@ void EditorLayer::onImGuiRender() {
 
     ImGui::PushStyleVar (ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
     ImGui::Begin("Viewport");
+    
     _viewportFocused = ImGui::IsWindowFocused();
     _viewportHovered = ImGui::IsWindowHovered();
+    
     Application::Get().getImGuiLayer()->blockEvents(!_viewportFocused || !_viewportHovered);
+    
     ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-    if (_viewportSize != *((glm::vec2*)&viewportPanelSize) && viewportPanelSize.x && viewportPanelSize.y) {
-        _viewportSize = { viewportPanelSize.x, viewportPanelSize.y };
-        _frameBuffer->resize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
-        //_cameraController.onResize(_viewportSize.x, _viewportSize.y);
-    }
+    _viewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+    
     uint32_t textureID = _frameBuffer->getColorAttachmentRendererID();
-    ImGui::Image((void*)textureID, viewportPanelSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+    ImGui::Image((void*)textureID, ImVec2{ _viewportSize.x, _viewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+    
     ImGui::End();
     ImGui::PopStyleVar();
 

@@ -21,9 +21,9 @@ private:
 
     Ref<FrameBuffer> _frameBuffer;
     
-    Ref<Scene> _scene;
+    Ref<Scene> _activeScene;
     Entity _squareEntity;
-    glm::vec4 _squareColor = { 0.0f, 1.0f, 0.0f, 1.0f };
+    Entity _cameraEntity;
 
     bool _viewportFocused = false;
     bool _viewportHovered = false;

@@ -177,6 +177,20 @@ void Renderer2D::Shutdown() {
     CODI_PROFILE_FUNCTION();
 }
 
+void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform) {    
+    CODI_PROFILE_FUNCTION();
+
+    glm::mat4 viewProj = camera.getProjection() * glm::inverse(transform);
+    
+    _Data.TextureShader->bind();
+    _Data.TextureShader->setMat4("u_ViewProjection", viewProj);
+
+    _Data.QuadIndexCount = 0;
+    _Data.QuadVertexBufferPtr = _Data.QuadVertexBufferBase;
+
+    _Data.TextureSlotIndex = 1;
+}
+
 void Renderer2D::BeginScene(const OrthographicCamera& camera) {    
     CODI_PROFILE_FUNCTION();
     

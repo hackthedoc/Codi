@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Codi/Renderer/Camera.h"
 #include "Codi/Renderer/OrthographicCamera.h"
 #include "Codi/Renderer/SubTexture.h"
 #include "Codi/Renderer/Texture.h"
@@ -11,6 +12,7 @@ public:
     static void Init();
     static void Shutdown();
 
+    static void BeginScene(const Camera& camera, const glm::mat4& transform);
     static void BeginScene(const OrthographicCamera& camera);
     static void EndScene();
     static void Flush();

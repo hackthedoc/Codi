@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+#include "Codi/Scene/SceneCamera.h"
+
 namespace Codi {
 
 struct TagComponent {
@@ -32,6 +34,15 @@ struct SpriteRendererComponent {
 
     operator glm::vec4& () { return color; }
     operator const glm::vec4& () const { return color; }
+};
+
+struct CameraComponent {
+    SceneCamera camera;
+    bool primary = true;
+    bool fixedAspectRatio = false;
+
+    CameraComponent() = default;
+    CameraComponent(const CameraComponent&) = default;
 };
 
 } // namespace Codi

@@ -19,7 +19,7 @@ public:
 
     virtual void resize(uint32_t width, uint32_t height) = 0;
 
-    virtual const FrameBufferSpecification& getSpecificationRef() const = 0;
+    virtual const FrameBufferSpecification& getSpecification() const = 0;
 
     virtual uint32_t getColorAttachmentRendererID() const = 0;
 
