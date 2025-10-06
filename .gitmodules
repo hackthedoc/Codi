@@ -10,3 +10,6 @@
 [submodule "Codi/vendor/imgui"]
     path = Codi/vendor/imgui
     url = https://github.com/hackthedoc/imgui
+[submodule "Codi/vendor/yaml-cpp"]
+	path = Codi/vendor/yaml-cpp
+	url = https://github.com/hackthedoc/yaml-cpp.git
