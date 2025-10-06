@@ -13,3 +13,6 @@
 [submodule "Codi/vendor/yaml-cpp"]
 	path = Codi/vendor/yaml-cpp
 	url = https://github.com/hackthedoc/yaml-cpp.git
+[submodule "Codi/vendor/ImGuizmo"]
+	path = Codi/vendor/ImGuizmo
+	url = https://github.com/hackthedoc/ImGuizmo.git
