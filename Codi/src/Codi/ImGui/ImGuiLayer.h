@@ -22,6 +22,9 @@ public:
 
     void blockEvents(const bool flag);
 
+    void setDarkThemeColors();
+    void setLightThemeColors();
+
 private:
     bool _blockEvents = false;
     float _time = 0.0f;
