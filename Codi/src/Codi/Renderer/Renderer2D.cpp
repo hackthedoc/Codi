@@ -180,7 +180,8 @@ void Renderer2D::Shutdown() {
 void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform) {    
     CODI_PROFILE_FUNCTION();
 
-    glm::mat4 viewProj = camera.getProjection() * glm::inverse(transform);
+    glm::mat4 view = glm::inverse(transform);  
+    glm::mat4 viewProj = camera.getProjection() * view;
     
     _Data.TextureShader->bind();
     _Data.TextureShader->setMat4("u_ViewProjection", viewProj);

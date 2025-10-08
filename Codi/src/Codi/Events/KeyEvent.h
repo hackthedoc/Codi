@@ -22,7 +22,9 @@ class KeyPressedEvent : public KeyEvent {
 public:
     KeyPressedEvent(int keycode, int repeatCount) : KeyEvent(keycode), _repeatCount(repeatCount) {}
 
-    inline int GetRepeatCount() const { return _repeatCount; }
+    inline int getRepeatCount() const { return _repeatCount; }
+
+    inline bool isRepeat() const { return _repeatCount > 0; }
 
     std::string toString() const override {
         std::stringstream ss;

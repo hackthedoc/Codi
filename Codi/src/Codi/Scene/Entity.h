@@ -13,8 +13,8 @@ public:
     Entity(const Entity& other) = default;
 
     template<typename T>
-    bool hasComponent() {
-        return _scene->_registry.any_of<T>(_entityHandle);
+    bool hasComponent() const noexcept {
+        return _scene->_registry.all_of<T>(_entityHandle);
     }
 
     template<typename T>
@@ -29,6 +29,12 @@ public:
         T& component = _scene->_registry.emplace<T>(_entityHandle, std::forward<Args>(args)...); 
         _scene->onComponentAdded<T>(*this, component);
         return component;
+    }
+
+    template<typename T, typename ... Args>
+    T& getOrCreateComponent(Args&&... args) { 
+        if (hasComponent<T>()) return getComponent<T>();
+        else return addComponent<T>(std::forward<Args>(args)...);
     }
 
     template<typename T>

@@ -19,6 +19,8 @@ public:
     void onUpdate(DeltaTime deltatime);
     void onViewportResize(uint32_t width, uint32_t height);
 
+    Entity getPrimaryCameraEntity();
+
 private:
     template<typename T>
     void onComponentAdded(Entity entity, T& component);
@@ -29,6 +31,7 @@ private:
 
     friend Entity;
     friend class SceneHierarchyPanel;
+    friend class SceneSerializer;
 };
     
 } // namespace Codi

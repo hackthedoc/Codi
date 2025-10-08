@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 
 #include "Codi/Scene/SceneCamera.h"
 #include "Codi/Scene/ScriptableEntity.h"
@@ -26,10 +28,10 @@ struct TransformComponent {
     TransformComponent(const glm::vec3& t) : translation(t) {}
 
     glm::mat4 getTransform() const {
-        glm::mat4 rot = glm::rotate(glm::mat4(1.0f), rotation.x, {1, 0, 0})
-                      * glm::rotate(glm::mat4(1.0f), rotation.y, {0, 1, 0})
-                      * glm::rotate(glm::mat4(1.0f), rotation.z, {0, 0, 1});
-        return glm::translate(glm::mat4(1.0f), translation) * rot * glm::scale(glm::mat4(1.0f), scale);
+        glm::mat4 rot = glm::toMat4(glm::quat(rotation));
+        glm::mat4 scl = glm::scale(glm::mat4(1.0f), scale);
+        glm::mat4 trans = glm::translate(glm::mat4(1.0f), translation);
+        return trans * rot * scl;
     }
 };
 

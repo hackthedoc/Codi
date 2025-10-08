@@ -30,7 +30,8 @@ void SceneCamera::setOrthographic(const float size, const float nearClip, const 
 }
 
 void SceneCamera::setViewportSize(const uint32_t width, const uint32_t height) {
-    _aspectRatio = (float)width / (float)height;
+    if (height == 0) _aspectRatio = (float)width;
+    else _aspectRatio = (float)width / (float)height;
     _recalculateProjection();
 }
 
@@ -40,7 +41,7 @@ void SceneCamera::_recalculateProjection() {
 }
 
 void SceneCamera::_recalculatePerspectiveProjection() {
-    _projection = glm::perspective(_perspectiveVerticalFOV, _aspectRatio, _perspectiveNearClip, _perspectiveFarClip);
+    _projection = glm::perspectiveRH_ZO(_perspectiveVerticalFOV, _aspectRatio, _perspectiveNearClip, _perspectiveFarClip);
 }
 
 void SceneCamera::_recalculateOrthographicProjection() {
@@ -49,7 +50,7 @@ void SceneCamera::_recalculateOrthographicProjection() {
     const float orthoBottom = -_orthographicSize * 0.5f;
     const float orthoTop    =  _orthographicSize * 0.5f;
 
-    _projection = glm::ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, _orthographicNearClip, _orthographicFarClip);
+    _projection = glm::orthoRH_ZO(orthoLeft, orthoRight, orthoBottom, orthoTop, _orthographicNearClip, _orthographicFarClip);
 }
 
 } // namespace Codi

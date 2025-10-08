@@ -5,7 +5,7 @@
 
 namespace Codi {
 
-enum class MouseCode {
+enum MouseCode {
     MOUSE_BUTTON_1         = 0,
     MOUSE_BUTTON_2         = 1,
     MOUSE_BUTTON_3         = 2,

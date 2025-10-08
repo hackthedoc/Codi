@@ -81,6 +81,13 @@ void Scene::onViewportResize(uint32_t width, uint32_t height) {
     }
 }
 
+Entity Scene::getPrimaryCameraEntity() {
+    auto view = _registry.view<CameraComponent>();
+    for (const auto& [entity, camera] : view.each())
+        if (camera.primary) return Entity {entity, this};
+    return Entity{};
+}
+
 template<typename T>
 void Scene::onComponentAdded(Entity entity, T& component) {
     CODI_CORE_ASSERT(false);

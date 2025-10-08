@@ -15,6 +15,8 @@ public:
 
     void onImGuiRender();
 
+    Entity getSelectedEntity() const { return _selectionContext; }
+
 private:
     void _drawEntityNode(Entity entity, const std::string& tag);
     void _drawComponents(Entity entity);

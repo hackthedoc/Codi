@@ -19,6 +19,13 @@ public:
     void onEvent(Event& e) override;
 
 private:
+    bool onKeyPressed(const KeyPressedEvent& e);
+
+private:
+    void _createNewScene();
+    void _openScene();
+    void _saveSceneAs();
+
     Ref<FrameBuffer> _frameBuffer;
     
     Ref<Scene> _activeScene;

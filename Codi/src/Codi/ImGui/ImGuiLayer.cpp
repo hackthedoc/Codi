@@ -8,8 +8,10 @@
 #include "Codi/Core/Application.h"
 
 // TODO: remove temporary includes
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include <ImGuizmo.h>
 
 namespace Codi {
 
@@ -70,6 +72,7 @@ void ImGuiLayer::begin() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
 }
 
 void ImGuiLayer::end() {

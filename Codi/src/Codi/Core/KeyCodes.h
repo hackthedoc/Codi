@@ -5,7 +5,7 @@
 
 namespace Codi {
 
-enum class KeyCode {
+enum KeyCode {
     UNKNOWN         = -1,
     
     SPACE           =  32,
