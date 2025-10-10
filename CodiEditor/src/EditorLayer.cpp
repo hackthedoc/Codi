@@ -24,6 +24,7 @@ void EditorLayer::onAttach() {
     FrameBufferSpecification fbSpec;
     fbSpec.width = 1280;
     fbSpec.height = 720;
+    fbSpec.attachements = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::Depth };
     _frameBuffer = FrameBuffer::Create(fbSpec);
 
     _editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
