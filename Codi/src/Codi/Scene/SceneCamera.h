@@ -54,7 +54,7 @@ private:
     void _recalculatePerspectiveProjection();
     void _recalculateOrthographicProjection();
 
-    ProjectionType _projectionType = ProjectionType::ORTHOGRAPHIC;
+    ProjectionType _projectionType = ProjectionType::PERSPECTIVE;
 
     float _perspectiveVerticalFOV = glm::radians(45.0f);
     float _perspectiveNearClip = 0.01f;

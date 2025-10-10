@@ -159,6 +159,7 @@ void EditorLayer::onImGuiRender() {
     
     _viewportFocused = ImGui::IsWindowFocused();
     _viewportHovered = ImGui::IsWindowHovered();
+    Application::Get().getImGuiLayer()->blockEvents(!_viewportFocused && !_viewportHovered);
         
     ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
     _viewportSize = { viewportPanelSize.x, viewportPanelSize.y };
@@ -179,29 +180,33 @@ void EditorLayer::onImGuiRender() {
         glm::mat4 transform = tc.getTransform();
 
         ImGuizmo::SetOrthographic(false);
-
-        // 🔥 If inside an ImGui viewport window:
         ImGuizmo::SetDrawlist();
         
         const float ww = (float)ImGui::GetWindowWidth();
         const float wh = (float)ImGui::GetWindowHeight();
         ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ww, wh);
 
+        bool snap = Input::IsKeyPressed(KeyCode::LEFT_CONTROL);
+        float snapValue = 0.5f;
+        if (_guizmoType == ImGuizmo::OPERATION::ROTATE) snapValue = 45.0f;
+        float snapValues[3] = { snapValue, snapValue, snapValue };
+
         ImGuizmo::Manipulate(
             glm::value_ptr(cameraView),
             glm::value_ptr(cameraProj),
             (ImGuizmo::OPERATION)_guizmoType,
             ImGuizmo::LOCAL,
-            glm::value_ptr(transform)
+            glm::value_ptr(transform),
+            nullptr,
+            snap ? snapValues : nullptr
         );
 
-        if (ImGuizmo::IsUsing())
-        {
+        if (ImGuizmo::IsUsing()) {
             glm::vec3 trans, rot, sc;
             Math::DecomposeTransform(transform, trans, rot, sc);
+
             tc.translation = trans;
-            glm::vec3 deltaRotation = rot - tc.rotation;
-            tc.rotation += deltaRotation;
+            tc.rotation = rot;
             tc.scale = sc;
         }
     }
