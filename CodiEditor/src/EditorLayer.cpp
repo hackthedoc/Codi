@@ -10,6 +10,8 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Codi/Math/Math.h"
+
 namespace Codi {
 
 EditorLayer::EditorLayer()
@@ -165,9 +167,9 @@ void EditorLayer::onImGuiRender() {
     ImGui::Image((void*)textureID, ImVec2{ _viewportSize.x, _viewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
     
     // Gizmos
-
     Entity selectedEntity = _hierarchyPanel.getSelectedEntity();
-    if (selectedEntity) {
+
+    if (selectedEntity && _guizmoType != -1) {
         Entity cameraEntity = _activeScene->getPrimaryCameraEntity(); 
         const SceneCamera& camera = cameraEntity.getComponent<CameraComponent>().camera;
         const glm::mat4& cameraProj = camera.getProjection();
@@ -177,18 +179,30 @@ void EditorLayer::onImGuiRender() {
         glm::mat4 transform = tc.getTransform();
 
         ImGuizmo::SetOrthographic(false);
+
+        // 🔥 If inside an ImGui viewport window:
         ImGuizmo::SetDrawlist();
         
         const float ww = (float)ImGui::GetWindowWidth();
         const float wh = (float)ImGui::GetWindowHeight();
         ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ww, wh);
 
-        ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProj), 
-            ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(transform));
+        ImGuizmo::Manipulate(
+            glm::value_ptr(cameraView),
+            glm::value_ptr(cameraProj),
+            (ImGuizmo::OPERATION)_guizmoType,
+            ImGuizmo::LOCAL,
+            glm::value_ptr(transform)
+        );
 
-        if (ImGuizmo::IsUsing()) {
-            tc.translation = transform[3];
-            
+        if (ImGuizmo::IsUsing())
+        {
+            glm::vec3 trans, rot, sc;
+            Math::DecomposeTransform(transform, trans, rot, sc);
+            tc.translation = trans;
+            glm::vec3 deltaRotation = rot - tc.rotation;
+            tc.rotation += deltaRotation;
+            tc.scale = sc;
         }
     }
 
@@ -219,6 +233,20 @@ bool EditorLayer::onKeyPressed(const KeyPressedEvent& e) {
         break;
     case KeyCode::S:
         if (ctrlPressed && shiftPressed) _saveSceneAs();
+        break;
+
+    // Guizmos
+    case KeyCode::Q:
+        _guizmoType = -1;
+        break;
+    case KeyCode::W:
+        _guizmoType = ImGuizmo::OPERATION::TRANSLATE;
+        break;
+    case KeyCode::E:
+        _guizmoType = ImGuizmo::OPERATION::SCALE;
+        break;
+    case KeyCode::R:
+        _guizmoType = ImGuizmo::OPERATION::ROTATE;
         break;
     }
 
