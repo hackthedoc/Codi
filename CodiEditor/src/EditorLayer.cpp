@@ -45,6 +45,8 @@ void EditorLayer::onUpdate(DeltaTime deltatime) {
         _viewportSize.x > 0.0f && _viewportSize.y > 0 &&
         (spec.width != _viewportSize.x || spec.height != _viewportSize.y)
         ) {
+        RenderCommand::SetViewport(0, 0, (uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
+
         _frameBuffer->resize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
         _editorCamera.setViewportSize(_viewportSize.x, _viewportSize.y);
         _activeScene->onViewportResize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
@@ -56,7 +58,6 @@ void EditorLayer::onUpdate(DeltaTime deltatime) {
     Renderer2D::ResetStats();
 
     _frameBuffer->bind();
-    RenderCommand::SetViewport(0, 0, (uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
     RenderCommand::SetClearColor({ 0.0863f, 0.0902f, 0.1137f, 1.0f });
     RenderCommand::Clear();
 
