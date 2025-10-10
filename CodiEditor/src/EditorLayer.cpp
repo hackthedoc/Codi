@@ -26,25 +26,9 @@ void EditorLayer::onAttach() {
     fbSpec.height = 720;
     _frameBuffer = FrameBuffer::Create(fbSpec);
 
+    _editorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
+
     _createNewScene();
-
-    Entity cameraEntity = _activeScene->createEntity("Camera Entity");
-    cameraEntity.addComponent<CameraComponent>();
-
-    class CameraController : public ScriptableEntity {
-    public:
-        virtual void onUpdate(DeltaTime deltatime) override {
-            glm::vec3& translation = getComponent<TransformComponent>().translation;
-            const float speed = 5.0f;
-
-            if (Input::IsKeyPressed(KeyCode::W)) translation[1] -= speed * deltatime;
-            if (Input::IsKeyPressed(KeyCode::A)) translation[0] += speed * deltatime;
-            if (Input::IsKeyPressed(KeyCode::S)) translation[1] += speed * deltatime;
-            if (Input::IsKeyPressed(KeyCode::D)) translation[0] -= speed * deltatime;
-        }
-   };
-
-   cameraEntity.addComponent<NativeScriptComponent>().bind<CameraController>();
 
    _hierarchyPanel.setContext(_activeScene);
 }
@@ -61,9 +45,12 @@ void EditorLayer::onUpdate(DeltaTime deltatime) {
         (spec.width != _viewportSize.x || spec.height != _viewportSize.y)
         ) {
         _frameBuffer->resize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
-
+        _editorCamera.setViewportSize(_viewportSize.x, _viewportSize.y);
         _activeScene->onViewportResize((uint32_t)_viewportSize.x, (uint32_t)_viewportSize.y);
     }
+
+    if (_viewportFocused)
+        _editorCamera.onUpdate(deltatime);
 
     Renderer2D::ResetStats();
 
@@ -72,7 +59,7 @@ void EditorLayer::onUpdate(DeltaTime deltatime) {
     RenderCommand::SetClearColor({ 0.0863f, 0.0902f, 0.1137f, 1.0f });
     RenderCommand::Clear();
 
-    _activeScene->onUpdate(deltatime);
+    _activeScene->onUpdateEditor(deltatime, _editorCamera);
     
     _frameBuffer->unbind();
 }
@@ -171,10 +158,8 @@ void EditorLayer::onImGuiRender() {
     Entity selectedEntity = _hierarchyPanel.getSelectedEntity();
 
     if (selectedEntity && _guizmoType != -1) {
-        Entity cameraEntity = _activeScene->getPrimaryCameraEntity(); 
-        const SceneCamera& camera = cameraEntity.getComponent<CameraComponent>().camera;
-        const glm::mat4& cameraProj = camera.getProjection();
-        glm::mat4 cameraView = glm::inverse(cameraEntity.getComponent<TransformComponent>().getTransform());
+        const glm::mat4& cameraProj = _editorCamera.getProjection();
+        const glm::mat4& cameraView = _editorCamera.getViewMatrix();
 
         TransformComponent& tc = selectedEntity.getComponent<TransformComponent>();
         glm::mat4 transform = tc.getTransform();
@@ -218,6 +203,8 @@ void EditorLayer::onImGuiRender() {
 }
 
 void EditorLayer::onEvent(Event& e) {
+    _editorCamera.onEvent(e);
+
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<KeyPressedEvent>(CODI_BIND_EVENT_FN(EditorLayer::onKeyPressed));
 }

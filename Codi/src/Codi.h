@@ -32,6 +32,8 @@
 #include "Codi/Renderer/SubTexture.h"
 #include "Codi/Renderer/VertexArray.h"
 
+#include "Codi/Renderer/EditorCamera.h"
+
 #include "Codi/Renderer/OrthographicCamera.h"
 #include "Codi/Renderer/OrthographicCameraController.h"
 /* ----------------------------------------------------- */

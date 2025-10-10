@@ -192,6 +192,18 @@ void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform) {
     _Data.TextureSlotIndex = 1;
 }
 
+void Renderer2D::BeginScene(const EditorCamera& camera) {    
+    CODI_PROFILE_FUNCTION();
+    
+    _Data.TextureShader->bind();
+    _Data.TextureShader->setMat4("u_ViewProjection", camera.getViewProjection());
+
+    _Data.QuadIndexCount = 0;
+    _Data.QuadVertexBufferPtr = _Data.QuadVertexBufferBase;
+
+    _Data.TextureSlotIndex = 1;
+}
+
 void Renderer2D::BeginScene(const OrthographicCamera& camera) {    
     CODI_PROFILE_FUNCTION();
     

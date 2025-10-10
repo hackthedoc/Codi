@@ -28,6 +28,7 @@ private:
 
     Ref<FrameBuffer> _frameBuffer;
     
+    EditorCamera _editorCamera;
     Ref<Scene> _activeScene;
 
     bool _viewportFocused = false;

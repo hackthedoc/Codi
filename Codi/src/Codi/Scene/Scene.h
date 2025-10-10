@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Codi/Core/DeltaTime.h"
+#include "Codi/Renderer/EditorCamera.h"
 
 #include "entt.hpp"
 
@@ -16,7 +17,8 @@ public:
     Entity createEntity(const std::string& name = std::string());
     void destroyEntity(Entity entity);
 
-    void onUpdate(DeltaTime deltatime);
+    void onUpdateEditor(DeltaTime deltatime, EditorCamera& camera);
+    void onUpdateRuntime(DeltaTime deltatime);
     void onViewportResize(uint32_t width, uint32_t height);
 
     Entity getPrimaryCameraEntity();

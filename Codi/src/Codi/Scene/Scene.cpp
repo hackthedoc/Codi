@@ -26,7 +26,17 @@ void Scene::destroyEntity(Entity entity) {
     _registry.destroy(entity);
 }
 
-void Scene::onUpdate(DeltaTime deltatime) {
+void Scene::onUpdateEditor(DeltaTime delta, EditorCamera& camera) {
+    Renderer2D::BeginScene(camera);
+
+    _registry.view<TransformComponent, SpriteRendererComponent>().each([](auto entity, TransformComponent& transform, SpriteRendererComponent& sprite) {
+        Renderer2D::DrawQuad(transform.getTransform(), sprite.color);
+    });
+
+    Renderer2D::EndScene();
+}
+
+void Scene::onUpdateRuntime(DeltaTime deltatime) {
     CODI_PROFILE_FUNCTION();
 
     // Update Script
