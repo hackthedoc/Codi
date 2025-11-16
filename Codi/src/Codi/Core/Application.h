@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Codi/Core/Core.h"
+#include "Codi/Core/Clock.h"
 #include "Codi/Core/Window.h"
 #include "Codi/Events/ApplicationEvents.h"
 
@@ -38,6 +39,8 @@ namespace Codi {
 
         Owned<Window> _Window;
         bool _Running = false;
+        Clock _Clock;
+        float64 _lastFrameTime = 0;
 
         static Application* _Instance;
     };

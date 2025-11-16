@@ -3,7 +3,10 @@
 
 #include "Codi/Events/ApplicationEvents.h"
 
+#include "Codi/Utils/PlatformUtils.h"
+
 namespace Codi {
+    static float64 PlatformFrequency;
 
     Owned<Window> Window::Create(const WindowSpecification& spec) {
         return Own<WindowsWindow>(spec);
@@ -37,6 +40,9 @@ namespace Codi {
             SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN
         );
 
+        // Clock Setup
+        PlatformFrequency = 1.0 / (float64)SDL_GetPerformanceFrequency();
+
         CODI_CORE_ASSERT(_Handle, "Failed to create SDL window!");
     }
 
@@ -62,5 +68,19 @@ namespace Codi {
             }
         }
     }
+    // -------------------------
+    // Platform Utils
+    // -------------------------
+
+    float64 Platform::GetAbsoluteTime() {
+        static const uint64 PlatformStartTicks = SDL_GetPerformanceCounter();
+        uint64 currentTicks = SDL_GetPerformanceCounter();
+        return (float64)(currentTicks - PlatformStartTicks) * PlatformFrequency;
+    }
+
+    void Platform::Sleep(uint32 ms) {
+        SDL_Delay(ms);
+    }
+
 
 } // namespace Codi
