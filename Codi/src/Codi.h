@@ -4,3 +4,5 @@
 
 #include "Codi/Core/Log.h"
 #include "Codi/Core/Assert.h"
+
+#include "Codi/Core/Application.h"

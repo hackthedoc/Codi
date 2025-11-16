@@ -1,17 +1,19 @@
 #pragma once
 
-namespace Codi {
-    void LogTest();
-}
+#include "Codi/Core/Application.h"
 
 #ifdef CODI_PLATFORM_WINDOWS
 
-extern void Codi::LogTest();
+extern Codi::Application* Codi::CreateApplication();
 
 int main(int argc, char** argv) {
     Codi::Log::Init();
 
-    Codi::LogTest();
+    auto app = Codi::CreateApplication();
+
+    app->Run();
+
+    delete app;
 
     Codi::Log::Shutdown();
 
