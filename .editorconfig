@@ -1,0 +1,81 @@
+# EditorConfig helps maintain consistent coding styles across editors and IDEs
+root = true
+
+# Applies to all files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Indentation
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+# Whitespace and formatting
+max_line_length = 120
+continuation_indent_size = 8
+
+# C++ files
+[*.{h,hpp,c,cpp,cc,inl}]
+# Use 4 spaces, no tabs
+indent_style = space
+indent_size = 4
+
+# Braces on new lines (Allman style)
+# Visual Studio interprets this for formatting
+cpp_new_line_before_open_brace_namespace = true
+cpp_new_line_before_open_brace_type = true
+cpp_new_line_before_open_brace_function = true
+cpp_new_line_before_open_brace_block = true
+
+# Keep one space before and after keywords like if, for, while
+cpp_space_after_keywords_in_control_flow_statements = true
+
+# Pointer and reference alignment
+cpp_space_around_pointer_operators = before
+cpp_space_around_reference_operators = before
+
+# Prefer spaces inside braces and parentheses only for readability
+cpp_space_within_parentheses = false
+cpp_space_within_braces = false
+cpp_space_before_open_square_bracket = false
+
+# Include ordering and spacing
+cpp_sort_using_statements = true
+cpp_preserve_blocks_with_single_statement = false
+cpp_space_after_cast = false
+cpp_space_after_c_style_cast = false
+
+# Keep a blank line between groups of includes
+cpp_new_line_between_include_blocks = true
+
+# Namespace indentation
+cpp_indent_case_contents = true
+cpp_indent_namespace_contents = true
+
+# Prefer consistent casing for types
+cpp_type_style = pascal_case
+cpp_function_style = camel_case
+cpp_variable_style = camel_case
+cpp_constant_style = upper_case
+
+# Comments
+cpp_space_after_comment_delimiters = true
+
+# Files like Premake scripts
+[*.lua]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+# Shader files
+[*.glsl]
+indent_style = space
+indent_size = 4
+
+# JSON, YAML, etc.
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
