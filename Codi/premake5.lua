@@ -7,6 +7,9 @@ project "Codi"
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/obj/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "codipch.h"
+	pchsource "src/codipch.cpp"
+
     files {
         "src/**.h",
         "src/**.cpp",
@@ -16,7 +19,12 @@ project "Codi"
         "%{wks.location}/Codi/src",
 
 		"%{IncludeDir.spdlog}",
+		"%{IncludeDir.SDL}",
     }
+
+	links {
+		"%{Library.SDL}"
+	}
 
     filter "system:windows"
         systemversion "latest"
