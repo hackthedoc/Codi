@@ -14,6 +14,8 @@ project "Codi"
 
     includedirs {
         "%{wks.location}/Codi/src",
+
+		"%{IncludeDir.spdlog}",
     }
 
     filter "system:windows"

@@ -1,3 +1,4 @@
 -- Core Dependencies
 
--- Will later be completed
+IncludeDir = {}
+IncludeDir["spdlog"]        = "%{wks.location}/Codi/vendor/spdlog/include"

@@ -16,6 +16,8 @@ project "Engine"
     includedirs {
         "%{wks.location}/Engine/src",
         "%{wks.location}/Codi/src",
+
+		"%{IncludeDir.spdlog}",
     }
 
     links {
