@@ -32,7 +32,6 @@ namespace Codi {
         while (_Running) {
             const float64 time = _Clock.Elapsed();
             const float64 deltatime = time - _lastFrameTime;
-            CODI_CORE_TRACE("Deltatime: {0} - {1} = {2}", time, _lastFrameTime, deltatime);
             _lastFrameTime = time;
             
             _Window->OnUpdate();

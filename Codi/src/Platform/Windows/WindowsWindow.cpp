@@ -2,6 +2,8 @@
 #include "WindowsWindow.h"
 
 #include "Codi/Events/ApplicationEvents.h"
+#include "Codi/Events/KeyEvents.h"
+#include "Codi/Events/MouseEvents.h"
 
 #include "Codi/Utils/PlatformUtils.h"
 
@@ -59,15 +61,77 @@ namespace Codi {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
-            case SDL_EVENT_QUIT: {
+            case SDL_EVENT_QUIT:
+            {
                 WindowCloseEvent e;
                 _Data.EventCallback(e);
                 break;
             }
-                
+            case SDL_EVENT_WINDOW_RESIZED:
+            {
+                _Data.Width = e.window.data1;
+                _Data.Height = e.window.data2;
+
+                WindowResizeEvent e(_Data.Width, _Data.Height);
+                _Data.EventCallback(e);
+                break;
+            }
+
+            // -------------------------
+            // Keyboard Input
+            // -------------------------
+            case SDL_EVENT_KEY_DOWN:
+            {
+                KeyPressedEvent e(e.key.key, 0);
+                _Data.EventCallback(e);
+                break;
+            }
+            case SDL_EVENT_KEY_UP:
+            {
+                KeyReleasedEvent e(e.key.key);
+                _Data.EventCallback(e);
+                break;
+            }
+
+            // -------------------------
+            // Mouse Buttons
+            // -------------------------
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            {
+                MouseButtonPressedEvent e(e.button.button);
+                _Data.EventCallback(e);
+                break;
+            }
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+            {
+                MouseButtonReleasedEvent e(e.button.button);
+                _Data.EventCallback(e);
+                break;
+            }
+
+            // -------------------------
+            // Mouse Mouvement
+            // -------------------------
+            case SDL_EVENT_MOUSE_MOTION:
+            {
+                MouseMovedEvent e(e.motion.x, e.motion.y);
+                _Data.EventCallback(e);
+                break;
+            }
+
+            // -------------------------
+            // Mouse Wheel
+            // -------------------------
+            case SDL_EVENT_MOUSE_WHEEL:
+            {
+                MouseScrolledEvent e(e.wheel.x, e.wheel.y);
+                _Data.EventCallback(e);
+                break;
+            }
             }
         }
     }
+
     // -------------------------
     // Platform Utils
     // -------------------------
