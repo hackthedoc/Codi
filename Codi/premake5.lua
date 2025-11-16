@@ -20,6 +20,7 @@ project "Codi"
 
     filter "system:windows"
         systemversion "latest"
+        buildoptions { "/utf-8" }
 
 	filter "configurations:Debug"
 		defines "CODI_DEBUG"
