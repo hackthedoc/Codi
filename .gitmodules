@@ -1,3 +1,6 @@
 [submodule "Codi/vendor/spdlog"]
 	path = Codi/vendor/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "Codi/vendor/SDL"]
+	path = Codi/vendor/SDL
+	url = https://github.com/hackthedoc/SDL
