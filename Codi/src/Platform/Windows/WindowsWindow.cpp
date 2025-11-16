@@ -7,6 +7,8 @@
 
 #include "Codi/Utils/PlatformUtils.h"
 
+#include "Platform/Windows/WindowsInputUtils.h"
+
 namespace Codi {
     static float64 PlatformFrequency;
 
@@ -82,13 +84,13 @@ namespace Codi {
             // -------------------------
             case SDL_EVENT_KEY_DOWN:
             {
-                KeyPressedEvent e(e.key.key, 0);
+                KeyPressedEvent e(Utils::KeyCodeFromSDL(e.key.key), 0);
                 _Data.EventCallback(e);
                 break;
             }
             case SDL_EVENT_KEY_UP:
             {
-                KeyReleasedEvent e(e.key.key);
+                KeyReleasedEvent e(Utils::KeyCodeFromSDL(e.key.key));
                 _Data.EventCallback(e);
                 break;
             }
@@ -98,13 +100,13 @@ namespace Codi {
             // -------------------------
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
             {
-                MouseButtonPressedEvent e(e.button.button);
+                MouseButtonPressedEvent e(Utils::MouseCodeFromSDL(e.button.button));
                 _Data.EventCallback(e);
                 break;
             }
             case SDL_EVENT_MOUSE_BUTTON_UP:
             {
-                MouseButtonReleasedEvent e(e.button.button);
+                MouseButtonReleasedEvent e(Utils::MouseCodeFromSDL(e.button.button));
                 _Data.EventCallback(e);
                 break;
             }

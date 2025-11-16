@@ -33,7 +33,7 @@ namespace Codi {
             const float64 time = _Clock.Elapsed();
             const float64 deltatime = time - _lastFrameTime;
             _lastFrameTime = time;
-            
+
             _Window->OnUpdate();
         }
     }
