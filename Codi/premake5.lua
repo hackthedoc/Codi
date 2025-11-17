@@ -20,10 +20,12 @@ project "Codi"
 
 		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.SDL}",
+		"%{IncludeDir.VulkanSDK}",
     }
 
 	links {
-		"%{Library.SDL}"
+		"%{Library.SDL}",
+		"%{Library.Vulkan}",
 	}
 
     filter "system:windows"
