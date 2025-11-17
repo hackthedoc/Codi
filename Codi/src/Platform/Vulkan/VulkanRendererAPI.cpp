@@ -9,8 +9,9 @@ namespace Codi {
         Window* window = Application::Get().GetWindow();
 
         // Graphics Context
+        VulkanDeviceRequirements deviceReq{};
         _Context = Own<VulkanGraphicsContext>(window->GetNativeWindow());
-        _Context->Create();
+        _Context->Create(deviceReq);
     }
 
     void VulkanRendererAPI::Shutdown() {
