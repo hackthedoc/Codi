@@ -98,7 +98,7 @@ namespace Codi {
         depthSpec.CreateView = true;
         depthSpec.AspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
         depthSpec.Type = VulkanImageType::DepthAttachment;
-        _DepthAttachment = Share<VulkanImage>(_Context, depthSpec);
+        _DepthAttachment = Share<VulkanImage>(depthSpec);
 
         CODI_CORE_INFO("Vulkan SwapChain created with {0} images.", imageCount);
     }

@@ -1,7 +1,8 @@
 #include "codipch.h"
 #include "VulkanImage.h"
 
-#include "Platform/Vulkan/VulkanGraphicsContext.h" 
+#include "Codi/Renderer/Renderer.h"
+
 #include "Platform/Vulkan/VulkanRendererAPI.h"
 
 namespace Codi {
@@ -16,7 +17,8 @@ namespace Codi {
     }
 
     void VulkanImage::CreateImage(const VulkanImageSpecification& spec) {
-        VkDevice logicalDevice = VulkanRendererAPI::GetContext()->GetLogicalDevice();
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
 
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -51,7 +53,8 @@ namespace Codi {
     }
 
     void VulkanImage::Destroy() {
-        VkDevice logicalDevice = VulkanRendererAPI::GetContext()->GetLogicalDevice();
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
 
         if (_ImageView)
             vkDestroyImageView(logicalDevice, _ImageView, VulkanRendererAPI::GetAllocator());
@@ -68,7 +71,8 @@ namespace Codi {
     }
 
     void VulkanImage::CreateImageView(VkFormat format, VkImageAspectFlags apsectFlags) {
-        VkDevice logicalDevice = VulkanRendererAPI::GetContext()->GetLogicalDevice();
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
 
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -88,7 +92,8 @@ namespace Codi {
     }
 
     uint32 VulkanImage::FindMemoryType(uint32 typeFilter, VkMemoryPropertyFlags properties) const {
-        VkPhysicalDevice physicalDevice = VulkanRendererAPI::GetContext()->GetPhysicalDevice();
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkPhysicalDevice physicalDevice = api.GetContext()->GetPhysicalDevice();
 
         VkPhysicalDeviceMemoryProperties memProperties;
         vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
