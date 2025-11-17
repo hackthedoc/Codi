@@ -36,7 +36,9 @@ namespace Codi {
             const float64 deltatime = time - _lastFrameTime;
             _lastFrameTime = time;
 
-            Renderer::DrawFrame();
+            // TODO: refactor packet creation
+            RenderPacket packet{ deltatime };
+            Renderer::DrawFrame(packet);
 
             _Window->OnUpdate();
         }

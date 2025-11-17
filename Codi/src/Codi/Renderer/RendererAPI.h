@@ -17,6 +17,9 @@ namespace Codi {
         virtual void Init() = 0;
         virtual void Shutdown() = 0;
 
+        virtual void BeginFrame(float32 deltatime) = 0;
+        virtual void EndFrame(float32 deltatime) = 0;
+
         static Owned<RendererAPI> Create();
 
         static inline API GetAPI() { return _API; }

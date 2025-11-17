@@ -15,8 +15,12 @@ namespace Codi {
         _RAPI = nullptr;
     }
 
-    void Renderer::DrawFrame() {
+    void Renderer::DrawFrame(const RenderPacket& packet) {
+        _RAPI->BeginFrame(packet.Deltatime);
+
         // nothing yet
+
+        _RAPI->EndFrame(packet.Deltatime);
     }
 
 } // namespace Codi

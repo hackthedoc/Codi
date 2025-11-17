@@ -5,12 +5,18 @@
 
 namespace Codi {
 
+    struct RenderPacket {
+        float Deltatime;
+    };
+
     class Renderer {
     public:
         static void Init();
         static void Shutdown();
 
-        static void DrawFrame();
+        static void DrawFrame(const RenderPacket& packet);
+
+        static RendererAPI& GetRAPI() { return *_RAPI; }
 
     private:
         static Owned<RendererAPI> _RAPI;

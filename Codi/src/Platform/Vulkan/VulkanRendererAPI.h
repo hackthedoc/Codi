@@ -19,6 +19,9 @@ namespace Codi {
         virtual void Init() override;
         virtual void Shutdown() override;
 
+        virtual void BeginFrame(float32 deltatime) override;
+        virtual void EndFrame(float32 deltatime) override;
+
         inline VulkanGraphicsContext* GetContext() { return _Context.get(); }
         inline VulkanSwapchain* GetSwapchain() { return _Swapchain.get(); }
         inline VulkanRenderPass* GetMainRenderPass() { return _MainRenderPass.get(); }
@@ -27,6 +30,11 @@ namespace Codi {
         static VkAllocationCallbacks* GetAllocator() { return nullptr; }
 
     private:
+        void RecreateSwapchain();
+
+    private:
+        uint32 _CurrentFrameIndex = 0;
+
         Owned<VulkanGraphicsContext> _Context;
         Owned<VulkanSwapchain> _Swapchain = nullptr;
         Owned<VulkanRenderPass> _MainRenderPass = nullptr;
