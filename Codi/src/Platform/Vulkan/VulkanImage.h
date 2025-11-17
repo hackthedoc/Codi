@@ -6,8 +6,6 @@
 
 namespace Codi {
 
-    class VulkanGraphicsContext;
-
     enum class VulkanImageType {
         ColorAttachment,
         DepthAttachment,
@@ -31,7 +29,7 @@ namespace Codi {
     class VulkanImage {
     public:
         VulkanImage() = default;
-        VulkanImage(VulkanGraphicsContext* context, const VulkanImageSpecification& spec);
+        VulkanImage(const VulkanImageSpecification& spec);
         ~VulkanImage() = default;
 
         void Destroy();
@@ -46,8 +44,6 @@ namespace Codi {
         uint32 FindMemoryType(uint32 typeFilter, VkMemoryPropertyFlags properties) const;
 
     private:
-        VulkanGraphicsContext* _Context;
-
         VkImage _Image = VK_NULL_HANDLE;
         VkImageView _ImageView = VK_NULL_HANDLE;
         VkDeviceMemory _Memory = VK_NULL_HANDLE;

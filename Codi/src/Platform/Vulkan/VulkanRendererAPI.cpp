@@ -4,6 +4,7 @@
 #include "Codi/Core/Application.h"
 
 namespace Codi {
+    Shared<VulkanGraphicsContext> VulkanRendererAPI::_Context = nullptr;
 
     void VulkanRendererAPI::Init() {
         Window* window = Application::Get().GetWindow();

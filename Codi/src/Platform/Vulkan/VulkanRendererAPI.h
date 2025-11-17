@@ -15,10 +15,13 @@ namespace Codi {
         virtual void Init() override;
         virtual void Shutdown() override;
 
+        static Shared<VulkanGraphicsContext> GetContext() { return _Context; }
+
         static VkAllocationCallbacks* GetAllocator() { return nullptr; }
 
     private:
-        Owned<VulkanGraphicsContext> _Context = nullptr;
+        static Shared<VulkanGraphicsContext> _Context;
+
         Owned<VulkanSwapchain> _Swapchain = nullptr;
     };
 
