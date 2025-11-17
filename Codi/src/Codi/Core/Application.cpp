@@ -1,6 +1,8 @@
 #include "codipch.h"
 #include "Application.h"
 
+#include "Codi/Renderer/Renderer.h"
+
 namespace Codi {
 
     Application* Application::_Instance = nullptr;
@@ -18,14 +20,14 @@ namespace Codi {
         _Window->SetEventCallback(CODI_BIND_EVENT_FN(Application::OnEvent));
 
         // Init subsystems
-        // Nothing yet
+        Renderer::Init();
 
         _Running = true;
     }
 
     Application::~Application() {
         // Shutdown subsystems
-        // Nothing yet
+        Renderer::Shutdown();
     }
 
     void Application::Run() {
@@ -33,6 +35,8 @@ namespace Codi {
             const float64 time = _Clock.Elapsed();
             const float64 deltatime = time - _lastFrameTime;
             _lastFrameTime = time;
+
+            Renderer::DrawFrame();
 
             _Window->OnUpdate();
         }
