@@ -30,16 +30,6 @@ namespace Codi {
         }
     };
 
-    struct VulkanSwapChainSupport {
-        VkSurfaceCapabilitiesKHR Capabilities{};
-        std::vector<VkSurfaceFormatKHR> Formats;
-        std::vector<VkPresentModeKHR> PresentModes;
-
-        bool IsAdequate() const {
-            return !Formats.empty() && !PresentModes.empty();
-        }
-    };
-
     class VulkanGraphicsContext {
     public:
         VulkanGraphicsContext(void* windowHandle);
@@ -57,7 +47,6 @@ namespace Codi {
         inline VkDevice GetLogicalDevice() const { return _LogicalDevice; }
 
         inline const VulkanQueueFamilyIndices& GetQueueIndices() const { return _QueueIndices; }
-        inline const VulkanSwapChainSupport& GetSwapChainSupport() const { return _SwapChainSupport; }
         inline const VkFormat GetDepthFormat() const { return _DepthFormat; }
 
         inline VkQueue GetGraphicsQueue() const { return _GraphicsQueue; }
@@ -68,7 +57,6 @@ namespace Codi {
         void CreateSurface();
         void PickPhysicalDevice(const VulkanDeviceRequirements& requirements);
         void CreateLogicalDevice(const VulkanDeviceRequirements& requirements);
-        VulkanSwapChainSupport QuerySwapChainSupport(VkPhysicalDevice device);
         void DetectDepthFormat();
 
         // --- Helpers ---
@@ -90,8 +78,7 @@ namespace Codi {
         VkDevice _LogicalDevice = VK_NULL_HANDLE;
 
         VulkanQueueFamilyIndices _QueueIndices;
-        VulkanSwapChainSupport _SwapChainSupport;
-        VkFormat _DepthFormat;
+        VkFormat _DepthFormat = VK_FORMAT_UNDEFINED;
 
         VkQueue _GraphicsQueue = VK_NULL_HANDLE;
         VkQueue _PresentQueue = VK_NULL_HANDLE;

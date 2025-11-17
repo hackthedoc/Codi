@@ -2,6 +2,7 @@
 #include "VulkanGraphicsContext.h"
 
 #include "Platform/Vulkan/VulkanRendererAPI.h"
+#include "Platform/Vulkan/VulkanSwapchain.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
@@ -77,7 +78,7 @@ namespace Codi {
         CreateSurface();
 
         PickPhysicalDevice(requirements);
-        _SwapChainSupport = QuerySwapChainSupport(_PhysicalDevice);
+        VulkanSwapchain::SetSupport(_PhysicalDevice, _Surface);
         DetectDepthFormat();
         CreateLogicalDevice(requirements);
 
@@ -268,26 +269,6 @@ namespace Codi {
         vkGetDeviceQueue(_LogicalDevice, _QueueIndices.PresentFamily, 0, &_PresentQueue);
     }
 
-    VulkanSwapChainSupport VulkanGraphicsContext::QuerySwapChainSupport(VkPhysicalDevice device) {
-        VulkanSwapChainSupport details;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, _Surface, &details.Capabilities);
-
-        uint32 count;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, _Surface, &count, nullptr);
-        if (count > 0) {
-            details.Formats.resize(count);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(device, _Surface, &count, details.Formats.data());
-        }
-
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, _Surface, &count, nullptr);
-        if (count > 0) {
-            details.PresentModes.resize(count);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(device, _Surface, &count, details.PresentModes.data());
-        }
-
-        return details;
-    }
-
     void VulkanGraphicsContext::DetectDepthFormat() {
         std::vector<VkFormat> candidates = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
         for (auto format : candidates) {
@@ -313,7 +294,7 @@ namespace Codi {
         bool extensionsSupported = CheckDeviceExtensionSupport(device, requirements.DeviceExtensions);
         if (!extensionsSupported) return 0;
 
-        VulkanSwapChainSupport swapSupport = QuerySwapChainSupport(device);
+        SwapchainSupportDetails swapSupport = VulkanSwapchain::QuerySupport(device, _Surface);
         if (!swapSupport.IsAdequate()) return 0;
 
         uint32 score = 0;

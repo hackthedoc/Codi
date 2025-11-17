@@ -4,6 +4,7 @@
 #include "Codi/Renderer/RendererAPI.h"
 
 #include "Platform/Vulkan/VulkanGraphicsContext.h"
+#include "Platform/Vulkan/VulkanSwapchain.h"
 
 #include <vulkan/vulkan.h>
 
@@ -18,6 +19,7 @@ namespace Codi {
 
     private:
         Owned<VulkanGraphicsContext> _Context = nullptr;
+        Owned<VulkanSwapchain> _Swapchain = nullptr;
     };
 
 } // namespace Codi
