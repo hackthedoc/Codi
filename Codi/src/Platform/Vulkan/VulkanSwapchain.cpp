@@ -14,8 +14,6 @@ namespace Codi {
     void VulkanSwapchain::Create(uint32 width, uint32 height) {
         CODI_CORE_INFO("Creating Vulkan SwapChain...");
 
-        _MaxFramesInFlight = 2;
-
         _ImageFormat = ChooseSurfaceFormat(_SwapchainSupportDetails.Formats);
         _PresentMode = ChoosePresentMode(_SwapchainSupportDetails.PresentModes);
         _Extent = ChooseExtent(_SwapchainSupportDetails.Capabilities, width, height);
@@ -23,6 +21,8 @@ namespace Codi {
         uint32 imageCount = _SwapchainSupportDetails.Capabilities.minImageCount + 1;
         if (_SwapchainSupportDetails.Capabilities.maxImageCount > 0 && imageCount > _SwapchainSupportDetails.Capabilities.maxImageCount)
             imageCount = _SwapchainSupportDetails.Capabilities.maxImageCount;
+
+        _MaxFramesInFlight = imageCount - 1;
 
         // Swapchain create info
         VkSwapchainCreateInfoKHR createInfo{};
