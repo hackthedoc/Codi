@@ -17,8 +17,12 @@ namespace Codi {
         virtual void Init() = 0;
         virtual void Shutdown() = 0;
 
-        virtual void BeginFrame(float32 deltatime) = 0;
-        virtual void EndFrame(float32 deltatime) = 0;
+        /// @return Wether the current frame is being skipped or not
+        virtual bool BeginFrame(float32 deltatime) = 0;
+        /// @return Wether the current frame is being skipped or not
+        virtual bool EndFrame(float32 deltatime) = 0;
+
+        virtual void OnWindowResize(uint32 width, uint32 height) = 0;
 
         static Owned<RendererAPI> Create();
 

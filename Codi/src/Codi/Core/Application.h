@@ -33,12 +33,14 @@ namespace Codi {
 
     private:
         bool OnWindowClosed(WindowCloseEvent& e);
+        bool OnWindowResize(WindowResizeEvent& e);
 
     private:
         ApplicationSpecification _Specification;
 
         Owned<Window> _Window;
         bool _Running = false;
+        bool _Minimized = false;
         Clock _Clock;
         float64 _lastFrameTime = 0;
 

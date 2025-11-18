@@ -14,6 +14,8 @@ namespace Codi {
         static void Init();
         static void Shutdown();
 
+        static void OnWindowResize(uint32 width, uint32 height);
+
         static void DrawFrame(const RenderPacket& packet);
 
         static RendererAPI& GetRAPI() { return *_RAPI; }

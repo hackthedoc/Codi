@@ -43,6 +43,8 @@ namespace Codi {
 
         inline VkSwapchainKHR GetHandle() const { return _Handle; }
 
+        inline uint32 GetWidth() const { return _Extent.width; }
+        inline uint32 GetHeight() const { return _Extent.height; }
         inline VkExtent2D GetExtent() const { return _Extent; }
         inline VkFormat GetImageFormat() const { return _ImageFormat.format; }
 

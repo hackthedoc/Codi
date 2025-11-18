@@ -58,6 +58,7 @@ namespace Codi {
         _Framebuffers->Create();
 
         _CurrentFrameIndex = 0;
+        _SwapchainNeedsRecreation = false;
     }
 
     void VulkanRendererAPI::Shutdown() {
@@ -93,22 +94,30 @@ namespace Codi {
         _Context = nullptr;
     }
 
-    void VulkanRendererAPI::BeginFrame(float32 deltatime) {
+    bool VulkanRendererAPI::BeginFrame(float32 deltatime) {
+        CODI_CORE_TRACE("BeginFrame - _CurrentFrameIndex = {0}", _CurrentFrameIndex);
+
+        if (_SwapchainNeedsRecreation) {
+            RecreateSwapchain();
+            _SwapchainNeedsRecreation = false;
+            return true; // skip this frame
+        }
+
         // Get IN FLIGHT objects
         VkFence inFlightFence = _Sync->GetInFlight(_CurrentFrameIndex);
         VkSemaphore inFlightImageAvailableSemaphore = _Sync->GetImageAvailable(_CurrentFrameIndex);
 
-        // Wait for previous frame to finish
-        vkWaitForFences(_Context->GetLogicalDevice(), 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-        vkResetFences(_Context->GetLogicalDevice(), 1, &inFlightFence);
-
         // Acquire next image from swapchain
         VulkanSwapResult result = _Swapchain->AcquireNextImage(inFlightImageAvailableSemaphore, VK_NULL_HANDLE, UINT64_MAX);
 
-        if (result == VulkanSwapResult::OutOfDate) {
-            RecreateSwapchain();
-            return;
+        if (result == VulkanSwapResult::OutOfDate || result == VulkanSwapResult::SubOptimal) {
+            _SwapchainNeedsRecreation = true;
+            return true; // skip this frame
         }
+
+        // Wait for previous frame to finish
+        vkWaitForFences(_Context->GetLogicalDevice(), 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+        vkResetFences(_Context->GetLogicalDevice(), 1, &inFlightFence);
 
         // Begin command buffer
         _CommandBuffers[_CurrentFrameIndex]->Reset();
@@ -116,9 +125,13 @@ namespace Codi {
 
         // Begin render pass
         _MainRenderPass->Begin(_CommandBuffers[_CurrentFrameIndex].get(), _Framebuffers->Get(_Swapchain->GetCurrentImageIndex()));
+
+        return false;
     }
 
-    void VulkanRendererAPI::EndFrame(float32 deltatime) {
+    bool VulkanRendererAPI::EndFrame(float32 deltatime) {
+        CODI_CORE_TRACE("EndFrame - _CurrentFrameIndex = {0}", _CurrentFrameIndex);
+
         // End render pass
         _MainRenderPass->End(_CommandBuffers[_CurrentFrameIndex].get());
 
@@ -140,6 +153,17 @@ namespace Codi {
 
         // Advance frame
         _CurrentFrameIndex = (_CurrentFrameIndex + 1) % _Swapchain->GetMaxFramesInFlight();
+
+        return false;
+    }
+
+    void VulkanRendererAPI::OnWindowResize(uint32 width, uint32 height) {
+        if (width == 0 || height == 0) return; // window minimized, ignore
+
+        if (_Swapchain->GetWidth() == width && _Swapchain->GetHeight() == height)
+            return; // size not changed, ignore
+
+        _SwapchainNeedsRecreation = true;
     }
 
     void VulkanRendererAPI::RecreateSwapchain() {
@@ -147,23 +171,24 @@ namespace Codi {
         uint32 width = window->GetWidth();
         uint32 height = window->GetHeight();
 
-        // Wait for the device to be idle before recreating
+        VulkanSwapchain::SetSupport(_Context->GetPhysicalDevice(), _Context->GetSurface());
+
         _Context->WaitDeviceIdle();
 
-        // Destroy old framebuffers
         _Framebuffers->Destroy();
 
-        // Destroy swapchain (this also destroys depth attachment)
-        _Swapchain->Destroy();
+        _Swapchain->Recreate(width, height);
 
-        // Recreate swapchain
-        _Swapchain->Create(width, height);
+        _MainRenderPass->SetSize(width, height);
 
-        // Recreate framebuffers for the new swapchain images
         _Framebuffers->Create();
 
-        // Update render pass size
-        _MainRenderPass->SetSize(width, height);
+        for (auto& cmd : _CommandBuffers)
+            cmd->Reset();   // reset all command buffers
+
+        _CurrentFrameIndex = (_CurrentFrameIndex + 1) % _Swapchain->GetMaxFramesInFlight();
+
+        CODI_CORE_WARN("Swapchain and framebuffers recreated for size {0}x{1}", width, height);
     }
 
 } // namespace Codi

@@ -47,11 +47,24 @@ namespace Codi {
     void Application::OnEvent(Event& e) {
         EventDispatcher dispatcher(e);
         dispatcher.Dispatch<WindowCloseEvent>(CODI_BIND_EVENT_FN(Application::OnWindowClosed));
+        dispatcher.Dispatch<WindowResizeEvent>(CODI_BIND_EVENT_FN(Application::OnWindowResize));
     }
 
     bool Application::OnWindowClosed(WindowCloseEvent& e) {
         _Running = false;
         return true;
+    }
+
+    bool Application::OnWindowResize(WindowResizeEvent& e) {
+        // window minimized, ignore
+        if (e.GetWidth() == 0 || e.GetHeight() == 0) { 
+            _Minimized = true;
+            return false;
+        }
+
+        _Minimized = false;
+        Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+        return false;
     }
 
 } // namespace Codi

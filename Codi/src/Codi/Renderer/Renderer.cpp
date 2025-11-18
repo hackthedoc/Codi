@@ -15,8 +15,13 @@ namespace Codi {
         _RAPI = nullptr;
     }
 
+    void Renderer::OnWindowResize(uint32 width, uint32 height) {
+        _RAPI->OnWindowResize(width, height);
+    }
+
     void Renderer::DrawFrame(const RenderPacket& packet) {
-        _RAPI->BeginFrame(packet.Deltatime);
+        bool frameSkipped = _RAPI->BeginFrame(packet.Deltatime);
+        if (frameSkipped) return;
 
         // nothing yet
 

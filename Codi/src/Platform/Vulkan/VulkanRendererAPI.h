@@ -19,8 +19,12 @@ namespace Codi {
         virtual void Init() override;
         virtual void Shutdown() override;
 
-        virtual void BeginFrame(float32 deltatime) override;
-        virtual void EndFrame(float32 deltatime) override;
+        /// @return Wether the current frame is being skipped or not
+        virtual bool BeginFrame(float32 deltatime) override;
+        /// @return Wether the current frame is being skipped or not
+        virtual bool EndFrame(float32 deltatime) override;
+
+        virtual void OnWindowResize(uint32 width, uint32 height) override;
 
         inline VulkanGraphicsContext* GetContext() { return _Context.get(); }
         inline VulkanSwapchain* GetSwapchain() { return _Swapchain.get(); }
@@ -34,6 +38,7 @@ namespace Codi {
 
     private:
         uint32 _CurrentFrameIndex = 0;
+        bool _SwapchainNeedsRecreation = false;
 
         Owned<VulkanGraphicsContext> _Context;
         Owned<VulkanSwapchain> _Swapchain = nullptr;
