@@ -66,8 +66,10 @@ namespace Codi {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             ImGui_ImplSDL3_ProcessEvent(&e);
+
             switch (e.type) {
             case SDL_EVENT_QUIT:
+            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
             {
                 WindowCloseEvent e;
                 _Data.EventCallback(e);
