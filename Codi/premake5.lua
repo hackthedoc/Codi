@@ -34,10 +34,13 @@ project "Codi"
 
 	links {
 		"ImGui",
-		
+
 		"%{Library.SDL}",
 		"%{Library.Vulkan}",
 	}
+
+	filter "files:vendor/ImGuizmo/**.cpp"
+	flags { "NoPCH" }
 
     filter "system:windows"
         systemversion "latest"

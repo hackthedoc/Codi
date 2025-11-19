@@ -28,6 +28,8 @@ namespace Codi {
 
         virtual void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount) = 0;
 
+        virtual inline void* GetCurrentFrameBufferHandle() const = 0;
+
         static Owned<RendererAPI> Create();
 
         static inline API GetAPI() { return _API; }

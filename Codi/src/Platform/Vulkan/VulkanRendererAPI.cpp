@@ -57,12 +57,20 @@ namespace Codi {
         _Framebuffers = Own<VulkanFramebuffers>();
         _Framebuffers->Create();
 
+        // ImGui Descriptor Pool
+        _ImGuiDescriptorPool = Own<VulkanDescriptorPool>();
+        _ImGuiDescriptorPool->Create();
+
         _CurrentFrameIndex = 0;
         _SwapchainNeedsRecreation = false;
     }
 
     void VulkanRendererAPI::Shutdown() {
         _Context->WaitDeviceIdle();
+
+        // ImGui Descriptor Pool
+        _ImGuiDescriptorPool->Destroy();
+        _ImGuiDescriptorPool = nullptr;
 
         // Frame buffers
         _Framebuffers->Destroy();

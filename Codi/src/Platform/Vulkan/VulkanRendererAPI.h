@@ -9,6 +9,7 @@
 #include "Platform/Vulkan/VulkanFramebuffers.h"
 #include "Platform/Vulkan/VulkanCommandPool.h"
 #include "Platform/Vulkan/VulkanSync.h"
+#include "Platform/Vulkan/VulkanDescriptorPool.h"
 
 #include <vulkan/vulkan.h>
 
@@ -27,6 +28,8 @@ namespace Codi {
         virtual void OnWindowResize(uint32 width, uint32 height) override;
         virtual void SetViewport(float32 x, float32 y, float32 width, float32 height) override;
 
+        virtual inline void* GetCurrentFrameBufferHandle() const override { return _CommandBuffers[_CurrentFrameIndex]->GetHandle(); }
+
         virtual void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount) override;
 
         inline uint32 GetCurrentFrameIndex() const { return _CurrentFrameIndex; }
@@ -38,6 +41,7 @@ namespace Codi {
         inline VulkanRenderPass* GetMainRenderPass() { return _MainRenderPass.get(); }
         inline VulkanFramebuffers* GetFramebuffers() { return _Framebuffers.get(); }
         inline VulkanCommandBuffer* GetCommandBuffer(uint32 index) { return _CommandBuffers[index].get(); }
+        inline VulkanDescriptorPool* GetImGuiDescriptorPool() { return _ImGuiDescriptorPool.get(); }
 
         static VkAllocationCallbacks* GetAllocator() { return nullptr; }
 
@@ -57,6 +61,7 @@ namespace Codi {
         Owned<VulkanCommandPool> _CommandPool = nullptr;
         std::vector<Owned<VulkanCommandBuffer>> _CommandBuffers;
         Owned<VulkanSync> _Sync = nullptr;
+        Owned<VulkanDescriptorPool> _ImGuiDescriptorPool = nullptr;
     };
 
 } // namespace Codi

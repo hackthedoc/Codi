@@ -5,6 +5,7 @@
 #include "Codi/Core/Window.h"
 #include "Codi/Core/LayerStack.h"
 #include "Codi/Events/ApplicationEvents.h"
+#include "Codi/ImGui/ImGuiLayer.h"
 
 namespace Codi {
 
@@ -43,6 +44,7 @@ namespace Codi {
         ApplicationSpecification _Specification;
 
         Owned<Window> _Window;
+        ImGuiLayer* _ImGuiLayer = nullptr;
         bool _Running = false;
         bool _Minimized = false;
         Clock _Clock;
