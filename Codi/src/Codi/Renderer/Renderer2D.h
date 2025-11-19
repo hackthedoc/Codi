@@ -5,18 +5,6 @@
 #include <glm/glm.hpp>
 
 namespace Codi {
-    class GraphicsPipeline;
-    class VertexBuffer;
-    class IndexBuffer;
-
-    struct RenderPacket2D {
-        Shared<GraphicsPipeline> Pipeline;
-        Shared<VertexBuffer> Vertex;
-        Shared<IndexBuffer> Index;
-
-        uint32 VertexCount;
-        uint32 IndexCount;
-    };
 
     class Renderer2D {
     public:

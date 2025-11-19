@@ -7,7 +7,7 @@ namespace Codi {
 
     Owned<RendererAPI> Renderer::_RAPI = nullptr;
 
-    static bool FrameSkipped = false;
+    bool Renderer::_FrameSkipped = false;
 
     void Renderer::Init() {
         _RAPI = RendererAPI::Create();
@@ -28,17 +28,17 @@ namespace Codi {
     }
 
     void Renderer::BeginFrame() {
-        FrameSkipped = _RAPI->BeginFrame();
+        _FrameSkipped = _RAPI->BeginFrame();
     }
 
     void Renderer::EndFrame() {
-        if (FrameSkipped) return;
+        if (_FrameSkipped) return;
 
         _RAPI->EndFrame();
     }
 
     void Renderer::DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount) {
-        if (FrameSkipped) return;
+        if (_FrameSkipped) return;
 
         _RAPI->DrawIndexed(vertexArray, indexCount);
     }

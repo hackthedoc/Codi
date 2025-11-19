@@ -5,10 +5,6 @@
 
 namespace Codi {
 
-    struct RenderPacket {
-        float Deltatime;
-    };
-
     class Renderer {
     public:
         static void Init();
@@ -21,10 +17,13 @@ namespace Codi {
 
         static void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount);
 
+        static inline bool IsFrameSkipped() { return _FrameSkipped; }
+
         static RendererAPI& GetRAPI() { return *_RAPI; }
 
     private:
         static Owned<RendererAPI> _RAPI;
+        static bool _FrameSkipped;
     };
 
 } // namespace Codi

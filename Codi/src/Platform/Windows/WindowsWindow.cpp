@@ -69,11 +69,29 @@ namespace Codi {
                 _Data.EventCallback(e);
                 break;
             }
+
+            // -------------------------
+            // Window Resize
+            // -------------------------
+
+            case SDL_EVENT_WINDOW_MAXIMIZED:
             case SDL_EVENT_WINDOW_RESIZED:
             {
                 _Data.Width = e.window.data1;
                 _Data.Height = e.window.data2;
 
+                WindowResizeEvent e(_Data.Width, _Data.Height);
+                _Data.EventCallback(e);
+                break;
+            }
+            case SDL_EVENT_WINDOW_MINIMIZED:
+            {
+                WindowResizeEvent e(0, 0);
+                _Data.EventCallback(e);
+                break;
+            }
+            case SDL_EVENT_WINDOW_RESTORED:
+            {
                 WindowResizeEvent e(_Data.Width, _Data.Height);
                 _Data.EventCallback(e);
                 break;

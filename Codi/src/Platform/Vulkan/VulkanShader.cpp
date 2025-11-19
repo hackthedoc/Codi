@@ -110,6 +110,8 @@ namespace Codi {
     }
 
     void VulkanShader::Bind() {
+        if (Renderer::IsFrameSkipped()) return;
+
         VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
         VulkanGraphicsContext* context = api.GetContext();
         uint32 imageIndex = api.GetCurrentFrameIndex();

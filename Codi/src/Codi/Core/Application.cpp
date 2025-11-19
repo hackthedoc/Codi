@@ -77,7 +77,7 @@ namespace Codi {
 
     bool Application::OnWindowResize(WindowResizeEvent& e) {
         // window minimized, ignore
-        if (e.GetWidth() == 0 || e.GetHeight() == 0) { 
+        if (e.GetWidth() == 0 || e.GetHeight() == 0) {
             _Minimized = true;
             return false;
         }

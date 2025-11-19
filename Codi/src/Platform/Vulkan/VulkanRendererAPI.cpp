@@ -114,6 +114,9 @@ namespace Codi {
             _SwapchainNeedsRecreation = true;
             return true; // skip this frame
         }
+        if (result != VulkanSwapResult::Success) {
+            return true; // skip this frame
+        }
 
         // Wait for previous frame to finish
         vkWaitForFences(_Context->GetLogicalDevice(), 1, &inFlightFence, VK_TRUE, UINT64_MAX);
@@ -151,7 +154,14 @@ namespace Codi {
         _CommandBuffers[_CurrentFrameIndex]->Submit(submitInfo);
 
         // Present image
-        _Swapchain->Present(_Sync->GetRenderFinished(_CurrentFrameIndex));
+        VulkanSwapResult presentRes = _Swapchain->Present(_Sync->GetRenderFinished(_CurrentFrameIndex));
+
+        if (presentRes == VulkanSwapResult::OutOfDate || presentRes == VulkanSwapResult::SubOptimal) {
+            _SwapchainNeedsRecreation = true;
+        }
+        else if (presentRes != VulkanSwapResult::Success) {
+            CODI_CORE_ERROR("VulkanSwapchain::Present failed with code {0}", (int8)presentRes);
+        }
 
         // Advance frame
         _CurrentFrameIndex = (_CurrentFrameIndex + 1) % _Swapchain->GetMaxFramesInFlight();
