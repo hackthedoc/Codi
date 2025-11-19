@@ -11,8 +11,8 @@ namespace Codi {
     void EditorLayer::OnUpdate(float deltatime) {
         Renderer2D::StartBatch(); // begin scene
 
-        glm::vec4 clearColor = glm::vec4(0.0863f, 0.0902f, 0.1137f, 1.0f);
-        Renderer2D::DrawQuad(clearColor);
+        glm::vec4 purpleColor = glm::vec4(0.741f, 0.576f, 0.976f, 1.0f);
+        Renderer2D::DrawQuad(purpleColor);
 
         Renderer2D::Flush(); // end scene
     }

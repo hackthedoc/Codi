@@ -43,9 +43,9 @@ namespace Codi {
         rpSpec.Y = 0;
         rpSpec.W = window->GetWidth();
         rpSpec.H = window->GetHeight();
-        rpSpec.R = 0.741f;
-        rpSpec.G = 0.576f;
-        rpSpec.B = 0.976f;
+        rpSpec.R = 0.0863f;
+        rpSpec.G = 0.0902f;
+        rpSpec.B = 0.1137f;
         rpSpec.A = 1.0f;
         rpSpec.Depth = 1.0f;
         rpSpec.Stencil = 0;
