@@ -1,14 +1,13 @@
 #include "codipch.h"
 #include "VulkanPipeline.h"
 
-#include "Codi/Math/Vertex3D.h"
 #include "Codi/Renderer/Renderer.h"
 
 #include "Platform/Vulkan/VulkanRendererAPI.h"
 
 namespace Codi {
 
-    void VulkanPipeline::Create(std::vector<VkVertexInputAttributeDescription> attributes, std::vector<VkDescriptorSetLayout> descriptorSetLayouts, std::vector<VkPipelineShaderStageCreateInfo> stages, bool isWireframe) {
+    void VulkanPipeline::Create(std::vector<VkVertexInputAttributeDescription> attributes, std::vector<VkDescriptorSetLayout> descriptorSetLayouts, std::vector<VkPipelineShaderStageCreateInfo> stages, uint32 stride, bool isWireframe) {
         VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
         VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
         VkViewport viewport = api.GetViewport();
@@ -90,7 +89,7 @@ namespace Codi {
         // Vertex Input
         VkVertexInputBindingDescription bindingDescription{};
         bindingDescription.binding = 0; // Binding index
-        bindingDescription.stride = sizeof(Vertex3D);
+        bindingDescription.stride = stride;
         bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // Move to next data entry for each vertex
 
         // Attributes

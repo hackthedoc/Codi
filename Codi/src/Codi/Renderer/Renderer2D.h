@@ -2,6 +2,8 @@
 
 #include "Codi/Core/Core.h"
 
+#include <glm/glm.hpp>
+
 namespace Codi {
     class GraphicsPipeline;
     class VertexBuffer;
@@ -24,7 +26,7 @@ namespace Codi {
         static void StartBatch();
         static void Flush();
 
-        static void DrawQuad();
+        static void DrawQuad(const glm::vec4& color);
 
     private:
         static void FlushAndReset();

@@ -9,6 +9,7 @@ namespace Codi {
 
     struct QuadVertex {
         glm::vec3 Position;
+        glm::vec4 Color;
     };
 
     struct Renderer2DData {
@@ -36,6 +37,7 @@ namespace Codi {
         Data.QuadVertexBuffer = VertexBuffer::Create(Renderer2DData::MAX_VERTICES * sizeof(QuadVertex));
         Data.QuadVertexBuffer->SetLayout({
             { ShaderDataType::Float3, "a_Position"      },
+            { ShaderDataType::Float4, "a_Color"         },
         });
         Data.QuadVertexArray->AddVertexBuffer(Data.QuadVertexBuffer);
         Data.QuadVertexBufferBase = new QuadVertex[Renderer2DData::MAX_VERTICES];
@@ -67,6 +69,9 @@ namespace Codi {
     
     void Renderer2D::Shutdown() {
         delete[] Data.QuadVertexBufferBase;
+        Data.QuadVertexBuffer = nullptr;
+        Data.QuadVertexArray = nullptr;
+        Data.QuadShader = nullptr;
     }
 
     void Renderer2D::StartBatch() {
@@ -90,7 +95,7 @@ namespace Codi {
         StartBatch();
     }
 
-    void Renderer2D::DrawQuad() {
+    void Renderer2D::DrawQuad(const glm::vec4& color) {
         constexpr uint64 quadVertexCount = 4;
         const float textureIndex = 0.0f; // White Texture
         constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -100,6 +105,7 @@ namespace Codi {
 
         for (uint64 i = 0; i < quadVertexCount; i++) {
             Data.QuadVertexBufferPtr->Position = Data.QuadVertexPositions[i];
+            Data.QuadVertexBufferPtr->Color = color;
             Data.QuadVertexBufferPtr++;
         }
 

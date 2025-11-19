@@ -13,7 +13,7 @@ namespace Codi {
         VulkanPipeline() = default;
         ~VulkanPipeline() = default;
 
-        void Create(std::vector<VkVertexInputAttributeDescription> attributes, std::vector<VkDescriptorSetLayout> descriptorSetLayouts, std::vector<VkPipelineShaderStageCreateInfo> stages, bool isWireframe);
+        void Create(std::vector<VkVertexInputAttributeDescription> attributes, std::vector<VkDescriptorSetLayout> descriptorSetLayouts, std::vector<VkPipelineShaderStageCreateInfo> stages, uint32 stride, bool isWireframe);
         void Destroy();
 
         void Bind(VulkanCommandBuffer* commandBuffer, VkPipelineBindPoint bindPoint);

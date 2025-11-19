@@ -36,8 +36,8 @@ namespace Codi {
     struct BufferElement {
         std::string Name;
         ShaderDataType Type;
-        uint32_t Size;
-        uint32_t Offset;
+        uint32 Size;
+        uint64 Offset;
         bool Normalized;
 
         BufferElement()
@@ -48,7 +48,7 @@ namespace Codi {
             : Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized)
             {}
 
-        uint8_t getComponentCount() const {
+        uint8 GetComponentCount() const {
             switch (Type) {
             case ShaderDataType::Float: return 1;
             case ShaderDataType::Float2: return 2;

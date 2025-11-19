@@ -118,11 +118,13 @@ namespace Codi {
 
     void VulkanShader::CreatePipeline(Shared<VertexBuffer> quadVertexBuffer) {
         // Attributes
-        const std::vector<BufferElement>& layout = quadVertexBuffer->GetLayout().GetElements();
+        const BufferLayout& layout = quadVertexBuffer->GetLayout();
+        const std::vector<BufferElement>& layoutElements = layout.GetElements();
         std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
 
-        for (uint32 i = 0; i < layout.size(); i++) {
-            const BufferElement& element = layout[i];
+        for (uint32 i = 0; i < layoutElements.size(); i++) {
+            const BufferElement& element = layoutElements[i];
+
             VkVertexInputAttributeDescription desc{};
             desc.binding = 0;
             desc.location = i;
@@ -150,7 +152,7 @@ namespace Codi {
         }
 
         _Pipeline = Share<VulkanPipeline>();
-        _Pipeline->Create(attributeDescriptions, descriptorSetLayouts, stageCreateInfos, false);
+        _Pipeline->Create(attributeDescriptions, descriptorSetLayouts, stageCreateInfos, layout.GetStride(), false);
     }
 
     std::string VulkanShader::ReadFile(const std::filesystem::path& filepath) {
