@@ -22,15 +22,10 @@ namespace Codi {
         // Init subsystems
         Renderer::Init();
 
-        _ImGuiLayer = new ImGuiLayer();
-        PushOverlay(_ImGuiLayer);
-
         _Running = true;
     }
 
     Application::~Application() {
-        _ImGuiLayer->OnDetach();
-
         // Shutdown subsystems
         Renderer::Shutdown();
     }
@@ -47,13 +42,6 @@ namespace Codi {
                 for (Layer* l : _LayerStack)
                     l->OnUpdate(deltatime);
 
-                _ImGuiLayer->Begin();
-                {
-                    for (Layer* l : _LayerStack)
-                        l->OnImGuiRender();
-                }
-                _ImGuiLayer->End();
-
                 Renderer::EndFrame();
             }
 
@@ -65,8 +53,6 @@ namespace Codi {
         EventDispatcher dispatcher(e);
         dispatcher.Dispatch<WindowCloseEvent>(CODI_BIND_EVENT_FN(Application::OnWindowClosed));
         dispatcher.Dispatch<WindowResizeEvent>(CODI_BIND_EVENT_FN(Application::OnWindowResize));
-
-        _ImGuiLayer->OnEvent(e);
 
         for (std::vector<Layer*>::iterator it = _LayerStack.end(); it != _LayerStack.begin();) {
             if (e.IsHandled()) break;

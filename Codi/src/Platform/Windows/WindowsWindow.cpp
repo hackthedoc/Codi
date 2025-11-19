@@ -9,8 +9,6 @@
 
 #include "Platform/Windows/WindowsInputUtils.h"
 
-// TODO: abstaraction ?
-#include <backends/imgui_impl_sdl3.h>
 
 namespace Codi {
     static float64 PlatformFrequency;
@@ -65,8 +63,6 @@ namespace Codi {
     void WindowsWindow::OnUpdate() {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
-            ImGui_ImplSDL3_ProcessEvent(&e);
-
             switch (e.type) {
             case SDL_EVENT_QUIT:
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED:

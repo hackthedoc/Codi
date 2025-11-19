@@ -13,7 +13,6 @@ namespace Codi {
         virtual void OnDetach() override;
 
         virtual void OnUpdate(float32 deltatime) override;
-        virtual void OnImGuiRender() override;
         virtual void OnEvent(Event& e) override;
 
     private:

@@ -19,10 +19,6 @@ namespace Codi {
         Renderer2D::Flush(); // end scene
     }
 
-    void EditorLayer::OnImGuiRender() {
-        ImGui::ShowDemoWindow();
-    }
-
     void EditorLayer::OnEvent(Event& e) {
         EventDispatcher dispatcher(e);
         dispatcher.Dispatch<KeyPressedEvent>(CODI_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
