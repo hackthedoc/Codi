@@ -18,6 +18,7 @@ project "Engine"
         "%{wks.location}/Codi/src",
         
         "%{IncludeDir.glm}",
+        "%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.spdlog}",
     }
 

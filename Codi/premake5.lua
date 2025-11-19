@@ -16,18 +16,25 @@ project "Codi"
 
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
+
+		"vendor/ImGuizmo/ImGuizmo.h",
+		"vendor/ImGuizmo/ImGuizmo.cpp",
     }
 
     includedirs {
         "%{wks.location}/Codi/src",
 
 		"%{IncludeDir.glm}",
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.SDL}",
 		"%{IncludeDir.VulkanSDK}",
     }
 
 	links {
+		"ImGui",
+		
 		"%{Library.SDL}",
 		"%{Library.Vulkan}",
 	}

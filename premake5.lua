@@ -27,6 +27,7 @@ group ""
 
 group "Dependencies"
     include "vendor/premake"
+	include "Codi/vendor/imgui"
 group ""
 
 group "Tools"

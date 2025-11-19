@@ -4,3 +4,9 @@
 [submodule "Codi/vendor/glm"]
 	path = Codi/vendor/glm
 	url = https://github.com/g-truc/glm
+[submodule "Codi/vendor/imgui"]
+	path = Codi/vendor/imgui
+	url = https://github.com/hackthedoc/imgui
+[submodule "Codi/vendor/ImGuizmo"]
+	path = Codi/vendor/ImGuizmo
+	url = https://github.com/hackthedoc/ImGuizmo.git
