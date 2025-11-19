@@ -52,6 +52,8 @@ namespace Codi {
         inline VkQueue GetGraphicsQueue() const { return _GraphicsQueue; }
         inline VkQueue GetPresentQueue() const { return _PresentQueue; }
 
+        inline VkPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties() const { return _MemoryProperties; }
+
     private:
         void CreateInstance();
         void CreateSurface();

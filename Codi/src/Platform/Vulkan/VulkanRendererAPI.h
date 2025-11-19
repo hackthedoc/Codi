@@ -25,6 +25,10 @@ namespace Codi {
         virtual bool EndFrame(float32 deltatime) override;
 
         virtual void OnWindowResize(uint32 width, uint32 height) override;
+        virtual void SetViewport(float32 x, float32 y, float32 width, float32 height) override;
+
+        inline VkViewport GetViewport() const { return _Viewport; }
+        inline VkRect2D GetScissor() const { return _Scissor; }
 
         inline VulkanGraphicsContext* GetContext() { return _Context.get(); }
         inline VulkanSwapchain* GetSwapchain() { return _Swapchain.get(); }
@@ -39,6 +43,8 @@ namespace Codi {
     private:
         uint32 _CurrentFrameIndex = 0;
         bool _SwapchainNeedsRecreation = false;
+        VkViewport _Viewport{};
+        VkRect2D _Scissor{};
 
         Owned<VulkanGraphicsContext> _Context;
         Owned<VulkanSwapchain> _Swapchain = nullptr;

@@ -126,6 +126,8 @@ namespace Codi {
         // Begin render pass
         _MainRenderPass->Begin(_CommandBuffers[_CurrentFrameIndex].get(), _Framebuffers->Get(_Swapchain->GetCurrentImageIndex()));
 
+        SetViewport(0, 0, (float32)_Swapchain->GetWidth(), (float32)_Swapchain->GetHeight());
+
         return false;
     }
 
@@ -164,6 +166,21 @@ namespace Codi {
             return; // size not changed, ignore
 
         _SwapchainNeedsRecreation = true;
+    }
+
+    void VulkanRendererAPI::SetViewport(float32 x, float32 y, float32 width, float32 height) {
+        _Viewport.x = x;
+        _Viewport.y = height - y; // inverted Y
+        _Viewport.width = width;
+        _Viewport.height = -height; // negative flips Y
+        _Viewport.minDepth = 0.0f;
+        _Viewport.maxDepth = 1.0f;
+
+        _Scissor.offset = { (int32)x, (int32)y };
+        _Scissor.extent = { (uint32)width, (uint32)height };
+
+        vkCmdSetViewport(_CommandBuffers[_CurrentFrameIndex]->GetHandle(), 0, 1, &_Viewport);
+        vkCmdSetScissor(_CommandBuffers[_CurrentFrameIndex]->GetHandle(), 0, 1, &_Scissor);
     }
 
     void VulkanRendererAPI::RecreateSwapchain() {
