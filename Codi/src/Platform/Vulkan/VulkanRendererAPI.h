@@ -20,13 +20,16 @@ namespace Codi {
         virtual void Shutdown() override;
 
         /// @return Wether the current frame is being skipped or not
-        virtual bool BeginFrame(float32 deltatime) override;
+        virtual bool BeginFrame() override;
         /// @return Wether the current frame is being skipped or not
-        virtual bool EndFrame(float32 deltatime) override;
+        virtual bool EndFrame() override;
 
         virtual void OnWindowResize(uint32 width, uint32 height) override;
         virtual void SetViewport(float32 x, float32 y, float32 width, float32 height) override;
 
+        virtual void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount) override;
+
+        inline uint32 GetCurrentFrameIndex() const { return _CurrentFrameIndex; }
         inline VkViewport GetViewport() const { return _Viewport; }
         inline VkRect2D GetScissor() const { return _Scissor; }
 
@@ -34,6 +37,7 @@ namespace Codi {
         inline VulkanSwapchain* GetSwapchain() { return _Swapchain.get(); }
         inline VulkanRenderPass* GetMainRenderPass() { return _MainRenderPass.get(); }
         inline VulkanFramebuffers* GetFramebuffers() { return _Framebuffers.get(); }
+        inline VulkanCommandBuffer* GetCommandBuffer(uint32 index) { return _CommandBuffers[index].get(); }
 
         static VkAllocationCallbacks* GetAllocator() { return nullptr; }
 

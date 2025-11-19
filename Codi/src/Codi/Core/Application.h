@@ -3,6 +3,7 @@
 #include "Codi/Core/Core.h"
 #include "Codi/Core/Clock.h"
 #include "Codi/Core/Window.h"
+#include "Codi/Core/LayerStack.h"
 #include "Codi/Events/ApplicationEvents.h"
 
 namespace Codi {
@@ -23,6 +24,9 @@ namespace Codi {
 
         void OnEvent(Event& e);
 
+        void PushLayer(Layer* layer);
+        void PushOverlay(Layer* overlay);
+
         void Close() { _Running = false; }
 
         inline Window* GetWindow() { return _Window.get(); }
@@ -42,6 +46,7 @@ namespace Codi {
         bool _Running = false;
         bool _Minimized = false;
         Clock _Clock;
+        LayerStack _LayerStack;
         float64 _lastFrameTime = 0;
 
         static Application* _Instance;

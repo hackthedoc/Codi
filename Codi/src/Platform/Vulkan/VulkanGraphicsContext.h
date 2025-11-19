@@ -40,6 +40,8 @@ namespace Codi {
 
         void WaitDeviceIdle() const;
 
+        uint32 FindMemoryType(uint32 typeFilter, VkMemoryPropertyFlags properties) const;
+
         inline VkInstance GetInstance() const { return _Instance; }
         inline VkSurfaceKHR GetSurface() const { return _Surface; }
 

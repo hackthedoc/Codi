@@ -94,7 +94,7 @@ namespace Codi {
         _Context = nullptr;
     }
 
-    bool VulkanRendererAPI::BeginFrame(float32 deltatime) {
+    bool VulkanRendererAPI::BeginFrame() {
         CODI_CORE_TRACE("BeginFrame - _CurrentFrameIndex = {0}", _CurrentFrameIndex);
 
         if (_SwapchainNeedsRecreation) {
@@ -131,7 +131,7 @@ namespace Codi {
         return false;
     }
 
-    bool VulkanRendererAPI::EndFrame(float32 deltatime) {
+    bool VulkanRendererAPI::EndFrame() {
         CODI_CORE_TRACE("EndFrame - _CurrentFrameIndex = {0}", _CurrentFrameIndex);
 
         // End render pass
@@ -181,6 +181,20 @@ namespace Codi {
 
         vkCmdSetViewport(_CommandBuffers[_CurrentFrameIndex]->GetHandle(), 0, 1, &_Viewport);
         vkCmdSetScissor(_CommandBuffers[_CurrentFrameIndex]->GetHandle(), 0, 1, &_Scissor);
+    }
+
+    void VulkanRendererAPI::DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount) {
+        VkCommandBuffer cmdBuffer = _CommandBuffers[_CurrentFrameIndex]->GetHandle();
+
+        std::vector<VkBuffer> vertexBuffers;
+        for (auto buffer : vertexArray->GetVertexBuffers())
+            vertexBuffers.push_back(*(VkBuffer*)buffer->GetHandle());
+
+        VkDeviceSize offsets[] = { 0 };
+
+        vkCmdBindVertexBuffers(cmdBuffer, 0, 1, vertexBuffers.data(), offsets);
+        vkCmdBindIndexBuffer(cmdBuffer, *(VkBuffer*)vertexArray->GetIndexBuffer()->GetHandle(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdDrawIndexed(cmdBuffer, indexCount, 1, 0, 0, 0);
     }
 
     void VulkanRendererAPI::RecreateSwapchain() {

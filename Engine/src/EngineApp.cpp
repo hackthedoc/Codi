@@ -1,11 +1,16 @@
 #include <Codi.h>
 #include <Codi/Core/EntryPoint.h>
 
+#include "EditorLayer.h"
+
 namespace Codi {
 
     class EngineApp : public Application {
     public:
-        EngineApp(const ApplicationSpecification& spec) : Application(spec) {}
+        EngineApp(const ApplicationSpecification& spec) : Application(spec) {
+            PushLayer(new EditorLayer());
+        }
+
         ~EngineApp() {}
     };
 

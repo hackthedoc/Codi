@@ -2,6 +2,8 @@
 
 #include "Codi/Core/Core.h"
 
+#include "Codi/Renderer/Buffer.h"
+
 #include <glm/glm.hpp>
 
 namespace Codi {
@@ -18,6 +20,8 @@ namespace Codi {
         virtual ~Shader() = default;
 
         virtual void Bind() = 0;
+
+        virtual void CreatePipeline(Shared<VertexBuffer> quadVertexBuffer) = 0;
 
         virtual void SetInt(const std::string& name, const int value) = 0;
         virtual void SetIntArray(const std::string& name, int* values, uint32_t count) = 0;

@@ -36,9 +36,14 @@ namespace Codi {
             const float64 deltatime = time - _lastFrameTime;
             _lastFrameTime = time;
 
-            // TODO: refactor packet creation
-            RenderPacket packet{ deltatime };
-            Renderer::DrawFrame(packet);
+            if (!_Minimized) {
+                Renderer::BeginFrame();
+
+                for (Layer* l : _LayerStack)
+                    l->OnUpdate(deltatime);
+
+                Renderer::EndFrame();
+            }
 
             _Window->OnUpdate();
         }
@@ -48,6 +53,21 @@ namespace Codi {
         EventDispatcher dispatcher(e);
         dispatcher.Dispatch<WindowCloseEvent>(CODI_BIND_EVENT_FN(Application::OnWindowClosed));
         dispatcher.Dispatch<WindowResizeEvent>(CODI_BIND_EVENT_FN(Application::OnWindowResize));
+
+        for (std::vector<Layer*>::iterator it = _LayerStack.end(); it != _LayerStack.begin();) {
+            if (e.IsHandled()) break;
+            (*--it)->OnEvent(e);
+        }
+    }
+
+    void Application::PushLayer(Layer* layer) {
+        _LayerStack.PushLayer(layer);
+        layer->OnAttach();
+    }
+
+    void Application::PushOverlay(Layer* overlay) {
+        _LayerStack.PushOverlay(overlay);
+        overlay->OnAttach();
     }
 
     bool Application::OnWindowClosed(WindowCloseEvent& e) {

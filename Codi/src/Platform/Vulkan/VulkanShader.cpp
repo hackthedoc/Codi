@@ -12,6 +12,23 @@ namespace Codi {
 
     namespace Utils {
 
+        static VkFormat ShaderDataTypeToVkFormat(ShaderDataType type) {
+            switch (type) {
+            case ShaderDataType::Float:  return VK_FORMAT_R32_SFLOAT;
+            case ShaderDataType::Float2: return VK_FORMAT_R32G32_SFLOAT;
+            case ShaderDataType::Float3: return VK_FORMAT_R32G32B32_SFLOAT;
+            case ShaderDataType::Float4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+            case ShaderDataType::Int:    return VK_FORMAT_R32_SINT;
+            case ShaderDataType::Int2:   return VK_FORMAT_R32G32_SINT;
+            case ShaderDataType::Int3:   return VK_FORMAT_R32G32B32_SINT;
+            case ShaderDataType::Int4:   return VK_FORMAT_R32G32B32A32_SINT;
+            case ShaderDataType::Bool:   return VK_FORMAT_R8_UINT;
+            default:
+                CODI_CORE_ASSERT(false, "Unknown ShaderDataType");
+                return VK_FORMAT_UNDEFINED;
+            }
+        }
+
         static shaderc_shader_kind ShaderTypeToShaderC(Shader::Type stage) {
             switch (stage) {
             case Shader::Type::Vertex: return shaderc_glsl_vertex_shader;
@@ -63,8 +80,6 @@ namespace Codi {
             stage.Module = CreateModule(stage.Data);
         }
 
-        CreatePipeline();
-
         // Extract name from filepath
         _Name = filepath.stem().string();
     }
@@ -81,8 +96,6 @@ namespace Codi {
             if (stage.Data.empty()) continue;
             stage.Module = CreateModule(stage.Data);
         }
-
-        CreatePipeline();
     }
 
     VulkanShader::~VulkanShader() {
@@ -94,6 +107,50 @@ namespace Codi {
 
         for (auto& [stage, data] : _Stages)
             vkDestroyShaderModule(logicalDevice, data.Module, VulkanRendererAPI::GetAllocator());
+    }
+
+    void VulkanShader::Bind() {
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VulkanGraphicsContext* context = api.GetContext();
+        uint32 imageIndex = api.GetCurrentFrameIndex();
+        _Pipeline->Bind(api.GetCommandBuffer(imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS);
+    }
+
+    void VulkanShader::CreatePipeline(Shared<VertexBuffer> quadVertexBuffer) {
+        // Attributes
+        const std::vector<BufferElement>& layout = quadVertexBuffer->GetLayout().GetElements();
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+
+        for (uint32 i = 0; i < layout.size(); i++) {
+            const BufferElement& element = layout[i];
+            VkVertexInputAttributeDescription desc{};
+            desc.binding = 0;
+            desc.location = i;
+            desc.format = Utils::ShaderDataTypeToVkFormat(element.Type);
+            desc.offset = element.Offset;
+            attributeDescriptions.push_back(desc);
+        }
+
+        // TODO: descriptor set layouts
+        std::vector<VkDescriptorSetLayout> descriptorSetLayouts{};
+
+        // Stages
+        std::vector<VkPipelineShaderStageCreateInfo> stageCreateInfos;
+        stageCreateInfos.reserve(_Stages.size());
+        for (auto& [type, stage] : _Stages) {
+            if (stage.Module == VK_NULL_HANDLE) continue;
+
+            VkPipelineShaderStageCreateInfo createInfo{};
+            createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            createInfo.stage = Utils::ShaderTypeToVkStage(type);
+            createInfo.module = stage.Module;
+            createInfo.pName = "main";
+
+            stageCreateInfos.push_back(createInfo);
+        }
+
+        _Pipeline = Share<VulkanPipeline>();
+        _Pipeline->Create(attributeDescriptions, descriptorSetLayouts, stageCreateInfos, false);
     }
 
     std::string VulkanShader::ReadFile(const std::filesystem::path& filepath) {
@@ -233,40 +290,7 @@ namespace Codi {
         CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to create shader module");
 
         return module;
-    }
-
-    void VulkanShader::CreatePipeline() {
-        // Attributes
-        // TODO: generate this dynamically based on Vertex layout
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
-        VkVertexInputAttributeDescription pos{};
-        pos.binding = 0;
-        pos.location = 0;
-        pos.format = VK_FORMAT_R32G32B32A32_SFLOAT;
-        pos.offset = 0;
-        attributeDescriptions.push_back(pos);
-
-        // TODO: descriptor set layouts
-        std::vector<VkDescriptorSetLayout> descriptorSetLayouts{};
-
-        // Stages
-        std::vector<VkPipelineShaderStageCreateInfo> stageCreateInfos;
-        stageCreateInfos.reserve(_Stages.size());
-        for (auto& [type, stage] : _Stages) {
-            if (stage.Module == VK_NULL_HANDLE) continue;
-
-            VkPipelineShaderStageCreateInfo createInfo{};
-            createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-            createInfo.stage = Utils::ShaderTypeToVkStage(type);
-            createInfo.module = stage.Module;
-            createInfo.pName = "main";
-
-            stageCreateInfos.push_back(createInfo);
-        }
-
-        _Pipeline = Share<VulkanPipeline>();
-        _Pipeline->Create(attributeDescriptions, descriptorSetLayouts, stageCreateInfos, false);
-    }
+    } 
 
     void VulkanShader::SetInt(const std::string& name, const int32 value) {  }
 

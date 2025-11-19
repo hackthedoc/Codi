@@ -25,7 +25,9 @@ namespace Codi {
         VulkanShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
         virtual ~VulkanShader();
 
-        virtual void Bind() override {}
+        virtual void Bind() override;
+
+        virtual void CreatePipeline(Shared<VertexBuffer> quadVertexBuffer) override;
 
         virtual void SetInt(const std::string& name, const int32 value) override;
         virtual void SetIntArray(const std::string& name, int32* values, uint32 count) override;
@@ -45,8 +47,6 @@ namespace Codi {
         void Reflect(Shader::Type type, const std::vector<uint32>& shaderData);
 
         VkShaderModule CreateModule(const std::vector<uint32>& shaderData);
-
-        void CreatePipeline();
 
     private:
         std::filesystem::path _Filepath;

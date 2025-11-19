@@ -115,6 +115,20 @@ namespace Codi {
         vkDeviceWaitIdle(_LogicalDevice);
     }
 
+    uint32 VulkanGraphicsContext::FindMemoryType(uint32 typeFilter, VkMemoryPropertyFlags properties) const {
+        VkPhysicalDeviceMemoryProperties memProperties;
+        vkGetPhysicalDeviceMemoryProperties(_PhysicalDevice, &memProperties);
+
+        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+            if ((typeFilter & (1u << i)) && ((memProperties.memoryTypes[i].propertyFlags & properties) == properties)) {
+                return i;
+            }
+        }
+
+        CODI_CORE_ASSERT(false, "Failed to find suitable memory type!");
+        return UINT32_MAX;
+    }
+
     void VulkanGraphicsContext::CreateInstance() {
         CODI_CORE_INFO("Creating Vulkan instance...");
 
@@ -253,6 +267,8 @@ namespace Codi {
         VkPhysicalDeviceFeatures deviceFeatures{};
         if (requirements.SamplerAnisotropy)
             deviceFeatures.samplerAnisotropy = VK_TRUE;
+
+        deviceFeatures.depthClamp = VK_TRUE;
 
         VkDeviceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

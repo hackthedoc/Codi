@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Codi/Core/Core.h"
+#include "Codi/Renderer/VertexArray.h"
 
 namespace Codi {
 
@@ -18,11 +19,14 @@ namespace Codi {
         virtual void Shutdown() = 0;
 
         /// @return Wether the current frame is being skipped or not
-        virtual bool BeginFrame(float32 deltatime) = 0;
+        virtual bool BeginFrame() = 0;
         /// @return Wether the current frame is being skipped or not
-        virtual bool EndFrame(float32 deltatime) = 0;
+        virtual bool EndFrame() = 0;
 
         virtual void OnWindowResize(uint32 width, uint32 height) = 0;
+        virtual void SetViewport(float32 x, float32 y, float32 width, float32 height) = 0;
+
+        virtual void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount) = 0;
 
         static Owned<RendererAPI> Create();
 

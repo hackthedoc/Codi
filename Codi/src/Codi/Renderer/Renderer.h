@@ -16,7 +16,10 @@ namespace Codi {
 
         static void OnWindowResize(uint32 width, uint32 height);
 
-        static void DrawFrame(const RenderPacket& packet);
+        static void BeginFrame();
+        static void EndFrame();
+
+        static void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount);
 
         static RendererAPI& GetRAPI() { return *_RAPI; }
 
