@@ -8,6 +8,13 @@
 #include "Codi/Core/Application.h"
 #include "Codi/Core/Layer.h"
 
+/* ----------------------- Events ---------------------- */
+#include "Codi/Events/Event.h"
+#include "Codi/Events/ApplicationEvents.h"
+#include "Codi/Events/KeyEvents.h"
+#include "Codi/Events/MouseEvents.h"
+/* ----------------------------------------------------- */
+
 /* ----------------------- INPUT ----------------------- */
 #include "Codi/Input/Input.h"
 #include "Codi/Input/KeyCode.h"

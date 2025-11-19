@@ -12,7 +12,19 @@ namespace Codi {
         virtual void OnAttach() override;
         virtual void OnDetach() override;
 
-        void OnUpdate(float deltatime) override;
+        virtual void OnUpdate(float32 deltatime) override;
+        virtual void OnImGuiRender() override;
+        virtual void OnEvent(Event& e) override;
+
+    private:
+        bool OnKeyPressed(const KeyPressedEvent& e);
+        bool OnMouseButtonPressed(const MouseButtonPressedEvent& e);
+
+    private:
+        bool _ViewportFocused = false;
+        bool _ViewportHovered = false;
+        glm::vec2 _ViewportSize = glm::vec2(0.0f);
+        glm::vec2 _ViewportBounds[2];
     };
 
 } // namespace Codi

@@ -27,6 +27,8 @@ namespace Codi {
         QuadVertex* QuadVertexBufferPtr = nullptr;
 
         glm::vec4 QuadVertexPositions[4];
+
+        Renderer2D::Statistics Stats;
     };
     static Renderer2DData Data;
 
@@ -87,6 +89,7 @@ namespace Codi {
 
             Data.QuadShader->Bind();
             Renderer::DrawIndexed(Data.QuadVertexArray, Data.QuadIndexCount);
+            Data.Stats.DrawCalls++;
         }
     }
 
@@ -110,6 +113,16 @@ namespace Codi {
         }
 
         Data.QuadIndexCount += 6;
+
+        Data.Stats.QuadCount++;
+    }
+
+    void Renderer2D::ResetStatistics() {
+        Data.Stats.Reset();
+    }
+
+    Renderer2D::Statistics Renderer2D::GetStatistics() {
+        return Data.Stats;
     }
 
 } // namespace Codi

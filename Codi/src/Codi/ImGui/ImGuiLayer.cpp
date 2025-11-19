@@ -73,7 +73,6 @@ namespace Codi {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
     }
 
     void ImGuiLayer::End() {

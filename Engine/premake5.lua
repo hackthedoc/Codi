@@ -16,6 +16,7 @@ project "Engine"
     includedirs {
         "%{wks.location}/Engine/src",
         "%{wks.location}/Codi/src",
+        "%{wks.location}/Codi/vendor",
         
         "%{IncludeDir.glm}",
         "%{IncludeDir.ImGuizmo}",
