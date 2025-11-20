@@ -9,7 +9,6 @@
 #include "Platform/Vulkan/VulkanFramebuffers.h"
 #include "Platform/Vulkan/VulkanCommandPool.h"
 #include "Platform/Vulkan/VulkanSync.h"
-#include "Platform/Vulkan/VulkanDescriptorPool.h"
 
 #include <vulkan/vulkan.h>
 
@@ -41,7 +40,6 @@ namespace Codi {
         inline VulkanRenderPass* GetMainRenderPass() { return _MainRenderPass.get(); }
         inline VulkanFramebuffers* GetFramebuffers() { return _Framebuffers.get(); }
         inline VulkanCommandBuffer* GetCommandBuffer(uint32 index) { return _CommandBuffers[index].get(); }
-        inline VulkanDescriptorPool* GetImGuiDescriptorPool() { return _ImGuiDescriptorPool.get(); }
 
         static VkAllocationCallbacks* GetAllocator() { return nullptr; }
 
@@ -61,7 +59,6 @@ namespace Codi {
         Owned<VulkanCommandPool> _CommandPool = nullptr;
         std::vector<Owned<VulkanCommandBuffer>> _CommandBuffers;
         Owned<VulkanSync> _Sync = nullptr;
-        Owned<VulkanDescriptorPool> _ImGuiDescriptorPool = nullptr;
     };
 
 } // namespace Codi

@@ -28,6 +28,12 @@ namespace Codi {
 
         glm::vec4 QuadVertexPositions[4];
 
+        struct CameraData {
+            glm::mat4 ViewProjection;
+        };
+        CameraData CameraBuffer;
+        Shared<UniformBuffer> CameraUniformBuffer;
+
         Renderer2D::Statistics Stats;
     };
     static Renderer2DData Data;
@@ -67,6 +73,9 @@ namespace Codi {
         Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
         Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
         Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
+
+        // Create camera
+        Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
     }
     
     void Renderer2D::Shutdown() {
@@ -74,6 +83,17 @@ namespace Codi {
         Data.QuadVertexBuffer = nullptr;
         Data.QuadVertexArray = nullptr;
         Data.QuadShader = nullptr;
+    }
+
+    void Renderer2D::BeginScene(const EditorCamera& camera) {
+        StartBatch();
+
+        Data.CameraBuffer.ViewProjection = camera.GetViewProjection();
+        Data.CameraUniformBuffer->SetData(&Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
+    }
+
+    void Renderer2D::EndScene() {
+        Flush();
     }
 
     void Renderer2D::StartBatch() {
@@ -98,7 +118,7 @@ namespace Codi {
         StartBatch();
     }
 
-    void Renderer2D::DrawQuad(const glm::vec4& color) {
+    void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color) {
         constexpr uint64 quadVertexCount = 4;
         const float textureIndex = 0.0f; // White Texture
         constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -107,7 +127,7 @@ namespace Codi {
         if (Data.QuadIndexCount >= Renderer2DData::MAX_INDICES) FlushAndReset();
 
         for (uint64 i = 0; i < quadVertexCount; i++) {
-            Data.QuadVertexBufferPtr->Position = Data.QuadVertexPositions[i];
+            Data.QuadVertexBufferPtr->Position = transform * Data.QuadVertexPositions[i];
             Data.QuadVertexBufferPtr->Color = color;
             Data.QuadVertexBufferPtr++;
         }

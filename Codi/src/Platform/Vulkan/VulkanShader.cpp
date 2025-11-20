@@ -82,6 +82,10 @@ namespace Codi {
 
         // Extract name from filepath
         _Name = filepath.stem().string();
+
+        CreateDescriptorSetLayouts();
+        CreateDescriptorPoolAndSets();
+        CreateUniformBuffers();
     }
 
     VulkanShader::VulkanShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc) : _Name(name), _Filepath(name) {
@@ -96,17 +100,36 @@ namespace Codi {
             if (stage.Data.empty()) continue;
             stage.Module = CreateModule(stage.Data);
         }
+
+        CreateDescriptorSetLayouts();
+        CreateDescriptorPoolAndSets();
+        CreateUniformBuffers();
     }
 
     VulkanShader::~VulkanShader() {
         VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
         VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
 
-        _Pipeline->Destroy();
-        _Pipeline = nullptr;
+        if (_Pipeline) {
+            _Pipeline->Destroy();
+            _Pipeline = nullptr;
+        }
 
         for (auto& [stage, data] : _Stages)
             vkDestroyShaderModule(logicalDevice, data.Module, VulkanRendererAPI::GetAllocator());
+        _Stages.clear();
+
+        if (_DescriptorPool) {
+            vkDestroyDescriptorPool(logicalDevice, _DescriptorPool, VulkanRendererAPI::GetAllocator());
+            _DescriptorPool = VK_NULL_HANDLE;
+        }
+        for (auto& layout : _DescriptorSetLayouts)
+            if (layout)
+                vkDestroyDescriptorSetLayout(logicalDevice, layout, VulkanRendererAPI::GetAllocator());
+        _DescriptorSetLayouts.clear();
+
+        // Destroy uniform buffers
+        DestroyUniformBuffers();
     }
 
     void VulkanShader::Bind() {
@@ -115,7 +138,30 @@ namespace Codi {
         VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
         VulkanGraphicsContext* context = api.GetContext();
         uint32 imageIndex = api.GetCurrentFrameIndex();
-        _Pipeline->Bind(api.GetCommandBuffer(imageIndex), VK_PIPELINE_BIND_POINT_GRAPHICS);
+        VulkanCommandBuffer* cmdBuffer = api.GetCommandBuffer(imageIndex);
+
+        _Pipeline->Bind(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS);
+
+        std::vector<VkDescriptorSet> boundSets;
+        boundSets.reserve(_DescriptorSetLayouts.size());
+
+        for (uint32 s = 0; s < _DescriptorSets.size(); s++) {
+            if (_DescriptorSets[s].empty()) continue;
+            boundSets.push_back(_DescriptorSets[s][imageIndex % (uint32)_DescriptorSets[s].size()]);
+        }
+
+        if (!boundSets.empty()) {
+            vkCmdBindDescriptorSets(
+                cmdBuffer->GetHandle(),
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                _Pipeline->GetLayout(),
+                0,
+                (uint32)boundSets.size(),
+                boundSets.data(),
+                0,
+                nullptr
+            );
+        }
     }
 
     void VulkanShader::CreatePipeline(Shared<VertexBuffer> quadVertexBuffer) {
@@ -135,9 +181,6 @@ namespace Codi {
             attributeDescriptions.push_back(desc);
         }
 
-        // TODO: descriptor set layouts
-        std::vector<VkDescriptorSetLayout> descriptorSetLayouts{};
-
         // Stages
         std::vector<VkPipelineShaderStageCreateInfo> stageCreateInfos;
         stageCreateInfos.reserve(_Stages.size());
@@ -154,7 +197,7 @@ namespace Codi {
         }
 
         _Pipeline = Share<VulkanPipeline>();
-        _Pipeline->Create(attributeDescriptions, descriptorSetLayouts, stageCreateInfos, layout.GetStride(), false);
+        _Pipeline->Create(attributeDescriptions, _DescriptorSetLayouts, stageCreateInfos, layout.GetStride(), false);
     }
 
     std::string VulkanShader::ReadFile(const std::filesystem::path& filepath) {
@@ -266,15 +309,61 @@ namespace Codi {
 
         CODI_CORE_TRACE("Uniform buffers:");
         for (const spirv_cross::Resource& resource : resources.uniform_buffers) {
-            const spirv_cross::SPIRType& bufferType = compiler.get_type(resource.base_type_id);
-            uint32 bufferSize = compiler.get_declared_struct_size(bufferType);
+            const uint32 baseTypeID = resource.base_type_id;
+            const spirv_cross::SPIRType& bufferType = compiler.get_type(baseTypeID);
+            uint32 blockSize = compiler.get_declared_struct_size(bufferType);
             uint32 binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
-            int32 memberCount = bufferType.member_types.size();
+            uint32 set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
 
-            CODI_CORE_TRACE("  {0}", resource.name);
-            CODI_CORE_TRACE("    Size = {0}", bufferSize);
-            CODI_CORE_TRACE("    Binding = {0}", binding);
-            CODI_CORE_TRACE("    Members = {0}", memberCount);
+            UniformBlock block;
+            block.Name = resource.name;
+            block.Binding = binding;
+            block.Set = set;
+            block.Size = blockSize;
+
+            for (uint32 m = 0; m < bufferType.member_types.size(); m++) {
+                UniformMember member;
+                // member name
+                member.Name = compiler.get_member_name(baseTypeID, m);
+                // member offset (reflect offset decoration)
+                // Use spirv_cross's get_member_decoration - offset decoration
+                uint32 offset = compiler.get_member_decoration(baseTypeID, m, spv::DecorationOffset);
+                member.Offset = offset;
+
+                // member size: derive from member type
+                const spirv_cross::SPIRType& memType = compiler.get_type(bufferType.member_types[m]);
+                uint32 memSize = 0;
+                if (memType.basetype == spirv_cross::SPIRType::Float) {
+                    memSize = 4 * (memType.vecsize * memType.columns);
+                }
+                else if (memType.basetype == spirv_cross::SPIRType::Int) {
+                    memSize = 4 * (memType.vecsize * memType.columns);
+                }
+                else {
+                    // conservative fallback using struct size if it's a nested struct
+                    memSize = (uint32)compiler.get_declared_struct_size(memType);
+                }
+                member.Size = memSize;
+
+                CODI_CORE_TRACE("  UBO member: {0} offset={1} size={2}", member.Name, member.Offset, member.Size);
+                block.Members.push_back(member);
+            }
+
+            _UniformBlocks.push_back(std::move(block));
+        }
+
+        // Sampled images
+        for (const spirv_cross::Resource& resource : resources.sampled_images) {
+            uint32 binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
+            uint32 set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+            ImageBinding ib;
+            ib.Name = resource.name;
+            ib.Binding = binding;
+            ib.Set = set;
+            ib.Count = 1;
+            _ImageBindings.push_back(ib);
+
+            CODI_CORE_TRACE("Sampled image: {0} set={1} binding={2}", resource.name, set, binding);
         }
     }
 
@@ -294,21 +383,311 @@ namespace Codi {
         CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to create shader module");
 
         return module;
-    } 
+    }
 
-    void VulkanShader::SetInt(const std::string& name, const int32 value) {  }
+    void VulkanShader::CreateDescriptorSetLayouts() {
+        if (_UniformBlocks.empty() && _ImageBindings.empty()) return;
 
-    void VulkanShader::SetIntArray(const std::string& name, int32* values, uint32 count) {  }
+        // Find maximum set index
+        uint32 maxSet = 0;
+        for (auto& b : _UniformBlocks) maxSet = std::max(maxSet, b.Set);
+        for (auto& img : _ImageBindings) maxSet = std::max(maxSet, img.Set);
 
-    void VulkanShader::SetFloat(const std::string& name, const float32 value) {  }
+        _DescriptorSetLayouts.resize(uint64(maxSet + 1), VK_NULL_HANDLE);
 
-    void VulkanShader::SetFloat2(const std::string& name, const glm::vec2& value) {  }
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
 
-    void VulkanShader::SetFloat3(const std::string& name, const glm::vec3& value) {  }
+        for (uint32 set = 0; set <= maxSet; set++) {
+            std::vector<VkDescriptorSetLayoutBinding> bindings;
 
-    void VulkanShader::SetFloat4(const std::string& name, const glm::vec4& value) {  }
+            for (auto& b : _UniformBlocks) {
+                if (b.Set != set) continue;
+                VkDescriptorSetLayoutBinding l{};
+                l.binding = b.Binding;
+                l.descriptorCount = 1;
+                l.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                l.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+                bindings.push_back(l);
+            }
 
-    void VulkanShader::SetMat4(const std::string& name, const glm::mat4& value) {  }
+            for (auto& img : _ImageBindings) {
+                if (img.Set != set) continue;
+                VkDescriptorSetLayoutBinding l{};
+                l.binding = img.Binding;
+                l.descriptorCount = img.Count;
+                l.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                l.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+                bindings.push_back(l);
+            }
 
+            if (bindings.empty()) continue;
+
+            VkDescriptorSetLayoutCreateInfo info{};
+            info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+            info.bindingCount = (uint32)bindings.size();
+            info.pBindings = bindings.data();
+
+            VkResult res = vkCreateDescriptorSetLayout(logicalDevice, &info, VulkanRendererAPI::GetAllocator(), &_DescriptorSetLayouts[set]);
+            CODI_CORE_ASSERT(res == VK_SUCCESS, "Failed to create descriptor set layout");
+        }
+    }
+
+    void VulkanShader::CreateDescriptorPoolAndSets() {
+        if (_DescriptorSetLayouts.empty()) return;
+
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
+        uint32 framesInFlight = api.GetSwapchain()->GetMaxFramesInFlight();
+
+        std::vector<VkDescriptorPoolSize> poolSizes;
+        if (!_UniformBlocks.empty()) {
+            // Count how many uniform buffers per set (we'll allocate frames_in_flight copies)
+            uint32 ubCount = (uint32)_UniformBlocks.size();
+            poolSizes.push_back({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ubCount * framesInFlight });
+        }
+        if (!_ImageBindings.empty()) {
+            uint32 imgCount = (uint32)_ImageBindings.size();
+            poolSizes.push_back({ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imgCount * framesInFlight });
+        }
+
+        VkDescriptorPoolCreateInfo poolInfo{};
+        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        poolInfo.poolSizeCount = (uint32)poolSizes.size();
+        poolInfo.pPoolSizes = poolSizes.data();
+        poolInfo.maxSets = (uint32)_DescriptorSetLayouts.size() * framesInFlight;
+
+        VkResult result = vkCreateDescriptorPool(logicalDevice, &poolInfo, VulkanRendererAPI::GetAllocator(), &_DescriptorPool);
+        CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to create descriptor pool");
+
+        _DescriptorSets.resize(_DescriptorSetLayouts.size());
+        for (uint32 s = 0; s < _DescriptorSetLayouts.size(); s++) {
+            if (_DescriptorSetLayouts[s] == VK_NULL_HANDLE) continue;
+
+            _DescriptorSets[s].resize(framesInFlight);
+            std::vector<VkDescriptorSetLayout> layouts(framesInFlight, _DescriptorSetLayouts[s]);
+
+            VkDescriptorSetAllocateInfo alloc{};
+            alloc.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            alloc.descriptorPool = _DescriptorPool;
+            alloc.descriptorSetCount = framesInFlight;
+            alloc.pSetLayouts = layouts.data();
+
+            result = vkAllocateDescriptorSets(logicalDevice, &alloc, _DescriptorSets[s].data());
+            CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate descriptor sets");
+        }
+    }
+
+    // Create GPU buffers for each uniform block and write initial descriptor updates.
+    void VulkanShader::CreateUniformBuffers() {
+        if (_UniformBlocks.empty()) return;
+
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
+        uint32 framesInFlight = api.GetSwapchain()->GetMaxFramesInFlight();
+
+        for (auto& block : _UniformBlocks) {
+            // For simplicity: create one buffer per-frame for each block so each frame can update independently.
+            // We'll store only one VkBuffer/Mem pair per block but map memory large enough for frames * size,
+            // or create separate buffer-per-frame. We'll create buffer-per-frame here for simplicity.
+
+            // We'll create `frames` buffers, but to keep API simple we'll allocate a single block.Buffer sized = block.Size * frames,
+            // and map it; each frame will write into offset = frame * block.Size. That's simpler and fewer Vulkan objects.
+            VkDeviceSize totalSize = (VkDeviceSize)block.Size * framesInFlight;
+
+            VkBufferCreateInfo bufInfo{};
+            bufInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+            bufInfo.size = totalSize;
+            bufInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+            bufInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+            VkResult result = vkCreateBuffer(logicalDevice, &bufInfo, VulkanRendererAPI::GetAllocator(), &block.Buffer);
+            CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to create uniform buffer");
+
+            VkMemoryRequirements memReq;
+            vkGetBufferMemoryRequirements(logicalDevice, block.Buffer, &memReq);
+
+            VkMemoryAllocateInfo alloc{};
+            alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+            alloc.allocationSize = memReq.size;
+            alloc.memoryTypeIndex = api.GetContext()->FindMemoryType(memReq.memoryTypeBits,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+            result = vkAllocateMemory(logicalDevice, &alloc, VulkanRendererAPI::GetAllocator(), &block.Memory);
+            CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate uniform buffer memory");
+
+            result = vkBindBufferMemory(logicalDevice, block.Buffer, block.Memory, 0);
+            CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to bind uniform buffer memory");
+
+            // persistent map
+            vkMapMemory(logicalDevice, block.Memory, 0, totalSize, 0, &block.Mapped);
+
+            // Write descriptor buffer infos for every frame's descriptor set entry for this binding
+            for (uint32 frame = 0; frame < framesInFlight; frame++) {
+                VkDescriptorBufferInfo bufDesc{};
+                bufDesc.buffer = block.Buffer;
+                bufDesc.offset = (VkDeviceSize)block.Size * frame;
+                bufDesc.range = block.Size;
+
+                VkWriteDescriptorSet write{};
+                write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                write.dstSet = _DescriptorSets[block.Set][frame];
+                write.dstBinding = block.Binding;
+                write.dstArrayElement = 0;
+                write.descriptorCount = 1;
+                write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                write.pBufferInfo = &bufDesc;
+
+                // We must call vkUpdateDescriptorSets for each write — keep a copy around so pointer remains valid.
+                // but bufDesc is on stack; we will call vkUpdateDescriptorSets immediately.
+                vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
+            }
+        }
+
+        // Images remain to be bound by manually (we don't create textures here).
+    }
+
+    void VulkanShader::DestroyUniformBuffers() {
+        if (_UniformBlocks.empty()) return;
+
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
+
+        for (auto& block : _UniformBlocks) {
+            if (block.Mapped) {
+                vkUnmapMemory(logicalDevice, block.Memory);
+                block.Mapped = nullptr;
+            }
+            if (block.Buffer != VK_NULL_HANDLE) {
+                vkDestroyBuffer(logicalDevice, block.Buffer, VulkanRendererAPI::GetAllocator());
+                block.Buffer = VK_NULL_HANDLE;
+            }
+            if (block.Memory != VK_NULL_HANDLE) {
+                vkFreeMemory(logicalDevice, block.Memory, VulkanRendererAPI::GetAllocator());
+                block.Memory = VK_NULL_HANDLE;
+            }
+        }
+        _UniformBlocks.clear();
+    }
+
+    VulkanShader::UniformBlock* VulkanShader::FindBlockByMemberName(const std::string& name, uint32& outOffset, uint32& outSize) {
+        // Accept either "member" (search through all UBO members) or "Block.member" (explicit)
+        std::string blockPart, memberPart;
+        uint64 dot = name.find('.');
+        if (dot != std::string::npos) {
+            blockPart = name.substr(0, dot);
+            memberPart = name.substr(dot + 1);
+        }
+        else {
+            blockPart = "";
+            memberPart = name;
+        }
+
+        for (auto& block : _UniformBlocks) {
+            if (!blockPart.empty() && block.Name != blockPart) continue;
+            for (auto& m : block.Members) {
+                if (m.Name == memberPart) {
+                    outOffset = m.Offset;
+                    outSize = m.Size;
+                    return &block;
+                }
+            }
+        }
+        return nullptr;
+    }
+
+    void VulkanShader::SetInt(const std::string& name, const int32 value) {
+        uint32 off, sz;
+        UniformBlock* b = FindBlockByMemberName(name, off, sz);
+        if (!b) {
+            CODI_CORE_WARN("SetInt: uniform '{0}' not found", name);
+            return;
+        }
+        // write into mapped memory for current frame
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        uint32 frame = api.GetCurrentFrameIndex();
+        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
+        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(int32)));
+    }
+
+    void VulkanShader::SetIntArray(const std::string& name, int32* values, uint32 count) {
+        uint32 off, sz;
+        UniformBlock* b = FindBlockByMemberName(name, off, sz);
+        if (!b) {
+            CODI_CORE_WARN("SetIntArray: uniform '{0}' not found", name);
+            return;
+        }
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        uint32 frame = api.GetCurrentFrameIndex();
+        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
+        uint32 bytes = count * sizeof(int32);
+        memcpy(dst, values, std::min<uint32>(bytes, sz));
+    }
+
+    void VulkanShader::SetFloat(const std::string& name, const float32 value) {
+        uint32 off, sz;
+        UniformBlock* b = FindBlockByMemberName(name, off, sz);
+        if (!b) {
+            CODI_CORE_WARN("SetFloat: uniform '{0}' not found", name);
+            return;
+        }
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        uint32 frame = api.GetCurrentFrameIndex();
+        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
+        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(float32)));
+    }
+
+    void VulkanShader::SetFloat2(const std::string& name, const glm::vec2& value) {
+        uint32 off, sz;
+        UniformBlock* b = FindBlockByMemberName(name, off, sz);
+        if (!b) {
+            CODI_CORE_WARN("SetFloat2: uniform '{0}' not found", name);
+            return;
+        }
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        uint32 frame = api.GetCurrentFrameIndex();
+        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
+        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(glm::vec2)));
+    }
+
+    void VulkanShader::SetFloat3(const std::string& name, const glm::vec3& value) {
+        uint32 off, sz;
+        UniformBlock* b = FindBlockByMemberName(name, off, sz);
+        if (!b) {
+            CODI_CORE_WARN("SetFloat3: uniform '{0}' not found", name);
+            return;
+        }
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        uint32 frame = api.GetCurrentFrameIndex();
+        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
+        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(glm::vec3)));
+    }
+
+    void VulkanShader::SetFloat4(const std::string& name, const glm::vec4& value) {
+        uint32 off, sz;
+        UniformBlock* b = FindBlockByMemberName(name, off, sz);
+        if (!b) {
+            CODI_CORE_WARN("SetFloat4: uniform '{0}' not found", name);
+            return;
+        }
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        uint32 frame = api.GetCurrentFrameIndex();
+        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
+        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(glm::vec4)));
+    }
+
+    void VulkanShader::SetMat4(const std::string& name, const glm::mat4& value) {
+        uint32 off, sz;
+        UniformBlock* b = FindBlockByMemberName(name, off, sz);
+        if (!b) {
+            CODI_CORE_WARN("SetMat4: uniform '{0}' not found", name);
+            return;
+        }
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        uint32 frame = api.GetCurrentFrameIndex();
+        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
+        // GLSL std140: mat4 is 4 vec4s (16 * 4 bytes) — copy full mat4
+        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(glm::mat4)));
+    }
 
 } // namespace Codi

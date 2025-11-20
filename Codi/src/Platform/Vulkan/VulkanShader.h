@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 namespace Codi {
+    class VulkanUniformBuffer;
 
     // TODO: Descriptors
     class VulkanShader : public Shader {
@@ -18,6 +19,30 @@ namespace Codi {
             std::string Source;
             std::vector<uint32> Data;
             VkShaderModule Module = VK_NULL_HANDLE;
+        };
+
+        struct UniformMember {
+            std::string Name;      // member name
+            uint32 Offset;         // byte offset inside block
+            uint32 Size;           // member size in bytes
+        };
+
+        struct UniformBlock {
+            std::string Name;         // block name
+            uint32 Binding;           // descriptor binding
+            uint32 Set;               // descriptor set (usually 0)
+            uint32 Size;              // total block size in bytes
+            VkBuffer Buffer = VK_NULL_HANDLE;
+            VkDeviceMemory Memory = VK_NULL_HANDLE;
+            void* Mapped = nullptr;   // persistent mapped pointer
+            std::vector<UniformMember> Members;
+        };
+
+        struct ImageBinding {
+            std::string Name;
+            uint32 Binding;
+            uint32 Set;
+            uint32 Count;
         };
 
     public:
@@ -48,11 +73,25 @@ namespace Codi {
 
         VkShaderModule CreateModule(const std::vector<uint32>& shaderData);
 
+        void CreateDescriptorSetLayouts();
+        void CreateDescriptorPoolAndSets();
+        void CreateUniformBuffers();
+        void DestroyUniformBuffers();
+
+        UniformBlock* FindBlockByMemberName(const std::string& name, uint32& outOffset, uint32& outSize);
+
     private:
         std::filesystem::path _Filepath;
         std::string _Name;
 
         std::unordered_map<Type, StageData> _Stages;
+
+        std::vector<UniformBlock> _UniformBlocks; // list of UBOs discovered
+        std::vector<ImageBinding> _ImageBindings;
+
+        VkDescriptorPool _DescriptorPool = VK_NULL_HANDLE;
+        std::vector<VkDescriptorSetLayout> _DescriptorSetLayouts; // per set
+        std::vector<std::vector<VkDescriptorSet>> _DescriptorSets; // per-set, per-frame
 
         Shared<VulkanPipeline> _Pipeline;
     };

@@ -2,6 +2,8 @@
 
 #include "Codi/Core/Core.h"
 
+#include "Codi/Renderer/EditorCamera.h"
+
 #include <glm/glm.hpp>
 
 namespace Codi {
@@ -22,12 +24,14 @@ namespace Codi {
         static void Init();
         static void Shutdown();
 
+        static void BeginScene(const EditorCamera& camera);
+        static void EndScene();
         static void StartBatch();
         static void Flush();
 
         // Primitives
 
-        static void DrawQuad(const glm::vec4& color);
+        static void DrawQuad(const glm::mat4& transform, const glm::vec4& color);
 
         // Internals
 

@@ -35,10 +35,6 @@ namespace Codi {
         virtual inline uint32 GetCount() const override { return _Count; }
 
     private:
-        void CreateBuffer(uint32 size);
-        void Upload(const void* data, uint32 size) const;
-
-    private:
         VkBuffer _Handle = VK_NULL_HANDLE;
         VkDeviceMemory _Memory = VK_NULL_HANDLE;
         uint32 _Count;

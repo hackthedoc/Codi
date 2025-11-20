@@ -18,12 +18,19 @@ namespace Codi {
     private:
         bool OnKeyPressed(const KeyPressedEvent& e);
         bool OnMouseButtonPressed(const MouseButtonPressedEvent& e);
+        bool OnWindowResize(const WindowResizeEvent& e);
 
     private:
+        // Viewport
+
         bool _ViewportFocused = false;
         bool _ViewportHovered = false;
         glm::vec2 _ViewportSize = glm::vec2(0.0f);
         glm::vec2 _ViewportBounds[2];
+
+        // Editor Specific
+
+        EditorCamera _EditorCamera;
     };
 
 } // namespace Codi
