@@ -95,8 +95,6 @@ namespace Codi {
     }
 
     bool VulkanRendererAPI::BeginFrame() {
-        CODI_CORE_TRACE("BeginFrame - _CurrentFrameIndex = {0}", _CurrentFrameIndex);
-
         if (_SwapchainNeedsRecreation) {
             RecreateSwapchain();
             _SwapchainNeedsRecreation = false;
@@ -135,8 +133,6 @@ namespace Codi {
     }
 
     bool VulkanRendererAPI::EndFrame() {
-        CODI_CORE_TRACE("EndFrame - _CurrentFrameIndex = {0}", _CurrentFrameIndex);
-
         // End render pass
         _MainRenderPass->End(_CommandBuffers[_CurrentFrameIndex].get());
 
