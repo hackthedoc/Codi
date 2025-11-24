@@ -121,19 +121,19 @@ namespace Codi {
 
         // Map persistently ? (we keep previous behaviour, we don't persistently map here)
         // Query properties so registry can store size and mapped pointer (null for now)
-        GlobalUniformRegistry::RegisteredBufferInfo info;
-        info.buffer = _Handle;
-        info.memory = _Memory;
-        info.size = _Size;
-        info.mapped = nullptr;
+        VulkanGlobalUniformRegistry::RegisteredBufferInfo info;
+        info.Buffer = _Handle;
+        info.Memory = _Memory;
+        info.Size = _Size;
+        info.Mapped = nullptr;
 
         // register for set=0
-        GlobalUniformRegistry::Get().Register(0, _Binding, info);
+        VulkanGlobalUniformRegistry::Get().Register(0, _Binding, info);
     }
 
     VulkanUniformBuffer::~VulkanUniformBuffer() {
         // Unregisterr before destroy
-        GlobalUniformRegistry::Get().Unregister(0, _Binding);
+        VulkanGlobalUniformRegistry::Get().Unregister(0, _Binding);
 
         Utils::DestroyBuffer(&_Handle, &_Memory);
     }

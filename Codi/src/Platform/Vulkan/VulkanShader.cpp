@@ -482,8 +482,8 @@ namespace Codi {
         if (_UniformBlocks.empty()) return;
 
         for (auto& block : _UniformBlocks) {
-            GlobalUniformRegistry::RegisteredBufferInfo regInfo;
-            bool hasExternal = GlobalUniformRegistry::Get().Get(block.Set, block.Binding, regInfo);
+            VulkanGlobalUniformRegistry::RegisteredBufferInfo regInfo;
+            bool hasExternal = VulkanGlobalUniformRegistry::Get().Get(block.Set, block.Binding, regInfo);
 
             if (hasExternal)
                 CreateExternalUniformBuffers(block);
@@ -499,12 +499,12 @@ namespace Codi {
         VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
         uint32 framesInFlight = api.GetSwapchain()->GetMaxFramesInFlight();
 
-        GlobalUniformRegistry::RegisteredBufferInfo regInfo;
-        GlobalUniformRegistry::Get().Get(block.Set, block.Binding, regInfo);
+        VulkanGlobalUniformRegistry::RegisteredBufferInfo regInfo;
+        VulkanGlobalUniformRegistry::Get().Get(block.Set, block.Binding, regInfo);
 
-        block.Buffer = regInfo.buffer;
-        block.Memory = regInfo.memory;
-        block.Mapped = regInfo.mapped; // might be nullptr
+        block.Buffer = regInfo.Buffer;
+        block.Memory = regInfo.Memory;
+        block.Mapped = regInfo.Mapped; // might be nullptr
 
         block.BufferInfos.resize(framesInFlight);
         for (uint32 frame = 0; frame < framesInFlight; frame++) {

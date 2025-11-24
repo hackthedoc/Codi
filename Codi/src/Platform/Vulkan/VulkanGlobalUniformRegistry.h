@@ -17,46 +17,46 @@ namespace Codi {
         }
     };
 
-    class GlobalUniformRegistry {
+    class VulkanGlobalUniformRegistry {
     public:
         struct RegisteredBufferInfo {
-            VkBuffer buffer = VK_NULL_HANDLE;
-            VkDeviceMemory memory = VK_NULL_HANDLE;
-            VkDeviceSize size = 0;
-            void* mapped = nullptr; // optional
+            VkBuffer Buffer = VK_NULL_HANDLE;
+            VkDeviceMemory Memory = VK_NULL_HANDLE;
+            VkDeviceSize Size = 0;
+            void* Mapped = nullptr; // optional
         };
 
     public:
-        static GlobalUniformRegistry& Get() {
-            static GlobalUniformRegistry s;
+        static VulkanGlobalUniformRegistry& Get() {
+            static VulkanGlobalUniformRegistry s;
             return s;
         }
 
         void Register(uint32 set, uint32 binding, const RegisteredBufferInfo& info) {
-            std::lock_guard<std::mutex> lock(_mutex);
-            _map[{set, binding}] = info;
+            std::lock_guard<std::mutex> lock(_Mutex);
+            _Map[{set, binding}] = info;
         }
 
         // returns true if found
         bool Get(uint32 set, uint32 binding, RegisteredBufferInfo& out) {
-            std::lock_guard<std::mutex> lock(_mutex);
-            auto it = _map.find({ set, binding });
-            if (it == _map.end()) return false;
+            std::lock_guard<std::mutex> lock(_Mutex);
+            auto it = _Map.find({ set, binding });
+            if (it == _Map.end()) return false;
             out = it->second;
             return true;
         }
 
         void Unregister(uint32 set, uint32 binding) {
-            std::lock_guard<std::mutex> lock(_mutex);
-            _map.erase({ set, binding });
+            std::lock_guard<std::mutex> lock(_Mutex);
+            _Map.erase({ set, binding });
         }
 
     private:
-        GlobalUniformRegistry() = default;
-        ~GlobalUniformRegistry() = default;
+        VulkanGlobalUniformRegistry() = default;
+        ~VulkanGlobalUniformRegistry() = default;
 
-        std::unordered_map<UboKey, RegisteredBufferInfo, UboKeyHash> _map;
-        std::mutex _mutex;
+        std::unordered_map<UboKey, RegisteredBufferInfo, UboKeyHash> _Map;
+        std::mutex _Mutex;
     };
 
 } // namespace Codi
