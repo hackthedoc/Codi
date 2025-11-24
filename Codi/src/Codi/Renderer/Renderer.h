@@ -15,7 +15,7 @@ namespace Codi {
         static void BeginFrame();
         static void EndFrame();
 
-        static void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount);
+        static void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount, uint32 instanceCount = 1, uint32 firstIndex = 0, int32 vertexOffset = 0, uint32 firstInstance = 0);
 
         static inline bool IsFrameSkipped() { return _FrameSkipped; }
 

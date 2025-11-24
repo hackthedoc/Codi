@@ -193,18 +193,18 @@ namespace Codi {
         vkCmdSetScissor(_CommandBuffers[_CurrentFrameIndex]->GetHandle(), 0, 1, &_Scissor);
     }
 
-    void VulkanRendererAPI::DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount) {
+    void VulkanRendererAPI::DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount, uint32 instanceCount, uint32 firstIndex, int32 vertexOffset, uint32 firstInstance) {
         VkCommandBuffer cmdBuffer = _CommandBuffers[_CurrentFrameIndex]->GetHandle();
 
         std::vector<VkBuffer> vertexBuffers;
-        for (auto buffer : vertexArray->GetVertexBuffers())
+        for (auto& buffer : vertexArray->GetVertexBuffers())
             vertexBuffers.push_back(*(VkBuffer*)buffer->GetHandle());
 
         VkDeviceSize offsets[] = { 0 };
 
-        vkCmdBindVertexBuffers(cmdBuffer, 0, 1, vertexBuffers.data(), offsets);
+        vkCmdBindVertexBuffers(cmdBuffer, 0, (uint32)vertexBuffers.size(), vertexBuffers.data(), offsets);
         vkCmdBindIndexBuffer(cmdBuffer, *(VkBuffer*)vertexArray->GetIndexBuffer()->GetHandle(), 0, VK_INDEX_TYPE_UINT32);
-        vkCmdDrawIndexed(cmdBuffer, indexCount, 1, 0, 0, 0);
+        vkCmdDrawIndexed(cmdBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
     }
 
     void VulkanRendererAPI::RecreateSwapchain() {

@@ -37,10 +37,10 @@ namespace Codi {
         _RAPI->EndFrame();
     }
 
-    void Renderer::DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount) {
+    void Renderer::DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount, uint32 instanceCount, uint32 firstIndex, int32 vertexOffset, uint32 firstInstance) {
         if (_FrameSkipped) return;
 
-        _RAPI->DrawIndexed(vertexArray, indexCount);
+        _RAPI->DrawIndexed(vertexArray, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
     }
 
 } // namespace Codi

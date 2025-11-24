@@ -134,4 +134,13 @@ namespace Codi {
         static Shared<UniformBuffer> Create(uint32 size, uint32 binding);
     };
 
+    class ShaderStorageBuffer {
+    public:
+        virtual ~ShaderStorageBuffer() = default;
+
+        virtual void SetData(const void* data, uint32 size, uint32 offset = 0) = 0;
+
+        static Shared<ShaderStorageBuffer> Create(uint32 size, uint32 binding);
+    };
+
 } // namespace Codi

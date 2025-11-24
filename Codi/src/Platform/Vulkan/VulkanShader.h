@@ -39,12 +39,25 @@ namespace Codi {
             VkShaderModule Module = VK_NULL_HANDLE;
         };
 
+        struct StorageBlock {
+            std::string Name;
+            uint32 Binding = 0;
+            uint32 Set = 0;
+            uint32 Size = 0;
+
+            VkBuffer Buffer = VK_NULL_HANDLE;
+            VkDeviceMemory Memory = VK_NULL_HANDLE;
+            void* Mapped = nullptr;   // persistent mapped pointer (optional)
+
+            std::vector<VkDescriptorBufferInfo> BufferInfos;
+        };
+
         struct UniformMember {
             std::string Name;
             uint32 Offset = 0;
             uint32 Size = 0;
         };
-
+        
         struct UniformBlock {
             std::string Name;
             uint32 Binding = 0;
@@ -78,6 +91,9 @@ namespace Codi {
         // Descriptor & buffer setup
         void CreateDescriptorSetLayouts();
         void CreateDescriptorPoolAndSets();
+        void CreateStorageBuffers();
+        void CreateExternalStorageBuffers(StorageBlock& block);
+        void CreateInternalStorageBuffers(StorageBlock& block);
         void CreateUniformBuffers();
         void CreateExternalUniformBuffers(UniformBlock& block);
         void CreateInternalUniformBuffers(UniformBlock& block);
@@ -95,6 +111,7 @@ namespace Codi {
 
         std::unordered_map<Type, StageData> _Stages;
 
+        std::vector<StorageBlock> _StorageBlocks;
         std::vector<UniformBlock> _UniformBlocks;
         std::vector<ImageBinding> _ImageBindings;
 

@@ -29,7 +29,7 @@ namespace Codi {
 
         virtual inline void* GetCurrentFrameBufferHandle() const override { return _CommandBuffers[_CurrentFrameIndex]->GetHandle(); }
 
-        virtual void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount) override;
+        virtual void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount, uint32 instanceCount = 1, uint32 firstIndex = 0, int32 vertexOffset = 0, uint32 firstInstance = 0) override;
 
         inline uint32 GetCurrentFrameIndex() const { return _CurrentFrameIndex; }
         inline VkViewport GetViewport() const { return _Viewport; }

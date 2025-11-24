@@ -142,4 +142,37 @@ namespace Codi {
         Utils::Upload(data, size, offset, _Memory);
     }
 
+    // STORAGE BUFFER ---------------------------------------
+
+    VulkanShaderStorageBuffer::VulkanShaderStorageBuffer(uint32 size, uint32 binding) : _Size(size), _Binding(binding) {
+        Utils::CreateBuffer(
+            size,
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            &_Handle,
+            &_Memory
+        );
+
+        // Map persistently ? (we keep previous behaviour, we don't persistently map here)
+        // Query properties so registry can store size and mapped pointer (null for now)
+        VulkanGlobalUniformRegistry::RegisteredBufferInfo info;
+        info.Buffer = _Handle;
+        info.Memory = _Memory;
+        info.Size = _Size;
+        info.Mapped = nullptr;
+
+        // register for set=0
+        VulkanGlobalUniformRegistry::Get().Register(0, _Binding, info);
+    }
+
+    VulkanShaderStorageBuffer::~VulkanShaderStorageBuffer() {
+        // Unregisterr before destroy
+        VulkanGlobalUniformRegistry::Get().Unregister(0, _Binding);
+
+        Utils::DestroyBuffer(&_Handle, &_Memory);
+    }
+
+    void VulkanShaderStorageBuffer::SetData(const void* data, uint32 size, uint32 offset) {
+        Utils::Upload(data, size, offset, _Memory);
+    }
+
 } // namespace Codi

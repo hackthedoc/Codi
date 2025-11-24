@@ -13,7 +13,7 @@ namespace Codi {
             CODI_CORE_ASSERT(false, "RendererAPI::API::None is currently not supported!");
             return nullptr;
         case RendererAPI::API::Vulkan:
-            return Own<VulkanVertexBuffer>(size);
+            return Share<VulkanVertexBuffer>(size);
         }
 
         CODI_CORE_ASSERT(false, "Unknown RendererAPI::API!");
@@ -26,7 +26,7 @@ namespace Codi {
             CODI_CORE_ASSERT(false, "RendererAPI::API::None is currently not supported!");
             return nullptr;
         case RendererAPI::API::Vulkan:
-            return Own<VulkanVertexBuffer>(vertices, size);
+            return Share<VulkanVertexBuffer>(vertices, size);
         }
 
         CODI_CORE_ASSERT(false, "Unknown RendererAPI::API!");
@@ -39,7 +39,7 @@ namespace Codi {
             CODI_CORE_ASSERT(false, "RendererAPI::API::None is currently not supported!");
             return nullptr;
         case RendererAPI::API::Vulkan:
-            return Own<VulkanIndexBuffer>(indices, count);
+            return Share<VulkanIndexBuffer>(indices, count);
         }
 
         CODI_CORE_ASSERT(false, "Unknown RendererAPI::API!");
@@ -52,7 +52,20 @@ namespace Codi {
             CODI_CORE_ASSERT(false, "RendererAPI::API::None is currently not supported!");
             return nullptr;
         case RendererAPI::API::Vulkan:
-            return Own<VulkanUniformBuffer>(size, binding);
+            return Share<VulkanUniformBuffer>(size, binding);
+        }
+
+        CODI_CORE_ASSERT(false, "Unknown RendererAPI::API!");
+        return nullptr;
+    }
+
+    Shared<ShaderStorageBuffer> ShaderStorageBuffer::Create(uint32 size, uint32 binding) {
+        switch (RendererAPI::GetAPI()) {
+        case RendererAPI::API::None:
+            CODI_CORE_ASSERT(false, "RendererAPI::API::None is currently not supported!");
+            return nullptr;
+        case RendererAPI::API::Vulkan:
+            return Share<VulkanShaderStorageBuffer>(size, binding);
         }
 
         CODI_CORE_ASSERT(false, "Unknown RendererAPI::API!");

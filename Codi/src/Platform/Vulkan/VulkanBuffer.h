@@ -54,4 +54,18 @@ namespace Codi {
         uint32 _Size = 0;
     };
 
+    class VulkanShaderStorageBuffer : public ShaderStorageBuffer {
+    public:
+        VulkanShaderStorageBuffer(uint32 size, uint32 binding);
+        ~VulkanShaderStorageBuffer();
+
+        virtual void SetData(const void* data, uint32 size, uint32 offset = 0) override;
+
+    private:
+        VkBuffer _Handle = VK_NULL_HANDLE;
+        VkDeviceMemory _Memory = VK_NULL_HANDLE;
+        uint32 _Binding = 0;
+        uint32 _Size = 0;
+    };
+
 } // namespace Codi

@@ -9,7 +9,14 @@ namespace Codi {
 
     struct QuadVertex {
         glm::vec3 Position;
-        glm::vec4 Color;
+    };
+
+    struct QuadInstanceData {
+        glm::mat4 Model;
+        glm::vec3 Color;
+        float32 TilingFactor;
+        int32 EntityID;
+        float32 Padding[3]; // padding to 16-byte alignment
     };
 
     struct Renderer2DData {
@@ -25,6 +32,10 @@ namespace Codi {
         uint32_t QuadIndexCount = 0;
         QuadVertex* QuadVertexBufferBase = nullptr;
         QuadVertex* QuadVertexBufferPtr = nullptr;
+        QuadInstanceData* QuadInstanceBufferBase = nullptr;
+        QuadInstanceData* QuadInstanceBufferPtr = nullptr;
+
+        Shared<ShaderStorageBuffer> QuadInstanceSSBO;
 
         glm::vec4 QuadVertexPositions[4];
 
@@ -48,10 +59,13 @@ namespace Codi {
         Data.QuadVertexBuffer = VertexBuffer::Create(Renderer2DData::MAX_VERTICES * sizeof(QuadVertex));
         Data.QuadVertexBuffer->SetLayout({
             { ShaderDataType::Float3, "a_Position"      },
-            { ShaderDataType::Float4, "a_Color"         },
         });
         Data.QuadVertexArray->AddVertexBuffer(Data.QuadVertexBuffer);
         Data.QuadVertexBufferBase = new QuadVertex[Renderer2DData::MAX_VERTICES];
+
+        // Quad SSBO
+        Data.QuadInstanceBufferBase = new QuadInstanceData[Renderer2DData::MAX_QUADS];
+        Data.QuadInstanceSSBO = ShaderStorageBuffer::Create(sizeof(QuadInstanceData) * Renderer2DData::MAX_QUADS, 1);
 
         uint32* quadIndices = new uint32[Renderer2DData::MAX_INDICES];
         for (uint32 i = 0, offset = 0; i < Renderer2DData::MAX_INDICES; i += 6, offset += 4) {
@@ -80,6 +94,8 @@ namespace Codi {
     
     void Renderer2D::Shutdown() {
         delete[] Data.QuadVertexBufferBase;
+        delete[] Data.QuadInstanceBufferBase;
+        Data.QuadInstanceSSBO = nullptr;
         Data.QuadVertexBuffer = nullptr;
         Data.QuadVertexArray = nullptr;
         Data.QuadShader = nullptr;
@@ -99,6 +115,7 @@ namespace Codi {
     void Renderer2D::StartBatch() {
         Data.QuadIndexCount = 0;
         Data.QuadVertexBufferPtr = Data.QuadVertexBufferBase;
+        Data.QuadInstanceBufferPtr = Data.QuadInstanceBufferBase;
     }
 
     void Renderer2D::Flush() {
@@ -107,8 +124,13 @@ namespace Codi {
             uint32 dataSize = (uint32)((uint8*)Data.QuadVertexBufferPtr - (uint8*)Data.QuadVertexBufferBase);
             Data.QuadVertexBuffer->SetData(Data.QuadVertexBufferBase, dataSize);
 
+            uint32 ssboSize = (uint32)((uint8*)Data.QuadInstanceBufferPtr - (uint8*)Data.QuadInstanceBufferBase);
+            Data.QuadInstanceSSBO->SetData(Data.QuadInstanceBufferBase, ssboSize);
+
+            uint32 instanceCount = (uint32)(Data.QuadInstanceBufferPtr - Data.QuadInstanceBufferBase);
+
             Data.QuadShader->Bind();
-            Renderer::DrawIndexed(Data.QuadVertexArray, Data.QuadIndexCount);
+            Renderer::DrawIndexed(Data.QuadVertexArray, Data.QuadIndexCount, instanceCount);
             Data.Stats.DrawCalls++;
         }
     }
@@ -119,21 +141,24 @@ namespace Codi {
     }
 
     void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color) {
-        constexpr uint64 quadVertexCount = 4;
         const float textureIndex = 0.0f; // White Texture
         constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
         const float tilingFactor = 1.0f;
 
         if (Data.QuadIndexCount >= Renderer2DData::MAX_INDICES) FlushAndReset();
 
-        for (uint64 i = 0; i < quadVertexCount; i++) {
+        for (uint64 i = 0; i < 4; i++) {
             Data.QuadVertexBufferPtr->Position = transform * Data.QuadVertexPositions[i];
-            Data.QuadVertexBufferPtr->Color = color;
             Data.QuadVertexBufferPtr++;
         }
 
-        Data.QuadIndexCount += 6;
+        QuadInstanceData& instance = *Data.QuadInstanceBufferPtr++;
+        instance.Model = transform;
+        instance.Color = color;
+        instance.TilingFactor = 1.0f;
+        instance.EntityID = -1;
 
+        Data.QuadIndexCount += 6;
         Data.Stats.QuadCount++;
     }
 

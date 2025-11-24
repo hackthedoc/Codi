@@ -7,10 +7,23 @@
 #version 450 core
 
 layout(location = 0) in vec3 a_Position;
-layout(location = 1) in vec4 a_Color;
 
 layout(set = 0, binding = 0) uniform Camera {
 	mat4 u_ViewProjection;
+};
+
+struct QuadInstanceData {
+    mat4 Model;
+    vec4 Color;
+    float TilingFactor;
+    int EntityID;
+    float padding0;
+    float padding1;
+    float padding2;
+};
+
+layout(std430, binding = 1) readonly buffer QuadBuffer {
+    QuadInstanceData Instances[];
 };
 
 struct VertexOutput {
@@ -20,8 +33,10 @@ struct VertexOutput {
 layout (location = 0) out VertexOutput Output;
 
 void main() {
-	Output.Color = a_Color;
+    uint instanceID = gl_InstanceIndex;
+    QuadInstanceData instance = Instances[instanceID];
 
+	Output.Color = instance.Color;
 	gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 }
 

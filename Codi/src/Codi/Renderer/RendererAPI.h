@@ -26,7 +26,7 @@ namespace Codi {
         virtual void OnWindowResize(uint32 width, uint32 height) = 0;
         virtual void SetViewport(float32 x, float32 y, float32 width, float32 height) = 0;
 
-        virtual void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount) = 0;
+        virtual void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount, uint32 instanceCount = 1, uint32 firstIndex = 0, int32 vertexOffset = 0, uint32 firstInstance = 0) = 0;
 
         virtual inline void* GetCurrentFrameBufferHandle() const = 0;
 

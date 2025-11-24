@@ -5,6 +5,8 @@
 
 #include "Platform/Vulkan/VulkanRendererAPI.h"
 
+#include <glm/glm.hpp>
+
 namespace Codi {
 
     void VulkanPipeline::Create(std::vector<VkVertexInputAttributeDescription> attributes, std::vector<VkDescriptorSetLayout> descriptorSetLayouts, std::vector<VkPipelineShaderStageCreateInfo> stages, uint32 stride, bool isWireframe) {

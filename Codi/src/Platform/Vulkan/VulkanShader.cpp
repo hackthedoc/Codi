@@ -86,6 +86,7 @@ namespace Codi {
 
         CreateDescriptorSetLayouts();
         CreateDescriptorPoolAndSets();
+        CreateStorageBuffers();
         CreateUniformBuffers();
     }
 
@@ -104,6 +105,7 @@ namespace Codi {
 
         CreateDescriptorSetLayouts();
         CreateDescriptorPoolAndSets();
+        CreateStorageBuffers();
         CreateUniformBuffers();
     }
 
@@ -307,6 +309,24 @@ namespace Codi {
         CODI_CORE_TRACE("   {0} uniform buffers", resources.uniform_buffers.size());
         CODI_CORE_TRACE("   {0} resources", resources.sampled_images.size());
 
+        CODI_CORE_TRACE("Storage Buffers:");
+        for (const spirv_cross::Resource& resource : resources.storage_buffers) {
+            const uint32 baseTypeID = resource.base_type_id;
+            const spirv_cross::SPIRType& bufferType = compiler.get_type(baseTypeID);
+            uint32 blockSize = (uint32)compiler.get_declared_struct_size(bufferType);
+            uint32 binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
+            uint32 set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+
+            StorageBlock block{};
+            block.Name = resource.name;
+            block.Binding = binding;
+            block.Set = set;
+            block.Size = blockSize;
+
+            _StorageBlocks.push_back(std::move(block));
+            CODI_CORE_TRACE("  {0} set={1} binding={2} size={3}", resource.name, set, binding, blockSize);
+        }
+
         CODI_CORE_TRACE("Uniform buffers:");
         for (const spirv_cross::Resource& resource : resources.uniform_buffers) {
             const uint32 baseTypeID = resource.base_type_id;
@@ -323,14 +343,10 @@ namespace Codi {
 
             for (uint32 m = 0; m < bufferType.member_types.size(); m++) {
                 UniformMember member;
-                // member name
                 member.Name = compiler.get_member_name(baseTypeID, m);
-                // member offset (reflect offset decoration)
-                // Use spirv_cross's get_member_decoration - offset decoration
                 uint32 offset = compiler.get_member_decoration(baseTypeID, m, spv::DecorationOffset);
                 member.Offset = offset;
 
-                // member size: derive from member type
                 const spirv_cross::SPIRType& memType = compiler.get_type(bufferType.member_types[m]);
                 uint32 memSize = 0;
                 if (memType.basetype == spirv_cross::SPIRType::Float) {
@@ -352,7 +368,7 @@ namespace Codi {
             _UniformBlocks.push_back(std::move(block));
         }
 
-        // Sampled images
+        CODI_CORE_TRACE("Sampled Image:");
         for (const spirv_cross::Resource& resource : resources.sampled_images) {
             uint32 binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
             uint32 set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
@@ -363,7 +379,7 @@ namespace Codi {
             ib.Count = 1;
             _ImageBindings.push_back(ib);
 
-            CODI_CORE_TRACE("Sampled image: {0} set={1} binding={2}", resource.name, set, binding);
+            CODI_CORE_TRACE("  {0} set={1} binding={2}", resource.name, set, binding);
         }
     }
 
@@ -400,6 +416,16 @@ namespace Codi {
 
         for (uint32 set = 0; set <= maxSet; set++) {
             std::vector<VkDescriptorSetLayoutBinding> bindings;
+
+            for (auto& b : _StorageBlocks) {
+                if (b.Set != set) continue;
+                VkDescriptorSetLayoutBinding l{};
+                l.binding = b.Binding;
+                l.descriptorCount = 1;
+                l.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                l.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+                bindings.push_back(l);
+            }
 
             for (auto& b : _UniformBlocks) {
                 if (b.Set != set) continue;
@@ -441,8 +467,11 @@ namespace Codi {
         uint32 framesInFlight = api.GetSwapchain()->GetMaxFramesInFlight();
 
         std::vector<VkDescriptorPoolSize> poolSizes;
+        if (!_StorageBlocks.empty()) {
+            uint32 sbCount = (uint32)_StorageBlocks.size();
+            poolSizes.push_back({ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, sbCount * framesInFlight });
+        }
         if (!_UniformBlocks.empty()) {
-            // Count how many uniform buffers per set (we'll allocate frames_in_flight copies)
             uint32 ubCount = (uint32)_UniformBlocks.size();
             poolSizes.push_back({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ubCount * framesInFlight });
         }
@@ -475,6 +504,107 @@ namespace Codi {
 
             result = vkAllocateDescriptorSets(logicalDevice, &alloc, _DescriptorSets[s].data());
             CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate descriptor sets");
+        }
+    }
+
+    void VulkanShader::CreateStorageBuffers() {
+        if (_StorageBlocks.empty()) return;
+
+        for (auto& block : _StorageBlocks) {
+            VulkanGlobalUniformRegistry::RegisteredBufferInfo regInfo;
+            bool hasExternal = VulkanGlobalUniformRegistry::Get().Get(block.Set, block.Binding, regInfo);
+
+            if (hasExternal)
+                CreateExternalStorageBuffers(block);
+            else
+                CreateInternalStorageBuffers(block);
+        }
+    }
+
+    void VulkanShader::CreateExternalStorageBuffers(StorageBlock& block) {
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
+        uint32 framesInFlight = api.GetSwapchain()->GetMaxFramesInFlight();
+
+
+        VulkanGlobalUniformRegistry::RegisteredBufferInfo regInfo;
+        VulkanGlobalUniformRegistry::Get().Get(block.Set, block.Binding, regInfo);
+
+        block.Buffer = regInfo.Buffer;
+        block.Memory = regInfo.Memory;
+        block.Mapped = regInfo.Mapped; // might be nullptr
+
+        block.BufferInfos.resize(framesInFlight);
+        for (uint32 frame = 0; frame < framesInFlight; frame++) {
+            auto& info = block.BufferInfos[frame];
+            info.buffer = block.Buffer;
+            info.offset = 0; // external buffer is dedicated per resource (no offsets)
+            info.range = VK_WHOLE_SIZE;
+
+            VkWriteDescriptorSet write{};
+            write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            write.dstSet = _DescriptorSets[block.Set][frame];
+            write.dstBinding = block.Binding;
+            write.dstArrayElement = 0;
+            write.descriptorCount = 1;
+            write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            write.pBufferInfo = &info;
+
+            vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
+        }
+    }
+
+    void VulkanShader::CreateInternalStorageBuffers(StorageBlock& block) {
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
+        uint32 framesInFlight = api.GetSwapchain()->GetMaxFramesInFlight();
+
+        VkDeviceSize totalSize = (VkDeviceSize)block.Size * framesInFlight;
+
+        VkBufferCreateInfo bufInfo{};
+        bufInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufInfo.size = totalSize;
+        bufInfo.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+        bufInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        VkResult result = vkCreateBuffer(logicalDevice, &bufInfo, VulkanRendererAPI::GetAllocator(), &block.Buffer);
+        CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to create uniform buffer");
+
+        VkMemoryRequirements memReq;
+        vkGetBufferMemoryRequirements(logicalDevice, block.Buffer, &memReq);
+
+        VkMemoryAllocateInfo alloc{};
+        alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        alloc.allocationSize = memReq.size;
+        alloc.memoryTypeIndex = api.GetContext()->FindMemoryType(memReq.memoryTypeBits,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+        result = vkAllocateMemory(logicalDevice, &alloc, VulkanRendererAPI::GetAllocator(), &block.Memory);
+        CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate storage buffer memory");
+
+        result = vkBindBufferMemory(logicalDevice, block.Buffer, block.Memory, 0);
+        CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to bind storage buffer memory");
+
+        vkMapMemory(logicalDevice, block.Memory, 0, totalSize, 0, &block.Mapped);
+
+        block.BufferInfos.resize(framesInFlight);
+
+        for (uint32 frame = 0; frame < framesInFlight; frame++) {
+            auto& info = block.BufferInfos[frame];
+            info.buffer = block.Buffer;
+            info.offset = (VkDeviceSize)block.Size * frame;
+            info.range = block.Size;
+
+            VkWriteDescriptorSet write{};
+            write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            write.dstSet = _DescriptorSets[block.Set][frame];
+            write.dstBinding = block.Binding;
+            write.dstArrayElement = 0;
+            write.descriptorCount = 1;
+            write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            write.pBufferInfo = &info;
+
+            vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
         }
     }
 
