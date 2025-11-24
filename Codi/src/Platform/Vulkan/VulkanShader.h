@@ -36,6 +36,7 @@ namespace Codi {
             VkDeviceMemory Memory = VK_NULL_HANDLE;
             void* Mapped = nullptr;   // persistent mapped pointer
             std::vector<UniformMember> Members;
+            std::vector<VkDescriptorBufferInfo> BufferInfos;
         };
 
         struct ImageBinding {

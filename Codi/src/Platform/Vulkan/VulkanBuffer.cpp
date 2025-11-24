@@ -4,6 +4,7 @@
 #include "Codi/Renderer/Renderer.h"
 
 #include "Platform/Vulkan/VulkanRendererAPI.h"
+#include "Platform/Vulkan/VulkanGlobalUniformRegistry.h"
 
 namespace Codi {
 
@@ -37,14 +38,15 @@ namespace Codi {
             vkBindBufferMemory(logicalDevice, *buffer, *memory, 0);
         }
 
-        static void Upload(const void* data, uint32 size, VkDeviceMemory memory) {
+        static void* Upload(const void* data, uint32 size, uint32 offset, VkDeviceMemory memory) {
             VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
             VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
 
             void* mapped;
-            vkMapMemory(logicalDevice, memory, 0, size, 0, &mapped);
+            vkMapMemory(logicalDevice, memory, offset, size, 0, &mapped);
             memcpy(mapped, data, size);
             vkUnmapMemory(logicalDevice, memory);
+            return mapped;
         }
 
         static void DestroyBuffer(VkBuffer* buffer, VkDeviceMemory* memory) {
@@ -78,7 +80,7 @@ namespace Codi {
             &_Handle,
             &_Memory
         );
-        Utils::Upload(vertices, size, _Memory);
+        Utils::Upload(vertices, size, 0, _Memory);
     }
 
     VulkanVertexBuffer::~VulkanVertexBuffer() {
@@ -86,7 +88,7 @@ namespace Codi {
     }
 
     void VulkanVertexBuffer::SetData(const void* data, uint32 size) {
-        Utils::Upload(data, size, _Memory);
+        Utils::Upload(data, size, 0, _Memory);
     }
 
     // INDEX BUFFER -----------------------------------------
@@ -100,7 +102,7 @@ namespace Codi {
             & _Handle,
             &_Memory
         );
-        Utils::Upload(indices, size, _Memory);
+        Utils::Upload(indices, size, 0, _Memory);
     }
 
     VulkanIndexBuffer::~VulkanIndexBuffer() {
@@ -116,14 +118,28 @@ namespace Codi {
             &_Handle,
             &_Memory
         );
+
+        // Map persistently ? (we keep previous behaviour, we don't persistently map here)
+        // Query properties so registry can store size and mapped pointer (null for now)
+        GlobalUniformRegistry::RegisteredBufferInfo info;
+        info.buffer = _Handle;
+        info.memory = _Memory;
+        info.size = _Size;
+        info.mapped = nullptr;
+
+        // register for set=0
+        GlobalUniformRegistry::Get().Register(0, _Binding, info);
     }
 
     VulkanUniformBuffer::~VulkanUniformBuffer() {
+        // Unregisterr before destroy
+        GlobalUniformRegistry::Get().Unregister(0, _Binding);
+
         Utils::DestroyBuffer(&_Handle, &_Memory);
     }
 
     void VulkanUniformBuffer::SetData(const void* data, uint32 size, uint32 offset) {
-        Utils::Upload(data, size, _Memory);
+        Utils::Upload(data, size, offset, _Memory);
     }
 
 } // namespace Codi

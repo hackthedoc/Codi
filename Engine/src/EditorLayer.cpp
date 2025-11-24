@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 
 namespace Codi {
 
@@ -26,19 +28,17 @@ namespace Codi {
         Renderer2D::BeginScene(_EditorCamera); // begin scene
 
         // Position at (0,0,0), default scale (1,1,1), no rotation
-        glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3 rotation = glm::vec3(0.0f); // radians
-        glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
+        glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+        glm::mat4 rotation = glm::toMat4(glm::quat(glm::vec3(0.0f))); // radians
+        glm::mat4 position = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
         // Build transform
-        glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-            * glm::rotate(glm::mat4(1.0f), rotation.z, glm::vec3(0, 0, 1))
-            * glm::scale(glm::mat4(1.0f), scale);
+        glm::mat4 transform = position * rotation * scale;
 
         glm::vec4 purpleColor = glm::vec4(0.741f, 0.576f, 0.976f, 1.0f);
         Renderer2D::DrawQuad(transform, purpleColor);
 
-        Renderer2D::Flush(); // end scene
+        Renderer2D::EndScene(); // end scene
     }
 
     void EditorLayer::OnEvent(Event& e) {

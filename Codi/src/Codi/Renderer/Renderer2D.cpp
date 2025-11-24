@@ -39,6 +39,9 @@ namespace Codi {
     static Renderer2DData Data;
 
     void Renderer2D::Init() {
+        // Create camera
+        Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
+
         // Quads
         Data.QuadVertexArray = VertexArray::Create();
 
@@ -73,9 +76,6 @@ namespace Codi {
         Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
         Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
         Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
-
-        // Create camera
-        Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
     }
     
     void Renderer2D::Shutdown() {

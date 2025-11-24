@@ -4,6 +4,7 @@
 #include "Codi/Renderer/Renderer.h"
 
 #include "Platform/Vulkan/VulkanRendererAPI.h"
+#include "Platform/Vulkan/VulkanGlobalUniformRegistry.h"
 
 #include <fstream>
 #include <spirv_cross/spirv_cross.hpp>
@@ -487,60 +488,89 @@ namespace Codi {
         uint32 framesInFlight = api.GetSwapchain()->GetMaxFramesInFlight();
 
         for (auto& block : _UniformBlocks) {
-            // For simplicity: create one buffer per-frame for each block so each frame can update independently.
-            // We'll store only one VkBuffer/Mem pair per block but map memory large enough for frames * size,
-            // or create separate buffer-per-frame. We'll create buffer-per-frame here for simplicity.
+            GlobalUniformRegistry::RegisteredBufferInfo regInfo;
+            bool hasExternal = GlobalUniformRegistry::Get().Get(block.Set, block.Binding, regInfo);
 
-            // We'll create `frames` buffers, but to keep API simple we'll allocate a single block.Buffer sized = block.Size * frames,
-            // and map it; each frame will write into offset = frame * block.Size. That's simpler and fewer Vulkan objects.
-            VkDeviceSize totalSize = (VkDeviceSize)block.Size * framesInFlight;
+            if (hasExternal) {
+                CODI_CORE_WARN("USING EXTERNAL UBO");
+                block.Buffer = regInfo.buffer;
+                block.Memory = regInfo.memory;
+                block.Mapped = regInfo.mapped; // might be nullptr
 
-            VkBufferCreateInfo bufInfo{};
-            bufInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-            bufInfo.size = totalSize;
-            bufInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-            bufInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                block.BufferInfos.resize(framesInFlight);
+                for (uint32 frame = 0; frame < framesInFlight; frame++) {
+                    auto& info = block.BufferInfos[frame];
+                    info.buffer = block.Buffer;
+                    info.offset = 0; // external buffer is dedicated per resource (no offsets)
+                    info.range = block.Size;
 
-            VkResult result = vkCreateBuffer(logicalDevice, &bufInfo, VulkanRendererAPI::GetAllocator(), &block.Buffer);
-            CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to create uniform buffer");
+                    VkWriteDescriptorSet write{};
+                    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                    write.dstSet = _DescriptorSets[block.Set][frame];
+                    write.dstBinding = block.Binding;
+                    write.dstArrayElement = 0;
+                    write.descriptorCount = 1;
+                    write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                    write.pBufferInfo = &info;
 
-            VkMemoryRequirements memReq;
-            vkGetBufferMemoryRequirements(logicalDevice, block.Buffer, &memReq);
+                    vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
+                }
+            }
+            else {
+                CODI_CORE_WARN("USING INTERNAL UBO");
+                // Fallback: create internal single large buffer (framesInFlight * block.Size) and map it
+                VkDeviceSize totalSize = (VkDeviceSize)block.Size * framesInFlight;
 
-            VkMemoryAllocateInfo alloc{};
-            alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-            alloc.allocationSize = memReq.size;
-            alloc.memoryTypeIndex = api.GetContext()->FindMemoryType(memReq.memoryTypeBits,
-                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+                VkBufferCreateInfo bufInfo{};
+                bufInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+                bufInfo.size = totalSize;
+                bufInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+                bufInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-            result = vkAllocateMemory(logicalDevice, &alloc, VulkanRendererAPI::GetAllocator(), &block.Memory);
-            CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate uniform buffer memory");
+                VkResult result = vkCreateBuffer(logicalDevice, &bufInfo, VulkanRendererAPI::GetAllocator(), &block.Buffer);
+                CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to create uniform buffer");
 
-            result = vkBindBufferMemory(logicalDevice, block.Buffer, block.Memory, 0);
-            CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to bind uniform buffer memory");
+                VkMemoryRequirements memReq;
+                vkGetBufferMemoryRequirements(logicalDevice, block.Buffer, &memReq);
 
-            // persistent map
-            vkMapMemory(logicalDevice, block.Memory, 0, totalSize, 0, &block.Mapped);
+                VkMemoryAllocateInfo alloc{};
+                alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+                alloc.allocationSize = memReq.size;
+                alloc.memoryTypeIndex = api.GetContext()->FindMemoryType(memReq.memoryTypeBits,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-            // Write descriptor buffer infos for every frame's descriptor set entry for this binding
-            for (uint32 frame = 0; frame < framesInFlight; frame++) {
-                VkDescriptorBufferInfo bufDesc{};
-                bufDesc.buffer = block.Buffer;
-                bufDesc.offset = (VkDeviceSize)block.Size * frame;
-                bufDesc.range = block.Size;
+                result = vkAllocateMemory(logicalDevice, &alloc, VulkanRendererAPI::GetAllocator(), &block.Memory);
+                CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate uniform buffer memory");
 
-                VkWriteDescriptorSet write{};
-                write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                write.dstSet = _DescriptorSets[block.Set][frame];
-                write.dstBinding = block.Binding;
-                write.dstArrayElement = 0;
-                write.descriptorCount = 1;
-                write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                write.pBufferInfo = &bufDesc;
+                result = vkBindBufferMemory(logicalDevice, block.Buffer, block.Memory, 0);
+                CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to bind uniform buffer memory");
 
-                // We must call vkUpdateDescriptorSets for each write — keep a copy around so pointer remains valid.
-                // but bufDesc is on stack; we will call vkUpdateDescriptorSets immediately.
-                vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
+                // persistent map
+                vkMapMemory(logicalDevice, block.Memory, 0, totalSize, 0, &block.Mapped);
+
+
+                block.BufferInfos.resize(framesInFlight);
+
+                // Write descriptor buffer infos for every frame's descriptor set entry for this binding
+                for (uint32 frame = 0; frame < framesInFlight; frame++) {
+                    auto& info = block.BufferInfos[frame];
+                    info.buffer = block.Buffer;
+                    info.offset = (VkDeviceSize)block.Size * frame;
+                    info.range = block.Size;
+
+                    VkWriteDescriptorSet write{};
+                    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                    write.dstSet = _DescriptorSets[block.Set][frame];
+                    write.dstBinding = block.Binding;
+                    write.dstArrayElement = 0;
+                    write.descriptorCount = 1;
+                    write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                    write.pBufferInfo = &info;
+
+                    // We must call vkUpdateDescriptorSets for each write — keep a copy around so pointer remains valid.
+                    // but bufDesc is on stack; we will call vkUpdateDescriptorSets immediately.
+                    vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
+                }
             }
         }
 
