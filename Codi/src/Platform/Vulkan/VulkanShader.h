@@ -91,13 +91,14 @@ namespace Codi {
         // Descriptor & buffer setup
         void CreateDescriptorSetLayouts();
         void CreateDescriptorPoolAndSets();
+
         void CreateStorageBuffers();
         void CreateExternalStorageBuffers(StorageBlock& block);
         void CreateInternalStorageBuffers(StorageBlock& block);
+
         void CreateUniformBuffers();
         void CreateExternalUniformBuffers(UniformBlock& block);
         void CreateInternalUniformBuffers(UniformBlock& block);
-        void DestroyUniformBuffers();
 
         UniformBlock* FindBlockByMemberName(const std::string& name, uint32& outOffset, uint32& outSize);
 

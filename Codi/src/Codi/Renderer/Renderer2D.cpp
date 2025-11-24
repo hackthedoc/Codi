@@ -87,12 +87,14 @@ namespace Codi {
 
         // Set quad vertex positions
         Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
-        Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
-        Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
+        Data.QuadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
+        Data.QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
         Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
     }
     
     void Renderer2D::Shutdown() {
+        Data.CameraUniformBuffer = nullptr;
+
         delete[] Data.QuadVertexBufferBase;
         delete[] Data.QuadInstanceBufferBase;
         Data.QuadInstanceSSBO = nullptr;

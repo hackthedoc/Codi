@@ -130,9 +130,6 @@ namespace Codi {
             if (layout)
                 vkDestroyDescriptorSetLayout(logicalDevice, layout, VulkanRendererAPI::GetAllocator());
         _DescriptorSetLayouts.clear();
-
-        // Destroy uniform buffers
-        DestroyUniformBuffers();
     }
 
     void VulkanShader::Bind() {
@@ -708,29 +705,6 @@ namespace Codi {
 
             vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
         }
-    }
-
-    void VulkanShader::DestroyUniformBuffers() {
-        if (_UniformBlocks.empty()) return;
-
-        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
-        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
-
-        for (auto& block : _UniformBlocks) {
-            if (block.Mapped) {
-                vkUnmapMemory(logicalDevice, block.Memory);
-                block.Mapped = nullptr;
-            }
-            if (block.Buffer != VK_NULL_HANDLE) {
-                vkDestroyBuffer(logicalDevice, block.Buffer, VulkanRendererAPI::GetAllocator());
-                block.Buffer = VK_NULL_HANDLE;
-            }
-            if (block.Memory != VK_NULL_HANDLE) {
-                vkFreeMemory(logicalDevice, block.Memory, VulkanRendererAPI::GetAllocator());
-                block.Memory = VK_NULL_HANDLE;
-            }
-        }
-        _UniformBlocks.clear();
     }
 
     VulkanShader::UniformBlock* VulkanShader::FindBlockByMemberName(const std::string& name, uint32& outOffset, uint32& outSize) {

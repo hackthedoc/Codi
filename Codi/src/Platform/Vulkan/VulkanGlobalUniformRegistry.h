@@ -13,7 +13,15 @@ namespace Codi {
 
     struct UboKeyHash {
         uint64 operator()(UboKey const& k) const noexcept {
-            return (uint64(k.first) << 32) ^ uint64(k.second);
+            size_t h1 = std::hash<uint32>{}(k.first);
+            size_t h2 = std::hash<uint32>{}(k.second);
+            return h1 ^ (h2 << 1);
+        }
+    };
+
+    struct UboKeyEqual {
+        bool operator()(const UboKey& a, const UboKey& b) const noexcept {
+            return a.first == b.first && a.second == b.second;
         }
     };
 
@@ -34,13 +42,15 @@ namespace Codi {
 
         void Register(uint32 set, uint32 binding, const RegisteredBufferInfo& info) {
             std::lock_guard<std::mutex> lock(_Mutex);
-            _Map[{set, binding}] = info;
+            UboKey key(set, binding);
+            _Map[key] = info;
         }
 
         // returns true if found
         bool Get(uint32 set, uint32 binding, RegisteredBufferInfo& out) {
             std::lock_guard<std::mutex> lock(_Mutex);
-            auto it = _Map.find({ set, binding });
+            UboKey key(set, binding);
+            auto it = _Map.find(key);
             if (it == _Map.end()) return false;
             out = it->second;
             return true;
@@ -48,14 +58,19 @@ namespace Codi {
 
         void Unregister(uint32 set, uint32 binding) {
             std::lock_guard<std::mutex> lock(_Mutex);
-            _Map.erase({ set, binding });
+            UboKey key(set, binding);
+            auto it = _Map.find(key);
+            if (it != _Map.end()) {
+                it->second = {}; // optional: zero the buffer info
+                _Map.erase(it);
+            }
         }
 
     private:
         VulkanGlobalUniformRegistry() = default;
         ~VulkanGlobalUniformRegistry() = default;
 
-        std::unordered_map<UboKey, RegisteredBufferInfo, UboKeyHash> _Map;
+        std::unordered_map<UboKey, RegisteredBufferInfo, UboKeyHash, UboKeyEqual> _Map;
         std::mutex _Mutex;
     };
 

@@ -134,7 +134,6 @@ namespace Codi {
     VulkanUniformBuffer::~VulkanUniformBuffer() {
         // Unregisterr before destroy
         VulkanGlobalUniformRegistry::Get().Unregister(0, _Binding);
-
         Utils::DestroyBuffer(&_Handle, &_Memory);
     }
 
