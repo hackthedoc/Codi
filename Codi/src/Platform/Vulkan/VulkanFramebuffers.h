@@ -16,7 +16,7 @@ namespace Codi {
         void Destroy();
 
         VkFramebuffer Get(uint32 index) const { return _Framebuffers[index]; }
-        uint32 Size() const { return _Framebuffers.size(); }
+        uint32 Size() const { return (uint32)_Framebuffers.size(); }
 
         VkFramebuffer operator[](uint32 index) const { return Get(index); }
 

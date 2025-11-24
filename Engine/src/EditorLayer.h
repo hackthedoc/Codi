@@ -12,7 +12,7 @@ namespace Codi {
         virtual void OnAttach() override;
         virtual void OnDetach() override;
 
-        virtual void OnUpdate(float32 deltatime) override;
+        virtual void OnUpdate(float64 deltatime) override;
         virtual void OnEvent(Event& e) override;
 
     private:

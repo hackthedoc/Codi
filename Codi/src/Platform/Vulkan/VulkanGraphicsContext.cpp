@@ -197,10 +197,10 @@ namespace Codi {
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         createInfo.pApplicationInfo = &appInfo;
 
-        createInfo.enabledExtensionCount = reqExtentions.size();
+        createInfo.enabledExtensionCount = (uint32)reqExtentions.size();
         createInfo.ppEnabledExtensionNames = reqExtentions.data();
 
-        createInfo.enabledLayerCount = reqValLayers.size();
+        createInfo.enabledLayerCount = (uint32)reqValLayers.size();
         createInfo.ppEnabledLayerNames = reqValLayers.data();
 
         VkResult result = vkCreateInstance(&createInfo, VulkanRendererAPI::GetAllocator(), &_Instance);

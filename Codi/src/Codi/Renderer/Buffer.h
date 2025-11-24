@@ -37,7 +37,7 @@ namespace Codi {
         std::string Name;
         ShaderDataType Type;
         uint32 Size;
-        uint64 Offset;
+        uint32 Offset;
         bool Normalized;
 
         BufferElement()

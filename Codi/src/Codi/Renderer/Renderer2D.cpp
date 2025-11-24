@@ -18,9 +18,9 @@ namespace Codi {
         static const uint32 MAX_INDICES = MAX_QUADS * 6;
         static const uint32 MAX_TEXTURE_SLOTS = 32; // TODO: RenderCaps
 
-        Shared<VertexArray> QuadVertexArray;
-        Shared<VertexBuffer> QuadVertexBuffer;
-        Shared<Shader> QuadShader;
+        Shared<VertexArray> QuadVertexArray = nullptr;
+        Shared<VertexBuffer> QuadVertexBuffer = nullptr;
+        Shared<Shader> QuadShader = nullptr;
 
         uint32_t QuadIndexCount = 0;
         QuadVertex* QuadVertexBufferBase = nullptr;
@@ -29,9 +29,9 @@ namespace Codi {
         glm::vec4 QuadVertexPositions[4];
 
         struct CameraData {
-            glm::mat4 ViewProjection;
+            glm::mat4 ViewProjection = glm::mat4(0.0f);
         };
-        CameraData CameraBuffer;
+        CameraData CameraBuffer{};
         Shared<UniformBuffer> CameraUniformBuffer;
 
         Renderer2D::Statistics Stats;

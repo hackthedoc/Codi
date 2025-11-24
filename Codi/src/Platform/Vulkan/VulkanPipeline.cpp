@@ -83,7 +83,7 @@ namespace Codi {
 
         VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
         dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-        dynamicStateCreateInfo.dynamicStateCount = dynamicState.size();
+        dynamicStateCreateInfo.dynamicStateCount = (uint32)dynamicState.size();
         dynamicStateCreateInfo.pDynamicStates = dynamicState.data();
 
         // Vertex Input
@@ -97,7 +97,7 @@ namespace Codi {
         vertexInputCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputCreateInfo.vertexBindingDescriptionCount = 1;
         vertexInputCreateInfo.pVertexBindingDescriptions = &bindingDescription;
-        vertexInputCreateInfo.vertexAttributeDescriptionCount = attributes.size();
+        vertexInputCreateInfo.vertexAttributeDescriptionCount = (uint32)attributes.size();
         vertexInputCreateInfo.pVertexAttributeDescriptions = attributes.data();
 
         // Input Assembly
@@ -111,7 +111,7 @@ namespace Codi {
         layoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
         // Descriptor set layouts
-        layoutCreateInfo.setLayoutCount = descriptorSetLayouts.size();
+        layoutCreateInfo.setLayoutCount = (uint32)descriptorSetLayouts.size();
         layoutCreateInfo.pSetLayouts = descriptorSetLayouts.data();
 
         // Create the pipeline layout
@@ -121,7 +121,7 @@ namespace Codi {
         // Pipeline
         VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
         pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        pipelineCreateInfo.stageCount = stages.size();
+        pipelineCreateInfo.stageCount = (uint32)stages.size();
         pipelineCreateInfo.pStages = stages.data();
         pipelineCreateInfo.pVertexInputState = &vertexInputCreateInfo;
         pipelineCreateInfo.pInputAssemblyState = &inputAssemblyCreateInfo;

@@ -19,7 +19,7 @@ namespace Codi {
 
     void EditorLayer::OnDetach() {}
 
-    void EditorLayer::OnUpdate(float32 deltatime) {
+    void EditorLayer::OnUpdate(float64 deltatime) {
         _EditorCamera.OnUpdate(deltatime);
 
         // Rendering
@@ -69,7 +69,7 @@ namespace Codi {
     }
 
     bool EditorLayer::OnWindowResize(const WindowResizeEvent& e) {
-        _EditorCamera.SetViewportSize(e.GetWidth(), e.GetHeight());
+        _EditorCamera.SetViewportSize((float32)e.GetWidth(), (float32)e.GetHeight());
         return false;
     }
 

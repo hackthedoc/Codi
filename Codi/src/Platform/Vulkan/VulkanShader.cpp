@@ -77,8 +77,8 @@ namespace Codi {
         CompileOrGetBinaries(shaderSources);
 
         for (auto& [type, stage] : _Stages) {
-            if (stage.Data.empty()) continue;
-            stage.Module = CreateModule(stage.Data);
+            if (stage.SPIRV.empty()) continue;
+            stage.Module = CreateModule(stage.SPIRV);
         }
 
         // Extract name from filepath
@@ -98,8 +98,8 @@ namespace Codi {
         CompileOrGetBinaries(shaderSources);
 
         for (auto& [type, stage] : _Stages) {
-            if (stage.Data.empty()) continue;
-            stage.Module = CreateModule(stage.Data);
+            if (stage.SPIRV.empty()) continue;
+            stage.Module = CreateModule(stage.SPIRV);
         }
 
         CreateDescriptorSetLayouts();
@@ -264,7 +264,7 @@ namespace Codi {
                 std::streampos size = infile.tellg();
                 infile.seekg(0, std::ios::beg);
 
-                std::vector<uint32>& data = _Stages[type].Data;
+                std::vector<uint32>& data = _Stages[type].SPIRV;
                 data.resize(size / sizeof(uint32));
                 infile.read((char*)data.data(), size);
 
@@ -279,12 +279,12 @@ namespace Codi {
                 }
 
                 _Stages[type].Source = source;
-                _Stages[type].Data = std::vector<uint32>(module.begin(), module.end());
+                _Stages[type].SPIRV = std::vector<uint32>(module.begin(), module.end());
 
                 // Export to cached Binary
                 std::ofstream outfile(cachedPath, std::ios::binary);
                 if (outfile.is_open()) {
-                    std::vector<uint32_t>& data = _Stages[type].Data;
+                    std::vector<uint32_t>& data = _Stages[type].SPIRV;
                     outfile.write((char*)data.data(), data.size() * sizeof(uint32));
                     outfile.flush();
                     outfile.close();
@@ -294,10 +294,9 @@ namespace Codi {
 
         // Reflect on shader resources for each stage
         for (auto&& [type, stage] : _Stages)
-            Reflect(type, stage.Data);
+            Reflect(type, stage.SPIRV);
     }
 
-    // Reflects on the SPIR-V binary to log uniform buffer and resource info
     void VulkanShader::Reflect(Shader::Type type, const std::vector<uint32>& shaderData) {
         if (shaderData.empty()) return;
 
@@ -312,7 +311,7 @@ namespace Codi {
         for (const spirv_cross::Resource& resource : resources.uniform_buffers) {
             const uint32 baseTypeID = resource.base_type_id;
             const spirv_cross::SPIRType& bufferType = compiler.get_type(baseTypeID);
-            uint32 blockSize = compiler.get_declared_struct_size(bufferType);
+            uint32 blockSize = (uint32)compiler.get_declared_struct_size(bufferType);
             uint32 binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
             uint32 set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
 
@@ -479,102 +478,106 @@ namespace Codi {
         }
     }
 
-    // Create GPU buffers for each uniform block and write initial descriptor updates.
     void VulkanShader::CreateUniformBuffers() {
         if (_UniformBlocks.empty()) return;
-
-        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
-        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
-        uint32 framesInFlight = api.GetSwapchain()->GetMaxFramesInFlight();
 
         for (auto& block : _UniformBlocks) {
             GlobalUniformRegistry::RegisteredBufferInfo regInfo;
             bool hasExternal = GlobalUniformRegistry::Get().Get(block.Set, block.Binding, regInfo);
 
-            if (hasExternal) {
-                CODI_CORE_WARN("USING EXTERNAL UBO");
-                block.Buffer = regInfo.buffer;
-                block.Memory = regInfo.memory;
-                block.Mapped = regInfo.mapped; // might be nullptr
-
-                block.BufferInfos.resize(framesInFlight);
-                for (uint32 frame = 0; frame < framesInFlight; frame++) {
-                    auto& info = block.BufferInfos[frame];
-                    info.buffer = block.Buffer;
-                    info.offset = 0; // external buffer is dedicated per resource (no offsets)
-                    info.range = block.Size;
-
-                    VkWriteDescriptorSet write{};
-                    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    write.dstSet = _DescriptorSets[block.Set][frame];
-                    write.dstBinding = block.Binding;
-                    write.dstArrayElement = 0;
-                    write.descriptorCount = 1;
-                    write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    write.pBufferInfo = &info;
-
-                    vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
-                }
-            }
-            else {
-                CODI_CORE_WARN("USING INTERNAL UBO");
-                // Fallback: create internal single large buffer (framesInFlight * block.Size) and map it
-                VkDeviceSize totalSize = (VkDeviceSize)block.Size * framesInFlight;
-
-                VkBufferCreateInfo bufInfo{};
-                bufInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-                bufInfo.size = totalSize;
-                bufInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-                bufInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-                VkResult result = vkCreateBuffer(logicalDevice, &bufInfo, VulkanRendererAPI::GetAllocator(), &block.Buffer);
-                CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to create uniform buffer");
-
-                VkMemoryRequirements memReq;
-                vkGetBufferMemoryRequirements(logicalDevice, block.Buffer, &memReq);
-
-                VkMemoryAllocateInfo alloc{};
-                alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-                alloc.allocationSize = memReq.size;
-                alloc.memoryTypeIndex = api.GetContext()->FindMemoryType(memReq.memoryTypeBits,
-                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-                result = vkAllocateMemory(logicalDevice, &alloc, VulkanRendererAPI::GetAllocator(), &block.Memory);
-                CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate uniform buffer memory");
-
-                result = vkBindBufferMemory(logicalDevice, block.Buffer, block.Memory, 0);
-                CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to bind uniform buffer memory");
-
-                // persistent map
-                vkMapMemory(logicalDevice, block.Memory, 0, totalSize, 0, &block.Mapped);
-
-
-                block.BufferInfos.resize(framesInFlight);
-
-                // Write descriptor buffer infos for every frame's descriptor set entry for this binding
-                for (uint32 frame = 0; frame < framesInFlight; frame++) {
-                    auto& info = block.BufferInfos[frame];
-                    info.buffer = block.Buffer;
-                    info.offset = (VkDeviceSize)block.Size * frame;
-                    info.range = block.Size;
-
-                    VkWriteDescriptorSet write{};
-                    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    write.dstSet = _DescriptorSets[block.Set][frame];
-                    write.dstBinding = block.Binding;
-                    write.dstArrayElement = 0;
-                    write.descriptorCount = 1;
-                    write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    write.pBufferInfo = &info;
-
-                    // We must call vkUpdateDescriptorSets for each write — keep a copy around so pointer remains valid.
-                    // but bufDesc is on stack; we will call vkUpdateDescriptorSets immediately.
-                    vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
-                }
-            }
+            if (hasExternal)
+                CreateExternalUniformBuffers(block);
+            else
+                CreateInternalUniformBuffers(block);
         }
 
-        // Images remain to be bound by manually (we don't create textures here).
+        // Images remain to be bound by manually.
+    }
+
+    void VulkanShader::CreateExternalUniformBuffers(UniformBlock& block) {
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
+        uint32 framesInFlight = api.GetSwapchain()->GetMaxFramesInFlight();
+
+        GlobalUniformRegistry::RegisteredBufferInfo regInfo;
+        GlobalUniformRegistry::Get().Get(block.Set, block.Binding, regInfo);
+
+        block.Buffer = regInfo.buffer;
+        block.Memory = regInfo.memory;
+        block.Mapped = regInfo.mapped; // might be nullptr
+
+        block.BufferInfos.resize(framesInFlight);
+        for (uint32 frame = 0; frame < framesInFlight; frame++) {
+            auto& info = block.BufferInfos[frame];
+            info.buffer = block.Buffer;
+            info.offset = 0; // external buffer is dedicated per resource (no offsets)
+            info.range = block.Size;
+
+            VkWriteDescriptorSet write{};
+            write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            write.dstSet = _DescriptorSets[block.Set][frame];
+            write.dstBinding = block.Binding;
+            write.dstArrayElement = 0;
+            write.descriptorCount = 1;
+            write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            write.pBufferInfo = &info;
+
+            vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
+        }
+    }
+
+    void VulkanShader::CreateInternalUniformBuffers(UniformBlock& block) {
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
+        uint32 framesInFlight = api.GetSwapchain()->GetMaxFramesInFlight();
+
+        VkDeviceSize totalSize = (VkDeviceSize)block.Size * framesInFlight;
+
+        VkBufferCreateInfo bufInfo{};
+        bufInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufInfo.size = totalSize;
+        bufInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+        bufInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        VkResult result = vkCreateBuffer(logicalDevice, &bufInfo, VulkanRendererAPI::GetAllocator(), &block.Buffer);
+        CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to create uniform buffer");
+
+        VkMemoryRequirements memReq;
+        vkGetBufferMemoryRequirements(logicalDevice, block.Buffer, &memReq);
+
+        VkMemoryAllocateInfo alloc{};
+        alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        alloc.allocationSize = memReq.size;
+        alloc.memoryTypeIndex = api.GetContext()->FindMemoryType(memReq.memoryTypeBits,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+        result = vkAllocateMemory(logicalDevice, &alloc, VulkanRendererAPI::GetAllocator(), &block.Memory);
+        CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate uniform buffer memory");
+
+        result = vkBindBufferMemory(logicalDevice, block.Buffer, block.Memory, 0);
+        CODI_CORE_ASSERT(result == VK_SUCCESS, "Failed to bind uniform buffer memory");
+
+        vkMapMemory(logicalDevice, block.Memory, 0, totalSize, 0, &block.Mapped);
+
+        block.BufferInfos.resize(framesInFlight);
+
+        for (uint32 frame = 0; frame < framesInFlight; frame++) {
+            auto& info = block.BufferInfos[frame];
+            info.buffer = block.Buffer;
+            info.offset = (VkDeviceSize)block.Size * frame;
+            info.range = block.Size;
+
+            VkWriteDescriptorSet write{};
+            write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            write.dstSet = _DescriptorSets[block.Set][frame];
+            write.dstBinding = block.Binding;
+            write.dstArrayElement = 0;
+            write.descriptorCount = 1;
+            write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            write.pBufferInfo = &info;
+
+            vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
+        }
     }
 
     void VulkanShader::DestroyUniformBuffers() {
@@ -626,98 +629,48 @@ namespace Codi {
         return nullptr;
     }
 
-    void VulkanShader::SetInt(const std::string& name, const int32 value) {
-        uint32 off, sz;
-        UniformBlock* b = FindBlockByMemberName(name, off, sz);
-        if (!b) {
-            CODI_CORE_WARN("SetInt: uniform '{0}' not found", name);
+    template<typename T>
+    void VulkanShader::UpdateUniform(const std::string& name, const T& value) {
+        uint32 offset, size;
+        UniformBlock* block = FindBlockByMemberName(name, offset, size);
+        if (!block) {
+            CODI_CORE_WARN("Uniform '{0}' not found", name);
             return;
         }
-        // write into mapped memory for current frame
+
         VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
         uint32 frame = api.GetCurrentFrameIndex();
-        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
-        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(int32)));
+
+        uint8* dst = (uint8*)block->Mapped + frame * block->Size + offset;
+        memcpy(dst, &value, std::min<uint32>(size, (uint32)sizeof(T)));
     }
+
+    void VulkanShader::SetInt(const std::string& name, const int32 value) { UpdateUniform(name, value); }
 
     void VulkanShader::SetIntArray(const std::string& name, int32* values, uint32 count) {
-        uint32 off, sz;
-        UniformBlock* b = FindBlockByMemberName(name, off, sz);
-        if (!b) {
-            CODI_CORE_WARN("SetIntArray: uniform '{0}' not found", name);
+        uint32 offset, size;
+        UniformBlock* block = FindBlockByMemberName(name, offset, size);
+        if (!block) {
+            CODI_CORE_WARN("Uniform '{0}' not found", name);
             return;
         }
+
         VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
         uint32 frame = api.GetCurrentFrameIndex();
-        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
+
+        uint8* dst = (uint8*)block->Mapped + (size_t)frame * block->Size + offset;
         uint32 bytes = count * sizeof(int32);
-        memcpy(dst, values, std::min<uint32>(bytes, sz));
+        memcpy(dst, values, std::min(bytes, size));
     }
 
-    void VulkanShader::SetFloat(const std::string& name, const float32 value) {
-        uint32 off, sz;
-        UniformBlock* b = FindBlockByMemberName(name, off, sz);
-        if (!b) {
-            CODI_CORE_WARN("SetFloat: uniform '{0}' not found", name);
-            return;
-        }
-        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
-        uint32 frame = api.GetCurrentFrameIndex();
-        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
-        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(float32)));
-    }
+    void VulkanShader::SetFloat(const std::string& name, const float32 value) { UpdateUniform(name, value); }
 
-    void VulkanShader::SetFloat2(const std::string& name, const glm::vec2& value) {
-        uint32 off, sz;
-        UniformBlock* b = FindBlockByMemberName(name, off, sz);
-        if (!b) {
-            CODI_CORE_WARN("SetFloat2: uniform '{0}' not found", name);
-            return;
-        }
-        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
-        uint32 frame = api.GetCurrentFrameIndex();
-        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
-        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(glm::vec2)));
-    }
+    void VulkanShader::SetFloat2(const std::string& name, const glm::vec2& value) { UpdateUniform(name, value); }
 
-    void VulkanShader::SetFloat3(const std::string& name, const glm::vec3& value) {
-        uint32 off, sz;
-        UniformBlock* b = FindBlockByMemberName(name, off, sz);
-        if (!b) {
-            CODI_CORE_WARN("SetFloat3: uniform '{0}' not found", name);
-            return;
-        }
-        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
-        uint32 frame = api.GetCurrentFrameIndex();
-        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
-        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(glm::vec3)));
-    }
+    void VulkanShader::SetFloat3(const std::string& name, const glm::vec3& value) { UpdateUniform(name, value); }
 
-    void VulkanShader::SetFloat4(const std::string& name, const glm::vec4& value) {
-        uint32 off, sz;
-        UniformBlock* b = FindBlockByMemberName(name, off, sz);
-        if (!b) {
-            CODI_CORE_WARN("SetFloat4: uniform '{0}' not found", name);
-            return;
-        }
-        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
-        uint32 frame = api.GetCurrentFrameIndex();
-        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
-        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(glm::vec4)));
-    }
+    void VulkanShader::SetFloat4(const std::string& name, const glm::vec4& value) { UpdateUniform(name, value); }
 
-    void VulkanShader::SetMat4(const std::string& name, const glm::mat4& value) {
-        uint32 off, sz;
-        UniformBlock* b = FindBlockByMemberName(name, off, sz);
-        if (!b) {
-            CODI_CORE_WARN("SetMat4: uniform '{0}' not found", name);
-            return;
-        }
-        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
-        uint32 frame = api.GetCurrentFrameIndex();
-        uint8* dst = (uint8*)b->Mapped + (size_t)frame * b->Size + off;
-        // GLSL std140: mat4 is 4 vec4s (16 * 4 bytes) — copy full mat4
-        memcpy(dst, &value, std::min<uint32>(sz, (uint32)sizeof(glm::mat4)));
-    }
+    void VulkanShader::SetMat4(const std::string& name, const glm::mat4& value) { UpdateUniform(name, value); }
 
 } // namespace Codi
