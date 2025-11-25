@@ -22,7 +22,7 @@ namespace Codi {
 
     private:
 
-        Shared<Texture2D> _ShroomlightStudioIcon;
+        Shared<Material> _ShroomlightStudioMaterial;
 
         // Viewport
 

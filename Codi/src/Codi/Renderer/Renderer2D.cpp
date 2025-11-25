@@ -17,9 +17,9 @@ namespace Codi {
         glm::mat4 Model;
         glm::vec4 Color;
         float32 TexIndex;
-        float32 TilingFactor;
+        glm::vec2 TilingFactor;
         int32 EntityID;
-        float32 Padding[2]; // padding to 16-byte alignment
+        float32 Padding[1]; // padding to 16-byte alignment
     };
 
     struct Renderer2DData {
@@ -178,7 +178,7 @@ namespace Codi {
         instance.Model = transform;
         instance.Color = color;
         instance.TexIndex = 0.0f;
-        instance.TilingFactor = 1.0f;
+        instance.TilingFactor = glm::vec2(1.0f);
         instance.EntityID = entityID;
 
         Data.QuadIndexCount += 6;
@@ -210,6 +210,51 @@ namespace Codi {
         QuadInstanceData& instance = *Data.QuadInstanceBufferPtr++;
         instance.Model = transform;
         instance.Color = tintColor;
+        instance.TexIndex = textureIndex;
+        instance.TilingFactor = glm::vec2(tilingFactor);
+        instance.EntityID = entityID;
+
+        Data.QuadIndexCount += 6;
+        Data.Stats.QuadCount++;
+    }
+
+    void Renderer2D::DrawQuad(const glm::mat4& transform, const Shared<Material>& material, const int32 entityID) {
+        if (Data.QuadIndexCount >= Renderer2DData::MAX_INDICES) FlushAndReset();
+
+        Shared<Texture2D> albedo = Data.WhiteTexture;
+        glm::vec4 color = glm::vec4(1.0f);
+        glm::vec2 tilingFactor = glm::vec2(1.0f);
+
+        if (material) {
+            albedo = material->GetAlbedo();
+            color = material->GetColor();
+            tilingFactor = material->GetTilingFactor();
+        }
+
+        float32 textureIndex = 0.0f;
+        if (albedo) {
+            for (uint32 i = 1; i < Data.TextureSlotIndex; i++)
+                if (*Data.TextureSlots[i] == *albedo) { textureIndex = (float32)i; break; }
+
+            if (textureIndex == 0.0f) {
+                if (Data.TextureSlotIndex >= Renderer2DData::MAX_TEXTURE_SLOTS)
+                    FlushAndReset();
+                textureIndex = (float32)Data.TextureSlotIndex;
+                Data.TextureSlots[Data.TextureSlotIndex++] = albedo;
+            }
+        }
+
+        constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+
+        for (uint64 i = 0; i < 4; i++) {
+            Data.QuadVertexBufferPtr->Position = transform * Data.QuadVertexPositions[i];
+            Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
+            Data.QuadVertexBufferPtr++;
+        }
+
+        QuadInstanceData& instance = *Data.QuadInstanceBufferPtr++;
+        instance.Model = transform;
+        instance.Color = color;
         instance.TexIndex = textureIndex;
         instance.TilingFactor = tilingFactor;
         instance.EntityID = entityID;

@@ -17,10 +17,9 @@ struct QuadInstanceData {
     mat4 Model;
     vec4 Color;
     float TexIndex;
-    float TilingFactor;
+    vec2 TilingFactor;
     int EntityID;
     float padding0;
-    float padding1;
 };
 
 layout(std430, binding = 1) readonly buffer QuadBuffer {
@@ -29,7 +28,7 @@ layout(std430, binding = 1) readonly buffer QuadBuffer {
 
 layout(location = 0) out vec4 v_Color;
 layout(location = 1) out vec2 v_TexCoord;
-layout(location = 2) out float v_TilingFactor;
+layout(location = 2) out vec2 v_TilingFactor;
 layout(location = 3) out flat float v_TexIndex;
 //layout(location = 4) out flat int v_EntityID;
 
@@ -54,7 +53,7 @@ layout(location = 0) out vec4 o_Color;
 
 layout(location = 0) in vec4 v_Color;
 layout(location = 1) in vec2 v_TexCoord;
-layout(location = 2) in float v_TilingFactor;
+layout(location = 2) in vec2 v_TilingFactor;
 layout(location = 3) in flat float v_TexIndex;
 //layout(location = 4) in flat int v_EntityID;
 

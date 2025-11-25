@@ -15,8 +15,8 @@ namespace Codi {
         static Shared<Texture2D> Load(const std::string& path);
         static Shared<Texture2D> Create(const uint32 width, uint32 height, void* data = nullptr);
 
-        static bool Exists(const UUID uuid);
-        static Shared<Texture2D> Get(const UUID uuid);
+        static bool Exists(const UUID& uuid);
+        static Shared<Texture2D> Get(const UUID& uuid);
 
         static bool Exists(const std::string& path);
         static Shared<Texture2D> Get(const std::string& path);

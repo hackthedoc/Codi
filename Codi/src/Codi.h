@@ -31,4 +31,7 @@
 
 #include "Codi/Renderer/Texture.h"
 #include "Codi/Renderer/TextureManager.h"
+
+#include "Codi/Renderer/Material.h"
+#include "Codi/Renderer/MaterialManager.h"
 /* ----------------------------------------------------- */

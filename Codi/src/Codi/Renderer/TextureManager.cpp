@@ -38,13 +38,13 @@ namespace Codi {
         return texture;
     }
 
-    bool TextureManager::Exists(const UUID uuid) {
+    bool TextureManager::Exists(const UUID& uuid) {
         return _TexturesByUUID.count(uuid) > 0;
     }
 
-    Shared<Texture2D> TextureManager::Get(const UUID uuid) {
-        if (Exists(uuid)) return _TexturesByUUID[uuid];
-        else nullptr;
+    Shared<Texture2D> TextureManager::Get(const UUID& uuid) {
+        auto it = _TexturesByUUID.find(uuid);
+        return it != _TexturesByUUID.end() ? it->second : nullptr;
     }
 
     bool TextureManager::Exists(const std::string& path) {
@@ -52,8 +52,8 @@ namespace Codi {
     }
 
     Shared<Texture2D> TextureManager::Get(const std::string& path) {
-        if (Exists(path)) return _TexturesByPath[path];
-        else Load(path);
+        auto it = _TexturesByPath.find(path);
+        return it != _TexturesByPath.end() ? it->second : Load(path);
     }
 
 } // namespace Codi
