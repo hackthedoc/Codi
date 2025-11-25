@@ -3,6 +3,7 @@
 #include "Codi/Renderer/Shader.h"
 
 #include "Platform/Vulkan/VulkanPipeline.h"
+#include "Platform/Vulkan/VulkanDescriptorSet.h"
 
 #include <shaderc/shaderc.hpp>
 #include <vulkan/vulkan.h>
@@ -99,6 +100,8 @@ namespace Codi {
         void CreateUniformBuffers();
         void CreateExternalUniformBuffers(UniformBlock& block);
         void CreateInternalUniformBuffers(UniformBlock& block);
+
+        void CreateImageBindings();
 
         UniformBlock* FindBlockByMemberName(const std::string& name, uint32& outOffset, uint32& outSize);
 

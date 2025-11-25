@@ -6,8 +6,9 @@ IncludeDir = {}
 IncludeDir["glm"]           = "%{wks.location}/Codi/vendor/glm"
 IncludeDir["ImGui"]         = "%{wks.location}/Codi/vendor/imgui"
 IncludeDir["ImGuizmo"]      = "%{wks.location}/Codi/vendor/ImGuizmo"
-IncludeDir["spdlog"]        = "%{wks.location}/Codi/vendor/spdlog/include"
 IncludeDir["SDL"]           = "%{wks.location}/Codi/vendor/SDL/include"
+IncludeDir["spdlog"]        = "%{wks.location}/Codi/vendor/spdlog/include"
+IncludeDir["stb_image"]     = "%{wks.location}/Codi/vendor/stb_image"
 IncludeDir["VulkanSDK"]     = "%{VULKAN_SDK}/Include"
 
 LibraryDir = {}

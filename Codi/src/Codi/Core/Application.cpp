@@ -26,6 +26,9 @@ namespace Codi {
     }
 
     Application::~Application() {
+        for (auto& l : _LayerStack)
+            l->OnDetach();
+
         // Shutdown subsystems
         Renderer::Shutdown();
     }
@@ -40,7 +43,7 @@ namespace Codi {
                 Renderer::BeginFrame();
 
                 for (Layer* l : _LayerStack)
-                    l->OnUpdate(deltatime);
+                    l->OnUpdate((float32)deltatime);
 
                 Renderer::EndFrame();
             }

@@ -2,9 +2,11 @@
 #include "VulkanShader.h"
 
 #include "Codi/Renderer/Renderer.h"
+#include "Codi/Renderer/Renderer2D.h"
 
 #include "Platform/Vulkan/VulkanRendererAPI.h"
 #include "Platform/Vulkan/VulkanGlobalUniformRegistry.h"
+#include "Platform/Vulkan/VulkanTexture.h"
 
 #include <fstream>
 #include <spirv_cross/spirv_cross.hpp>
@@ -88,6 +90,7 @@ namespace Codi {
         CreateDescriptorPoolAndSets();
         CreateStorageBuffers();
         CreateUniformBuffers();
+        CreateImageBindings();
     }
 
     VulkanShader::VulkanShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc) : _Name(name), _Filepath(name) {
@@ -107,6 +110,7 @@ namespace Codi {
         CreateDescriptorPoolAndSets();
         CreateStorageBuffers();
         CreateUniformBuffers();
+        CreateImageBindings();
     }
 
     VulkanShader::~VulkanShader() {
@@ -134,6 +138,8 @@ namespace Codi {
 
     void VulkanShader::Bind() {
         if (Renderer::IsFrameSkipped()) return;
+
+        CreateImageBindings();
 
         VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
         VulkanGraphicsContext* context = api.GetContext();
@@ -320,8 +326,8 @@ namespace Codi {
             block.Set = set;
             block.Size = blockSize;
 
+            CODI_CORE_TRACE("  {0} set={1} binding={2} size={3}", block.Name, block.Set, block.Binding, block.Size);
             _StorageBlocks.push_back(std::move(block));
-            CODI_CORE_TRACE("  {0} set={1} binding={2} size={3}", resource.name, set, binding, blockSize);
         }
 
         CODI_CORE_TRACE("Uniform buffers:");
@@ -369,14 +375,21 @@ namespace Codi {
         for (const spirv_cross::Resource& resource : resources.sampled_images) {
             uint32 binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
             uint32 set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+            const spirv_cross::SPIRType& type = compiler.get_type(resource.type_id);
+
             ImageBinding ib;
             ib.Name = resource.name;
             ib.Binding = binding;
             ib.Set = set;
-            ib.Count = 1;
+
+            if (type.array.empty())
+                ib.Count = 1;
+            else
+                ib.Count = type.array[0];
+
             _ImageBindings.push_back(ib);
 
-            CODI_CORE_TRACE("  {0} set={1} binding={2}", resource.name, set, binding);
+            CODI_CORE_TRACE("  {0} set={1} binding={2} count={3}", resource.name, set, binding, ib.Count);
         }
     }
 
@@ -399,10 +412,9 @@ namespace Codi {
     }
 
     void VulkanShader::CreateDescriptorSetLayouts() {
-        if (_UniformBlocks.empty() && _ImageBindings.empty()) return;
-
         // Find maximum set index
         uint32 maxSet = 0;
+        for (auto& b : _StorageBlocks) maxSet = std::max(maxSet, b.Set);
         for (auto& b : _UniformBlocks) maxSet = std::max(maxSet, b.Set);
         for (auto& img : _ImageBindings) maxSet = std::max(maxSet, img.Set);
 
@@ -473,7 +485,9 @@ namespace Codi {
             poolSizes.push_back({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ubCount * framesInFlight });
         }
         if (!_ImageBindings.empty()) {
-            uint32 imgCount = (uint32)_ImageBindings.size();
+            uint32 imgCount = 0;
+            for (auto& img : _ImageBindings)
+                imgCount += img.Count;
             poolSizes.push_back({ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imgCount * framesInFlight });
         }
 
@@ -617,8 +631,6 @@ namespace Codi {
             else
                 CreateInternalUniformBuffers(block);
         }
-
-        // Images remain to be bound by manually.
     }
 
     void VulkanShader::CreateExternalUniformBuffers(UniformBlock& block) {
@@ -704,6 +716,32 @@ namespace Codi {
             write.pBufferInfo = &info;
 
             vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
+        }
+    }
+
+    void VulkanShader::CreateImageBindings() {
+        VulkanRendererAPI& api = static_cast<VulkanRendererAPI&>(Renderer::GetRAPI());
+        VkDevice logicalDevice = api.GetContext()->GetLogicalDevice();
+        uint32 frame = api.GetCurrentFrameIndex();
+
+        for (auto& img : _ImageBindings) {
+            // TODO: use an asset manager variable
+            for (uint32 i = 0; i < 32; i++) {
+                Shared<Texture2D> tex = Renderer2D::GetTextureSlot(i);
+
+                VulkanTexture2D* vTex = (VulkanTexture2D*)tex.get();
+
+                VkWriteDescriptorSet write{};
+                write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                write.dstSet = _DescriptorSets[img.Set][frame];
+                write.dstBinding = img.Binding;
+                write.dstArrayElement = i;
+                write.descriptorCount = 1;
+                write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                write.pImageInfo = &vTex->GetDescriptorInfo();
+
+                vkUpdateDescriptorSets(logicalDevice, 1, &write, 0, nullptr);
+            }
         }
     }
 

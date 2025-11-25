@@ -203,6 +203,24 @@ namespace Codi {
         vkCmdDrawIndexed(cmdBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
     }
 
+    Shared<VulkanCommandBuffer> VulkanRendererAPI::BeginSingleTimeCommands() {
+        Shared<VulkanCommandBuffer> cmdBuffer = Share< VulkanCommandBuffer>();
+        cmdBuffer->Allocate(_Context->GetLogicalDevice(), _CommandPool->GetHandle());
+        cmdBuffer->Begin(true);
+        return cmdBuffer;
+    }
+
+    void VulkanRendererAPI::EndSingleTimeCommands(Shared<VulkanCommandBuffer> cmdBuffer) {
+        cmdBuffer->End();
+
+        VulkanCommandBuffer::SubmitInfo submitInfo{};
+        submitInfo.Queue = _Context->GetGraphicsQueue();
+        submitInfo.WaitIdle = true;
+        cmdBuffer->Submit(submitInfo);
+
+        cmdBuffer->Free(_Context->GetLogicalDevice(), _CommandPool->GetHandle());
+    }
+
     void VulkanRendererAPI::RecreateSwapchain() {
         Window* window = Application::Get().GetWindow();
         uint32 width = window->GetWidth();

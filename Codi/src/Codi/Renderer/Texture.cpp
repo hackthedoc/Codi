@@ -1,36 +1,34 @@
 #include "codipch.h"
-#include "Shader.h"
+#include "Texture.h"
 
 #include "Codi/Renderer/RendererAPI.h"
 
-#include "Platform/Vulkan/VulkanShader.h"
+#include "Platform/Vulkan/VulkanTexture.h"
 
 namespace Codi {
-
-    Shared<Shader> Shader::Create(const std::filesystem::path& filepath) {
+    Shared<Texture2D> Texture2D::Create(uint32 width, uint32 height, void* data) {
         switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:
             CODI_CORE_ASSERT(false, "RendererAPI::API::None is currently not supported!");
             return nullptr;
         case RendererAPI::API::Vulkan:
-            return Share<VulkanShader>(filepath);
+            return Share<VulkanTexture2D>(width, height, data);
         }
 
         CODI_CORE_ASSERT(false, "Unknown RendererAPI::API!");
         return nullptr;
     }
 
-    Shared<Shader> Shader::Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc) {
+    Shared<Texture2D> Texture2D::Create(const std::string& path) {
         switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:
             CODI_CORE_ASSERT(false, "RendererAPI::API::None is currently not supported!");
             return nullptr;
         case RendererAPI::API::Vulkan:
-            return Share<VulkanShader>(name, vertexSrc, fragmentSrc);
+            return Share<VulkanTexture2D>(path);
         }
 
         CODI_CORE_ASSERT(false, "Unknown RendererAPI::API!");
         return nullptr;
     }
-
 } // namespace Codi

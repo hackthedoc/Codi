@@ -9,14 +9,16 @@ namespace Codi {
 
     struct QuadVertex {
         glm::vec3 Position;
+        glm::vec2 TexCoord;
     };
 
     struct QuadInstanceData {
         glm::mat4 Model;
-        glm::vec3 Color;
+        glm::vec4 Color;
+        float32 TexIndex;
         float32 TilingFactor;
         int32 EntityID;
-        float32 Padding[3]; // padding to 16-byte alignment
+        float32 Padding[2]; // padding to 16-byte alignment
     };
 
     struct Renderer2DData {
@@ -27,6 +29,7 @@ namespace Codi {
 
         Shared<VertexArray> QuadVertexArray = nullptr;
         Shared<VertexBuffer> QuadVertexBuffer = nullptr;
+        Shared<ShaderStorageBuffer> QuadInstanceSSBO;
         Shared<Shader> QuadShader = nullptr;
 
         uint32_t QuadIndexCount = 0;
@@ -35,7 +38,9 @@ namespace Codi {
         QuadInstanceData* QuadInstanceBufferBase = nullptr;
         QuadInstanceData* QuadInstanceBufferPtr = nullptr;
 
-        Shared<ShaderStorageBuffer> QuadInstanceSSBO;
+        std::array<Shared<Texture2D>, MAX_TEXTURE_SLOTS> TextureSlots;
+        uint32 TextureSlotIndex = 1; // 0 = white texture
+        Shared<Texture2D> WhiteTexture;
 
         glm::vec4 QuadVertexPositions[4];
 
@@ -50,6 +55,11 @@ namespace Codi {
     static Renderer2DData Data;
 
     void Renderer2D::Init() {
+        // White Texture
+        uint32 whiteData = 0xfffffffff;
+        Data.WhiteTexture = Texture2D::Create(1, 1, &whiteData);
+        Data.TextureSlots[0] = Data.WhiteTexture;
+        
         // Create camera
         Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
 
@@ -59,6 +69,7 @@ namespace Codi {
         Data.QuadVertexBuffer = VertexBuffer::Create(Renderer2DData::MAX_VERTICES * sizeof(QuadVertex));
         Data.QuadVertexBuffer->SetLayout({
             { ShaderDataType::Float3, "a_Position"      },
+            { ShaderDataType::Float2, "a_TexCoord"      },
         });
         Data.QuadVertexArray->AddVertexBuffer(Data.QuadVertexBuffer);
         Data.QuadVertexBufferBase = new QuadVertex[Renderer2DData::MAX_VERTICES];
@@ -93,7 +104,12 @@ namespace Codi {
     }
     
     void Renderer2D::Shutdown() {
-        Data.CameraUniformBuffer = nullptr;
+        for (auto& tex : Data.TextureSlots)
+            tex.reset();
+        Data.WhiteTexture->Destroy();
+        Data.WhiteTexture.reset();
+
+        Data.CameraUniformBuffer.reset();
 
         delete[] Data.QuadVertexBufferBase;
         delete[] Data.QuadInstanceBufferBase;
@@ -118,6 +134,8 @@ namespace Codi {
         Data.QuadIndexCount = 0;
         Data.QuadVertexBufferPtr = Data.QuadVertexBufferBase;
         Data.QuadInstanceBufferPtr = Data.QuadInstanceBufferBase;
+
+        Data.TextureSlotIndex = 1;
     }
 
     void Renderer2D::Flush() {
@@ -128,6 +146,9 @@ namespace Codi {
 
             uint32 ssboSize = (uint32)((uint8*)Data.QuadInstanceBufferPtr - (uint8*)Data.QuadInstanceBufferBase);
             Data.QuadInstanceSSBO->SetData(Data.QuadInstanceBufferBase, ssboSize);
+
+            for (uint32 i = 0; i < Data.TextureSlotIndex; i++)
+                Data.TextureSlots[i]->Bind(i);
 
             uint32 instanceCount = (uint32)(Data.QuadInstanceBufferPtr - Data.QuadInstanceBufferBase);
 
@@ -142,26 +163,64 @@ namespace Codi {
         StartBatch();
     }
 
-    void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color) {
-        const float textureIndex = 0.0f; // White Texture
-        constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
-        const float tilingFactor = 1.0f;
-
+    void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, const int32 entityID) {
         if (Data.QuadIndexCount >= Renderer2DData::MAX_INDICES) FlushAndReset();
+
+        constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 
         for (uint64 i = 0; i < 4; i++) {
             Data.QuadVertexBufferPtr->Position = transform * Data.QuadVertexPositions[i];
+            Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
             Data.QuadVertexBufferPtr++;
         }
 
         QuadInstanceData& instance = *Data.QuadInstanceBufferPtr++;
         instance.Model = transform;
         instance.Color = color;
+        instance.TexIndex = 0.0f;
         instance.TilingFactor = 1.0f;
-        instance.EntityID = -1;
+        instance.EntityID = entityID;
 
         Data.QuadIndexCount += 6;
         Data.Stats.QuadCount++;
+    }
+
+    void Renderer2D::DrawQuad(const glm::mat4& transform, const Shared<Texture2D>& texture, const float32 tilingFactor, const glm::vec4& tintColor, const int32 entityID) {
+        if (Data.QuadIndexCount >= Renderer2DData::MAX_INDICES) FlushAndReset();
+
+        float32 textureIndex = 0.0f;
+        for (uint32 i = 1; i < Data.TextureSlotIndex; i++)
+            if (*Data.TextureSlots[i] == *texture) { textureIndex = (float32)i; break; }
+
+        if (textureIndex == 0.0f) {
+            if (Data.TextureSlotIndex >= Renderer2DData::MAX_TEXTURE_SLOTS)
+                FlushAndReset();
+            textureIndex = (float32)Data.TextureSlotIndex;
+            Data.TextureSlots[Data.TextureSlotIndex++] = texture;
+        }
+
+        constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+
+        for (uint64 i = 0; i < 4; i++) {
+            Data.QuadVertexBufferPtr->Position = transform * Data.QuadVertexPositions[i];
+            Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
+            Data.QuadVertexBufferPtr++;
+        }
+
+        QuadInstanceData& instance = *Data.QuadInstanceBufferPtr++;
+        instance.Model = transform;
+        instance.Color = tintColor;
+        instance.TexIndex = textureIndex;
+        instance.TilingFactor = tilingFactor;
+        instance.EntityID = entityID;
+
+        Data.QuadIndexCount += 6;
+        Data.Stats.QuadCount++;
+    }
+
+    Shared<Texture2D> Renderer2D::GetTextureSlot(uint32 index) {
+        if (index < Data.TextureSlotIndex) return Data.TextureSlots[index];
+        else return Data.WhiteTexture;
     }
 
     void Renderer2D::ResetStatistics() {

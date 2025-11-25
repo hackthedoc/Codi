@@ -3,6 +3,7 @@
 #include "Codi/Core/Core.h"
 
 #include "Codi/Renderer/EditorCamera.h"
+#include "Codi/Renderer/Texture.h"
 
 #include <glm/glm.hpp>
 
@@ -31,7 +32,12 @@ namespace Codi {
 
         // Primitives
 
-        static void DrawQuad(const glm::mat4& transform, const glm::vec4& color);
+        static void DrawQuad(const glm::mat4& transform, const glm::vec4& color, const int32 entityID = -1);
+        static void DrawQuad(const glm::mat4& transform, const Shared<Texture2D>& texture, const float32 tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f), const int32 entityID = -1);
+
+        // Getters
+
+        static Shared<Texture2D> GetTextureSlot(uint32 index);
 
         // Internals
 

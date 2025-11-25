@@ -31,6 +31,9 @@ namespace Codi {
 
         virtual void DrawIndexed(const Shared<VertexArray>& vertexArray, uint32 indexCount, uint32 instanceCount = 1, uint32 firstIndex = 0, int32 vertexOffset = 0, uint32 firstInstance = 0) override;
 
+        Shared<VulkanCommandBuffer> BeginSingleTimeCommands();
+        void EndSingleTimeCommands(Shared<VulkanCommandBuffer> cmdBuffer);
+
         inline uint32 GetCurrentFrameIndex() const { return _CurrentFrameIndex; }
         inline VkViewport GetViewport() const { return _Viewport; }
         inline VkRect2D GetScissor() const { return _Scissor; }

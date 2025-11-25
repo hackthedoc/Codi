@@ -12,7 +12,7 @@ namespace Codi {
 
         virtual void OnAttach() {}
         virtual void OnDetach() {}
-        virtual void OnUpdate(float64 deltatime) {}
+        virtual void OnUpdate(float32 deltatime) {}
         virtual void OnImGuiRender() {}
         virtual void OnEvent(Event& e) {}
 

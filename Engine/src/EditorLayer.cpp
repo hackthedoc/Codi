@@ -12,14 +12,19 @@ namespace Codi {
     EditorLayer::EditorLayer() : Layer("EditorLayer") {}
 
     void EditorLayer::OnAttach() {
+
+        _ShroomlightStudioIcon = Texture2D::Create("Resources/Textures/shroomlight_logo.png");
+
         // Create Editor Camera
 
         _EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
     }
 
-    void EditorLayer::OnDetach() {}
+    void EditorLayer::OnDetach() {
+        _ShroomlightStudioIcon->Destroy();
+    }
 
-    void EditorLayer::OnUpdate(float64 deltatime) {
+    void EditorLayer::OnUpdate(float32 deltatime) {
         _EditorCamera.OnUpdate(deltatime);
 
         // Rendering
@@ -28,7 +33,7 @@ namespace Codi {
         Renderer2D::BeginScene(_EditorCamera);
 
         static float32 rotationAngle = 0.0f;
-        rotationAngle -= glm::radians(90.0f) * (float32)deltatime;
+        rotationAngle -= glm::radians(90.0f) * deltatime;
 
         glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
         glm::mat4 rotation = glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, rotationAngle)));
@@ -36,7 +41,8 @@ namespace Codi {
         glm::mat4 transform = position * rotation * scale;
 
         glm::vec4 purpleColor = glm::vec4(0.741f, 0.576f, 0.976f, 1.0f);
-        Renderer2D::DrawQuad(transform, purpleColor);
+        //Renderer2D::DrawQuad(transform, purpleColor);
+        Renderer2D::DrawQuad(transform, _ShroomlightStudioIcon, 1.0f, purpleColor);
 
         Renderer2D::EndScene();
     }

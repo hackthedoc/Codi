@@ -19,6 +19,9 @@ project "Codi"
 
 		"vendor/ImGuizmo/ImGuizmo.h",
 		"vendor/ImGuizmo/ImGuizmo.cpp",
+
+		"vendor/stb_image/**.h",
+		"vendor/stb_image/**.cpp",
     }
 
     includedirs {
@@ -27,8 +30,9 @@ project "Codi"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
-		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.SDL}",
+		"%{IncludeDir.spdlog}",
+		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.VulkanSDK}",
     }
 
