@@ -2,6 +2,7 @@
 #include "Renderer.h"
 
 #include "Codi/Renderer/Renderer2D.h"
+#include "Codi/Renderer/TextureManager.h"
 
 namespace Codi {
 
@@ -13,10 +14,12 @@ namespace Codi {
         _RAPI = RendererAPI::Create();
         _RAPI->Init();
 
+        TextureManager::Init();
         Renderer2D::Init();
     }
 
     void Renderer::Shutdown() {
+        TextureManager::Shutdown();
         Renderer2D::Shutdown();
 
         _RAPI->Shutdown();

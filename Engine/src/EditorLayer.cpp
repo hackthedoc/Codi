@@ -13,16 +13,14 @@ namespace Codi {
 
     void EditorLayer::OnAttach() {
 
-        _ShroomlightStudioIcon = Texture2D::Create("Resources/Textures/shroomlight_logo.png");
+        _ShroomlightStudioIcon = TextureManager::Load("Resources/Textures/shroomlight_logo.png");
 
         // Create Editor Camera
 
         _EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
     }
 
-    void EditorLayer::OnDetach() {
-        _ShroomlightStudioIcon->Destroy();
-    }
+    void EditorLayer::OnDetach() {}
 
     void EditorLayer::OnUpdate(float32 deltatime) {
         _EditorCamera.OnUpdate(deltatime);

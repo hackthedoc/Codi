@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Codi/Core/Core.h"
+#include "Codi/Core/UUID.h"
 
 namespace Codi {
 
@@ -18,6 +19,8 @@ namespace Codi {
 
         virtual void Bind(uint32 slot = 0) const = 0;
         virtual void Unbind() const = 0;
+
+        virtual UUID GetUUID() const = 0;
 
         virtual bool operator==(const Texture& other) const = 0;
     };

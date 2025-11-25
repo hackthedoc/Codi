@@ -26,9 +26,6 @@ namespace Codi {
     }
 
     Application::~Application() {
-        for (auto& l : _LayerStack)
-            l->OnDetach();
-
         // Shutdown subsystems
         Renderer::Shutdown();
     }

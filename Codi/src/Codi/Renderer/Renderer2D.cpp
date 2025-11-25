@@ -4,6 +4,7 @@
 #include "Codi/Renderer/Renderer.h"
 #include "Codi/Renderer/Shader.h"
 #include "Codi/Renderer/VertexArray.h"
+#include "Codi/Renderer/TextureManager.h"
 
 namespace Codi {
 
@@ -57,7 +58,7 @@ namespace Codi {
     void Renderer2D::Init() {
         // White Texture
         uint32 whiteData = 0xfffffffff;
-        Data.WhiteTexture = Texture2D::Create(1, 1, &whiteData);
+        Data.WhiteTexture = TextureManager::Create(1, 1, &whiteData);
         Data.TextureSlots[0] = Data.WhiteTexture;
         
         // Create camera
@@ -106,7 +107,6 @@ namespace Codi {
     void Renderer2D::Shutdown() {
         for (auto& tex : Data.TextureSlots)
             tex.reset();
-        Data.WhiteTexture->Destroy();
         Data.WhiteTexture.reset();
 
         Data.CameraUniformBuffer.reset();

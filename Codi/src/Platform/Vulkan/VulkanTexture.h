@@ -23,7 +23,9 @@ namespace Codi {
         virtual void Bind(uint32 slot = 0) const override;
         virtual void Unbind() const override;
 
-        virtual bool operator==(const Texture& other) const override { return _Image == ((VulkanTexture2D&)other).GetImage(); }
+        virtual UUID GetUUID() const override { return _UUID; };
+
+        virtual bool operator==(const Texture& other) const override { return _UUID == other.GetUUID(); }
 
         VkImage GetImage() const { return _Image; }
         VkDescriptorImageInfo& GetDescriptorInfo() const { return _DescriptorInfo; }
@@ -32,6 +34,8 @@ namespace Codi {
         void UploadToGPU(void* pixels);
 
     private:
+        UUID _UUID;
+
         std::string _Path;
         uint32 _Width = 0;
         uint32 _Height = 0;
