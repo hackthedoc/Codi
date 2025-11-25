@@ -57,7 +57,7 @@ namespace Codi {
 
     void Renderer2D::Init() {
         // White Texture
-        uint32 whiteData = 0xfffffffff;
+        uint32 whiteData = 0xffffffff;
         Data.WhiteTexture = TextureManager::Create(1, 1, &whiteData);
         Data.TextureSlots[0] = Data.WhiteTexture;
         

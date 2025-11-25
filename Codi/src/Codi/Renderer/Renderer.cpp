@@ -2,6 +2,7 @@
 #include "Renderer.h"
 
 #include "Codi/Renderer/Renderer2D.h"
+#include "Codi/Renderer/GeometryManager.h"
 #include "Codi/Renderer/MaterialManager.h"
 #include "Codi/Renderer/TextureManager.h"
 
@@ -17,11 +18,13 @@ namespace Codi {
 
         TextureManager::Init();
         MaterialManager::Init();
+        GeometryManager::Init();
 
         Renderer2D::Init();
     }
 
     void Renderer::Shutdown() {
+        GeometryManager::Shutdown();
         MaterialManager::Shutdown();
         TextureManager::Shutdown();
 

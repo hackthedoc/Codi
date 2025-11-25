@@ -23,6 +23,7 @@ namespace Codi {
     private:
 
         Shared<Material> _ShroomlightStudioMaterial;
+        Shared<Geometry> _ShroomlightIcon;
 
         // Viewport
 

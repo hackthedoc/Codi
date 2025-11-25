@@ -3,6 +3,7 @@
 #include "Codi/Core/Core.h"
 
 #include "Codi/Renderer/EditorCamera.h"
+#include "Codi/Renderer/Geometry.h"
 #include "Codi/Renderer/Material.h"
 #include "Codi/Renderer/Texture.h"
 

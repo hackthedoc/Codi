@@ -34,4 +34,7 @@
 
 #include "Codi/Renderer/Material.h"
 #include "Codi/Renderer/MaterialManager.h"
+
+#include "Codi/Renderer/Geometry.h"
+#include "Codi/Renderer/GeometryManager.h"
 /* ----------------------------------------------------- */

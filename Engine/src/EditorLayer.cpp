@@ -13,10 +13,12 @@ namespace Codi {
 
     void EditorLayer::OnAttach() {
 
-        _ShroomlightStudioMaterial = MaterialManager::Create("ShroomlightStudioIcon");
+        _ShroomlightStudioMaterial = MaterialManager::Create("ShroomlightStudioIconMaterial");
         _ShroomlightStudioMaterial->SetAlbedo(TextureManager::Load("Resources/Textures/shroomlight_logo.png"));
         glm::vec4 purpleColor = glm::vec4(0.741f, 0.576f, 0.976f, 1.0f);
         _ShroomlightStudioMaterial->SetColor(purpleColor);
+
+        _ShroomlightIcon = GeometryManager::Create("ShroomlightIcon", Geometry::Type::Quad, _ShroomlightStudioMaterial);
 
         // Create Editor Camera
 
@@ -42,7 +44,8 @@ namespace Codi {
         glm::mat4 transform = position * rotation * scale;
 
         _ShroomlightStudioMaterial->SetTilingFactor(glm::vec2(1.0f));
-        Renderer2D::DrawQuad(transform, _ShroomlightStudioMaterial);
+
+        Renderer2D::DrawGeometry(transform, _ShroomlightIcon);
 
         Renderer2D::EndScene();
     }
