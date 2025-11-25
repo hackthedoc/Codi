@@ -21,16 +21,16 @@ namespace Codi {
     }
 
     void EditorCamera::OnUpdate(const float32 dt) {
-        if (Input::IsKeyPressed(KeyCode::LEFT_ALT)) {
+        if (Input::IsKeyPressed(KeyCode::LeftAlt)) {
             const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
             const glm::vec2 delta = (mouse - _InitialMousePosition) * 0.003f;
             _InitialMousePosition = mouse;
 
-            if (Input::IsMouseButtonPressed(MouseCode::BUTTON_MIDDLE))
+            if (Input::IsMouseButtonPressed(MouseCode::ButtonMiddle))
                 MousePan(delta);
-            else if (Input::IsMouseButtonPressed(MouseCode::BUTTON_LEFT))
+            else if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft))
                 MouseRotate(delta);
-            else if (Input::IsMouseButtonPressed(MouseCode::BUTTON_RIGHT))
+            else if (Input::IsMouseButtonPressed(MouseCode::ButtonRight))
                 MouseZoom(delta.y);
         }
 

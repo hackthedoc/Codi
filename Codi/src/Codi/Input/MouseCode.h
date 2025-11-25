@@ -6,16 +6,16 @@ namespace Codi {
 
     struct MouseCode {
         enum : int32 {
-            BUTTON_LEFT = 0,
-            BUTTON_RIGHT = 1,
-            BUTTON_MIDDLE = 2,
-            BUTTON_X1 = 3,  // Typically "Back" button on some mice
-            BUTTON_X2 = 4,  // Typically "Forward" button
+            ButtonLeft = 0,
+            ButtonRight = 1,
+            ButtonMiddle = 2,
+            ButtonX1 = 3,  // Typically "Back" button
+            ButtonX2 = 4,  // Typically "Forward" button
 
-            SCROLL_UP = 5,
-            SCROLL_DOWN = 6,
-            SCROLL_LEFT = 7,
-            SCROLL_RIGHT = 8,
+            ScrollUp = 5,
+            ScrollDown = 6,
+            ScrollLeft = 7,
+            ScrollRight = 8,
         };
         int32 value;
 

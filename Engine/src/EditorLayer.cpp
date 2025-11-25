@@ -56,8 +56,8 @@ namespace Codi {
     bool EditorLayer::OnKeyPressed(const KeyPressedEvent& e) {
         if (e.IsRepeat()) return false;
 
-        const bool ctrlPressed = Input::IsKeyPressed(KeyCode::LEFT_CONTROL) || Input::IsKeyPressed(KeyCode::RIGHT_CONTROL);
-        const bool shiftPressed = Input::IsKeyPressed(KeyCode::LEFT_SHIFT) || Input::IsKeyPressed(KeyCode::RIGHT_SHIFT);
+        const bool ctrlPressed = Input::IsKeyPressed(KeyCode::LeftControl) || Input::IsKeyPressed(KeyCode::RightControl);
+        const bool shiftPressed = Input::IsKeyPressed(KeyCode::LeftShift) || Input::IsKeyPressed(KeyCode::RightShift);
 
         switch (e.GetKeyCode()) {
         case KeyCode::Q:
